@@ -13,6 +13,10 @@ public partial class PauseMenu : Control
     private Button? _loadBtn;
     private Button? _settingsBtn;
     private Button? _quitBtn;
+    private SettingsPanel? _settingsPanel;
+
+    private static readonly PackedScene SettingsScene =
+        GD.Load<PackedScene>("res://Scenes/UI/SettingsPanel.tscn");
 
     public override void _Ready()
     {
@@ -30,6 +34,11 @@ public partial class PauseMenu : Control
 
         Visible = false;
         ProcessMode = ProcessModeEnum.Always;
+
+        // Pre-instantiate the settings panel (hidden by default).
+        _settingsPanel = SettingsScene.Instantiate<SettingsPanel>();
+        _settingsPanel.Closed += OnSettingsClosed;
+        AddChild(_settingsPanel);
     }
 
     public override void _UnhandledInput(InputEvent @event)
@@ -71,7 +80,14 @@ public partial class PauseMenu : Control
 
     private void OnSettings()
     {
-        GD.Print("Settings not yet implemented.");
+        if (_settingsPanel == null) return;
+        _settingsPanel.Visible = true;
+    }
+
+    private void OnSettingsClosed()
+    {
+        if (_settingsPanel != null)
+            _settingsPanel.Visible = false;
     }
 
     private void OnQuitToMenu()

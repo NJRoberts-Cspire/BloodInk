@@ -12,6 +12,10 @@ public partial class MainMenu : Control
     private Button? _continueBtn;
     private Button? _settingsBtn;
     private Button? _quitBtn;
+    private SettingsPanel? _settingsPanel;
+
+    private static readonly PackedScene SettingsScene =
+        GD.Load<PackedScene>("res://Scenes/UI/SettingsPanel.tscn");
 
     public override void _Ready()
     {
@@ -28,6 +32,11 @@ public partial class MainMenu : Control
         // Disable continue if no save exists.
         if (_continueBtn != null)
             _continueBtn.Disabled = !Core.SaveSystem.SaveExists("slot1");
+
+        // Pre-instantiate the settings panel (hidden by default).
+        _settingsPanel = SettingsScene.Instantiate<SettingsPanel>();
+        _settingsPanel.Closed += OnSettingsClosed;
+        AddChild(_settingsPanel);
     }
 
     private void OnNewGame()
@@ -45,8 +54,14 @@ public partial class MainMenu : Control
 
     private void OnSettings()
     {
-        // TODO: Open settings panel (volume, controls, display).
-        GD.Print("Settings not yet implemented.");
+        if (_settingsPanel == null) return;
+        _settingsPanel.Visible = true;
+    }
+
+    private void OnSettingsClosed()
+    {
+        if (_settingsPanel != null)
+            _settingsPanel.Visible = false;
     }
 
     private void OnQuit()
