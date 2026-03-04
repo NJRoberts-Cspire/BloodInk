@@ -1,0 +1,94 @@
+[gd_scene load_steps=7 format=3 uid="uid://enemy_slime01"]
+
+[ext_resource type="Script" path="res://Scripts/Enemies/EnemyBase.cs" id="1"]
+[ext_resource type="Script" path="res://Scripts/Core/StateMachine.cs" id="2"]
+[ext_resource type="Script" path="res://Scripts/Enemies/States/EnemyIdleState.cs" id="3"]
+[ext_resource type="Script" path="res://Scripts/Enemies/States/EnemyChaseState.cs" id="4"]
+[ext_resource type="Script" path="res://Scripts/Enemies/States/EnemyAttackState.cs" id="5"]
+[ext_resource type="Script" path="res://Scripts/Combat/Hurtbox.cs" id="6"]
+[ext_resource type="Script" path="res://Scripts/Combat/Hitbox.cs" id="7"]
+[ext_resource type="Script" path="res://Scripts/Combat/HealthComponent.cs" id="8"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(12, 10)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hurtbox"]
+radius = 8.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hitbox"]
+radius = 10.0
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_slime"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": null
+}],
+"loop": true,
+"name": &"idle",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": null
+}],
+"loop": true,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": null
+}],
+"loop": false,
+"name": &"attack",
+"speed": 10.0
+}]
+
+[node name="Slime" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1")
+MoveSpeed = 50.0
+DetectRange = 80.0
+AttackRange = 20.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_slime")
+animation = &"idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_body")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 8
+script = ExtResource("6")
+
+[node name="HurtboxShape" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("CircleShape2D_hurtbox")
+
+[node name="Hitbox" type="Area2D" parent="."]
+collision_layer = 16
+collision_mask = 0
+script = ExtResource("7")
+Damage = 1
+
+[node name="HitboxShape" type="CollisionShape2D" parent="Hitbox"]
+shape = SubResource("CircleShape2D_hitbox")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("8")
+MaxHealth = 3
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("2")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("3")
+
+[node name="Chase" type="Node" parent="StateMachine"]
+script = ExtResource("4")
+
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("5")

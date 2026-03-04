@@ -1,0 +1,92 @@
+[gd_scene load_steps=3 format=3 uid="uid://camp001"]
+
+[ext_resource type="Script" path="res://Scripts/World/CampScene.cs" id="1"]
+[ext_resource type="Script" path="res://Scripts/Interaction/DialogueNPC.cs" id="2"]
+
+[node name="Camp" type="Node2D"]
+script = ExtResource("1")
+
+[node name="Ground" type="ColorRect" parent="."]
+offset_left = -320.0
+offset_top = -180.0
+offset_right = 320.0
+offset_bottom = 180.0
+color = Color(0.12, 0.15, 0.08, 1)
+
+[node name="CampfireGlow" type="PointLight2D" parent="."]
+color = Color(0.9, 0.5, 0.15, 1)
+energy = 0.6
+texture_scale = 2.0
+
+[node name="SpawnPoint" type="Marker2D" parent="."]
+position = Vector2(0, 80)
+
+[node name="Needlewise" type="CharacterBody2D" parent="."]
+position = Vector2(-80, -40)
+
+[node name="NeedlewiseSprite" type="AnimatedSprite2D" parent="Needlewise"]
+
+[node name="NeedlewiseInteract" type="Area2D" parent="Needlewise"]
+collision_layer = 32
+collision_mask = 2
+script = ExtResource("2")
+DisplayName = "Needlewise"
+ActionVerb = "Talk"
+
+[node name="NeedlewiseShape" type="CollisionShape2D" parent="Needlewise/NeedlewiseInteract"]
+
+[node name="Grael" type="CharacterBody2D" parent="."]
+position = Vector2(80, -30)
+
+[node name="GraelSprite" type="AnimatedSprite2D" parent="Grael"]
+
+[node name="GraelInteract" type="Area2D" parent="Grael"]
+collision_layer = 32
+collision_mask = 2
+script = ExtResource("2")
+DisplayName = "Grael"
+ActionVerb = "Talk"
+
+[node name="GraelShape" type="CollisionShape2D" parent="Grael/GraelInteract"]
+
+[node name="Rukh" type="CharacterBody2D" parent="."]
+position = Vector2(-100, 50)
+
+[node name="RukhSprite" type="AnimatedSprite2D" parent="Rukh"]
+
+[node name="RukhInteract" type="Area2D" parent="Rukh"]
+collision_layer = 32
+collision_mask = 2
+script = ExtResource("2")
+DisplayName = "Rukh"
+ActionVerb = "Talk"
+
+[node name="RukhShape" type="CollisionShape2D" parent="Rukh/RukhInteract"]
+
+[node name="Senna" type="CharacterBody2D" parent="."]
+position = Vector2(100, 60)
+
+[node name="SennaSprite" type="AnimatedSprite2D" parent="Senna"]
+
+[node name="SennaInteract" type="Area2D" parent="Senna"]
+collision_layer = 32
+collision_mask = 2
+script = ExtResource("2")
+DisplayName = "Senna"
+ActionVerb = "Talk"
+
+[node name="SennaShape" type="CollisionShape2D" parent="Senna/SennaInteract"]
+
+[node name="InkTent" type="Area2D" parent="."]
+position = Vector2(-80, -80)
+collision_layer = 32
+collision_mask = 2
+
+[node name="InkTentShape" type="CollisionShape2D" parent="InkTent"]
+
+[node name="MissionBoard" type="Area2D" parent="."]
+position = Vector2(0, -80)
+collision_layer = 32
+collision_mask = 2
+
+[node name="MissionBoardShape" type="CollisionShape2D" parent="MissionBoard"]
