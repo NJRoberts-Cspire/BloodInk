@@ -79,7 +79,10 @@ public partial class PlayerController : CharacterBody2D
     public void UpdateAnimation(string animName)
     {
         AnimPlayer.FlipH = FacingDirection.X < 0;
-        AnimPlayer.Play(animName);
+        if (AnimPlayer.SpriteFrames != null && AnimPlayer.SpriteFrames.HasAnimation(animName))
+            AnimPlayer.Play(animName);
+        else if (AnimPlayer.SpriteFrames != null && AnimPlayer.SpriteFrames.HasAnimation("idle"))
+            AnimPlayer.Play("idle");
     }
 
     private void OnHurt(int damage, Vector2 knockback)

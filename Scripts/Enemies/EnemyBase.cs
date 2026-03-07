@@ -1,5 +1,6 @@
 using Godot;
 using BloodInk.Combat;
+using BloodInk.Tools;
 
 namespace BloodInk.Enemies;
 
@@ -25,6 +26,15 @@ public partial class EnemyBase : CharacterBody2D
     /// <summary>Reference to the player — set by the world or via detection.</summary>
     public Node2D? Target { get; set; }
 
+    /// <summary>Safe animation play — falls back to idle if animation doesn't exist.</summary>
+    public void PlayAnimation(string animName)
+    {
+        if (AnimPlayer.SpriteFrames != null && AnimPlayer.SpriteFrames.HasAnimation(animName))
+            AnimPlayer.Play(animName);
+        else if (AnimPlayer.SpriteFrames != null && AnimPlayer.SpriteFrames.HasAnimation("idle"))
+            AnimPlayer.Play("idle");
+    }
+
     public override void _Ready()
     {
         AnimPlayer = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
@@ -38,11 +48,30 @@ public partial class EnemyBase : CharacterBody2D
         Hurtbox.Hurt += OnHurt;
         Health.Died += OnDied;
 
+        // Apply placeholder sprites if no textures are loaded.
+        ApplyPlaceholderSprites();
+
         EnemyReady();
     }
 
     /// <summary>Override in subclasses for additional setup.</summary>
     protected virtual void EnemyReady() { }
+
+    /// <summary>Apply placeholder sprite frames if none are set.</summary>
+    private void ApplyPlaceholderSprites()
+    {
+        if (AnimPlayer.SpriteFrames == null ||
+            AnimPlayer.SpriteFrames.GetFrameCount("idle") == 0 ||
+            AnimPlayer.SpriteFrames.GetFrameTexture("idle", 0) == null)
+        {
+            var placeholder = PlaceholderSprites.GetFrames("slime_frames");
+            if (placeholder != null)
+            {
+                AnimPlayer.SpriteFrames = placeholder;
+                AnimPlayer.Play("idle");
+            }
+        }
+    }
 
     public void ApplyKnockback(double delta)
     {

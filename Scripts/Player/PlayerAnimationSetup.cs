@@ -67,6 +67,22 @@ public partial class PlayerAnimationSetup : Node
             sprite.Play();
             GD.Print($"PlayerAnimationSetup: Built {anims.Count} animations from '{SheetPath}'.");
         }
+        else
+        {
+            // Fallback to placeholder sprites when sheet doesn't exist.
+            var placeholder = PlaceholderSprites.GetFrames("player_frames");
+            if (placeholder != null)
+            {
+                sprite.SpriteFrames = placeholder;
+                sprite.Animation = "idle";
+                sprite.Play();
+                GD.Print("PlayerAnimationSetup: Using placeholder sprites (no sheet found).");
+            }
+            else
+            {
+                GD.PushWarning("PlayerAnimationSetup: No sprite sheet and no placeholders available.");
+            }
+        }
     }
 
     // ── Animation table ─────────────────────────────────────────────

@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BloodInk.Tools;
 
 namespace BloodInk.Core;
 
@@ -47,6 +48,9 @@ public partial class GameManager : Node
     /// </summary>
     private void InitializeSystems()
     {
+        // Generate placeholder sprites first so all scenes can use them.
+        PlaceholderSprites.CreateAll();
+
         // Core systems.
         InkInventory = new Ink.InkInventory();
         TattooSystem = new Ink.TattooSystem();
