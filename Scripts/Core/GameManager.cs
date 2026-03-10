@@ -60,6 +60,7 @@ public partial class GameManager : Node
         NewGamePlus = new Progression.NewGamePlus();
         SaveSystem = new SaveSystem();
 
+        AddChild(InkInventory);
         AddChild(TattooSystem);
         AddChild(EchoManager);
         AddChild(CampaignManager);
@@ -82,6 +83,10 @@ public partial class GameManager : Node
         AddChild(Tremor);
         AddChild(Crafting);
         AddChild(Camp);
+
+        // Noise propagation for stealth hearing.
+        var noiseProp = new Stealth.NoisePropagator();
+        AddChild(noiseProp);
 
         // Kingdom states.
         string[] kingdomNames = { "Ashenmarch", "Veilgard", "Thornwall", "Duskhollow", "Irontide", "The Pale" };
@@ -106,8 +111,19 @@ public partial class GameManager : Node
         TattooSystem.TattooApplied += (tattooId, slot) =>
         {
             // Check if this tattoo has an associated Blood Echo.
-            // (Actual echo ID is stored on the TattooData resource.)
+            var tattoo = Content.TattooRegistry.FindById(tattooId);
+            if (tattoo != null && !string.IsNullOrEmpty(tattoo.BloodEchoId))
+            {
+                EchoManager?.UnlockEcho(tattoo.BloodEchoId);
+            }
         };
+
+        // Register all crafting recipes.
+        foreach (var recipe in Content.CraftingRecipeRegistry.GetAll())
+            Crafting?.RegisterRecipe(recipe);
+
+        // Register all echo definitions.
+        EchoManager?.RegisterEchoes(Content.EchoRegistry.GetAll());
 
         GD.Print("BloodInk: All gameplay systems initialized.");
 
@@ -118,17 +134,19 @@ public partial class GameManager : Node
         }
     }
 
-    public override void _UnhandledInput(InputEvent @event)
-    {
-        if (@event.IsActionPressed("pause"))
-        {
-            TogglePause();
-        }
-    }
-
+    /// <summary>
+    /// Toggle pause state. Called by PauseMenu — do NOT also handle "pause"
+    /// input here to avoid double-toggling.
+    /// </summary>
     public void TogglePause()
     {
-        IsPaused = !IsPaused;
+        SetPaused(!IsPaused);
+    }
+
+    /// <summary>Explicitly set the paused state.</summary>
+    public void SetPaused(bool paused)
+    {
+        IsPaused = paused;
         GetTree().Paused = IsPaused;
         GD.Print(IsPaused ? "Game Paused" : "Game Resumed");
     }
@@ -160,6 +178,17 @@ public partial class GameManager : Node
             ["ngPlus"] = NewGamePlus?.Serialize() ?? new()
         };
 
+        // Save dialogue flags.
+        var dialogueFlags = Dialogue.DialogueManager.Instance?.ExportFlags();
+        if (dialogueFlags != null && dialogueFlags.Count > 0)
+            data["dialogueFlags"] = dialogueFlags.ToDictionary(kv => kv.Key, kv => (object)kv.Value);
+
+        // Save current scene path for proper scene restoration on load.
+        data["meta"] = new Dictionary<string, object>
+        {
+            ["scene"] = GetTree().CurrentScene?.SceneFilePath ?? ""
+        };
+
         // Add kingdom states.
         for (int i = 0; i < 6; i++)
             data[$"kingdom_{i}"] = Kingdoms[i]?.Serialize() ?? new();
@@ -180,7 +209,7 @@ public partial class GameManager : Node
             var intData = inkData.ToDictionary(kv => kv.Key, kv => Convert.ToInt32(kv.Value));
             InkInventory?.Deserialize(intData);
         }
-        // TattooSystem restore would need tattoo registry lookup — deferred to content loading.
+        if (data.TryGetValue("tattoos", out var tatData)) TattooSystem?.Deserialize(tatData);
         if (data.TryGetValue("echoes", out var echoData)) EchoManager?.Deserialize(echoData);
         if (data.TryGetValue("campaigns", out var campData)) CampaignManager?.Deserialize(campData);
         if (data.TryGetValue("tremor", out var tremData)) Tremor?.Deserialize(tremData);
@@ -188,8 +217,20 @@ public partial class GameManager : Node
         if (data.TryGetValue("choices", out var choiceData)) Choices?.Deserialize(choiceData);
         if (data.TryGetValue("ngPlus", out var ngData)) NewGamePlus?.Deserialize(ngData);
 
+        // Restore subsystems that were previously skipped.
+        if (data.TryGetValue("warband", out var warbandData)) Warband?.Deserialize(warbandData);
+        if (data.TryGetValue("spyNetwork", out var spyData)) SpyNetwork?.Deserialize(spyData);
+        if (data.TryGetValue("crafting", out var craftData)) Crafting?.Deserialize(craftData);
+
         for (int i = 0; i < 6; i++)
             if (data.TryGetValue($"kingdom_{i}", out var kData)) Kingdoms[i]?.Deserialize(kData);
+
+        // Restore dialogue flags.
+        if (data.TryGetValue("dialogueFlags", out var dfData))
+        {
+            var stringFlags = dfData.ToDictionary(kv => kv.Key, kv => kv.Value?.ToString() ?? "");
+            Dialogue.DialogueManager.Instance?.ImportFlags(stringFlags);
+        }
     }
 
     // ─── NG+ Transition ───────────────────────────────────────────

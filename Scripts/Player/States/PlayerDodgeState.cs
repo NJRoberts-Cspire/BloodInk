@@ -11,12 +11,19 @@ public partial class PlayerDodgeState : State
 {
     [Export] public float DodgeDuration { get; set; } = 0.25f;
 
+    /// <summary>Cooldown after dodge ends before another dodge is allowed (seconds).</summary>
+    [Export] public float DodgeCooldown { get; set; } = 0.3f;
+
     private PlayerController _player = null!;
     private float _timer;
+
+    /// <summary>Shared cooldown tracker — set on exit, checked by IdleState/MoveState. Reset on Init().</summary>
+    public static float CooldownRemaining { get; set; } = 0f;
 
     public override void Init()
     {
         _player = GetOwner<PlayerController>();
+        CooldownRemaining = 0f;
     }
 
     private GhostTrail? _ghostTrail;
@@ -49,6 +56,7 @@ public partial class PlayerDodgeState : State
     {
         _player.Hurtbox.IsInvincible = false;
         _ghostTrail?.StopTrail();
+        CooldownRemaining = DodgeCooldown;
 
         // Landing dust.
         DustPuff.SpawnAt(_player.GetTree().CurrentScene, _player.GlobalPosition, 0.8f);

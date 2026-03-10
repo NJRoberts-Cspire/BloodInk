@@ -89,32 +89,12 @@ public partial class TestWorld : Node2D
         AddChild(visual);
 
         // Area2D that marks shadow zone for stealth system.
-        var area = new Area2D();
+        var area = new Stealth.ShadowZone();
         area.Position = position + size / 2;
-        area.CollisionLayer = 0;
-        area.CollisionMask = 2; // Player layer.
         var shape = new CollisionShape2D();
         var rectShape = new RectangleShape2D { Size = size };
         shape.Shape = rectShape;
         area.AddChild(shape);
         AddChild(area);
-
-        // Connect body entered/exited to toggle shadow on stealth profile.
-        area.BodyEntered += (body) =>
-        {
-            if (body is Player.PlayerController pc)
-            {
-                var stealth = pc.GetNodeOrNull<Stealth.StealthProfile>("StealthProfile");
-                if (stealth != null) stealth.ShadowZoneCount++;
-            }
-        };
-        area.BodyExited += (body) =>
-        {
-            if (body is Player.PlayerController pc)
-            {
-                var stealth = pc.GetNodeOrNull<Stealth.StealthProfile>("StealthProfile");
-                if (stealth != null) stealth.ShadowZoneCount--;
-            }
-        };
     }
 }

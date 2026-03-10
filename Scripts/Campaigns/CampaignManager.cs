@@ -127,13 +127,18 @@ public partial class CampaignManager : Node
 
     public void Deserialize(Dictionary<string, object> data)
     {
+        _unlockedCampaigns.Clear();
+        _completedCampaigns.Clear();
+        // Vetch is always unlocked.
+        _unlockedCampaigns.Add(CampaignHand.Vetch);
+
         if (data.TryGetValue("active", out var active) && active is int a)
             ActiveCampaign = (CampaignHand)a;
 
-        if (data.TryGetValue("unlocked", out var unlocked) && unlocked is List<int> uList)
-            foreach (var h in uList) _unlockedCampaigns.Add((CampaignHand)h);
+        if (data.TryGetValue("unlocked", out var unlocked) && unlocked is List<object> uList)
+            foreach (var h in uList) { if (h is int hi) _unlockedCampaigns.Add((CampaignHand)hi); }
 
-        if (data.TryGetValue("completed", out var completed) && completed is List<int> cList)
-            foreach (var h in cList) _completedCampaigns.Add((CampaignHand)h);
+        if (data.TryGetValue("completed", out var completed) && completed is List<object> cList)
+            foreach (var h in cList) { if (h is int hi) _completedCampaigns.Add((CampaignHand)hi); }
     }
 }

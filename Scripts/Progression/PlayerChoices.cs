@@ -116,6 +116,8 @@ public partial class PlayerChoices : Node
 
     public void Deserialize(Dictionary<string, object> data)
     {
+        _choices.Clear();
+
         if (data.TryGetValue("mercy", out var m) && m is int mi) Mercy = mi;
         if (data.TryGetValue("cruelty", out var c) && c is int ci) Cruelty = ci;
         if (data.TryGetValue("optKills", out var ok) && ok is int oki) OptionalKills = oki;
@@ -125,8 +127,8 @@ public partial class PlayerChoices : Node
         if (data.TryGetValue("senna", out var sn) && sn is bool snb) SennaSurvived = snb;
         if (data.TryGetValue("edictBroken", out var eb) && eb is bool ebb) EdictBroken = ebb;
 
-        if (data.TryGetValue("choices", out var ch) && ch is Dictionary<string, int> chd)
-            foreach (var (k, v) in chd) _choices[k] = v;
+        if (data.TryGetValue("choices", out var ch) && ch is Dictionary<string, object> chd)
+            foreach (var (k, v) in chd) { if (v is int vi) _choices[k] = vi; }
     }
 }
 

@@ -30,6 +30,11 @@ public partial class CameraShake : Camera2D
         Instance = this;
     }
 
+    public override void _ExitTree()
+    {
+        if (Instance == this) Instance = null;
+    }
+
     public override void _Process(double delta)
     {
         if (_trauma <= 0)

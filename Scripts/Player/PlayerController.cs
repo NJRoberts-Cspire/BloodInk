@@ -31,11 +31,18 @@ public partial class PlayerController : CharacterBody2D
 
     public override void _Ready()
     {
-        AnimPlayer = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
-        Hurtbox = GetNode<Hurtbox>("Hurtbox");
-        SwordHitbox = GetNode<Hitbox>("SwordHitbox");
-        Health = GetNode<HealthComponent>("HealthComponent");
+        AnimPlayer = GetNodeOrNull<AnimatedSprite2D>("AnimatedSprite2D")!;
+        Hurtbox = GetNodeOrNull<Hurtbox>("Hurtbox")!;
+        SwordHitbox = GetNodeOrNull<Hitbox>("SwordHitbox")!;
+        Health = GetNodeOrNull<HealthComponent>("HealthComponent")!;
         VfxLibrary = GetNodeOrNull<VfxAnimationLibrary>("VfxLibrary");
+
+        if (AnimPlayer == null || Hurtbox == null || SwordHitbox == null || Health == null)
+        {
+            GD.PrintErr($"PlayerController '{Name}': missing required child nodes (AnimatedSprite2D, Hurtbox, SwordHitbox, or HealthComponent).");
+            SetPhysicsProcess(false);
+            return;
+        }
 
         SwordHitbox.Source = this;
         SwordHitbox.Monitoring = false; // Turned on only during attack state.
@@ -85,10 +92,18 @@ public partial class PlayerController : CharacterBody2D
             AnimPlayer.Play("idle");
     }
 
+    /// <summary>Post-hit invincibility duration in seconds.</summary>
+    private const float InvincibilityDuration = 0.6f;
+
     private void OnHurt(int damage, Vector2 knockback)
     {
         Health.TakeDamage(damage);
         KnockbackVelocity = knockback;
+
+        // Post-hit invincibility frames to prevent multi-hit shredding.
+        Hurtbox.IsInvincible = true;
+        var iTimer = GetTree().CreateTimer(InvincibilityDuration);
+        iTimer.Timeout += () => { if (IsInsideTree()) Hurtbox.IsInvincible = false; };
 
         // VFX: red screen flash + camera shake on player hit.
         VFX.ScreenTransition.Instance?.FlashRed(0.2f);
@@ -100,15 +115,28 @@ public partial class PlayerController : CharacterBody2D
         GD.Print("Player died!");
         UpdateAnimation("death");
         SetPhysicsProcess(false);
+        SetProcessUnhandledInput(false);
+
+        // Disable the state machine so the player can't attack/dodge while dead.
+        var sm = GetNodeOrNull<Core.StateMachine>("StateMachine");
+        if (sm != null) sm.ProcessMode = ProcessModeEnum.Disabled;
+
+        // Prevent further hits and disable sword.
+        Hurtbox.IsInvincible = true;
+        SwordHitbox.Monitoring = false;
 
         // VFX: dramatic death effects.
         VFX.CameraShake.Instance?.ShakeExtreme();
         VFX.HitStop.Instance?.FreezeHeavy();
         VFX.ScreenTransition.Instance?.FadeToBlack(1.5f);
 
+        // Ensure game is unpaused (e.g. if player dies during dialogue).
+        Core.GameManager.Instance?.SetPaused(false);
+
         // Store the current scene for retry, then transition to Game Over.
-        UI.GameOver.LastMissionScene = GetTree().CurrentScene.SceneFilePath;
-        var timer = GetTree().CreateTimer(2.0f);
+        UI.GameOver.LastMissionScene = GetTree().CurrentScene?.SceneFilePath ?? "";
+        // processAlways: true ensures the timer ticks even if something re-pauses.
+        var timer = GetTree().CreateTimer(2.0f, true, false, true);
         timer.Timeout += () =>
         {
             GetTree().ChangeSceneToFile("res://Scenes/UI/GameOver.tscn");

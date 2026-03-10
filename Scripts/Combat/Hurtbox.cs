@@ -38,37 +38,48 @@ public partial class Hurtbox : Area2D
             // ─── VFX Juice ────────────────────────────────────────
             if (Owner is Node2D target)
             {
-                bool isCrit = hitbox.Damage >= 100;
+                // Stealth kills are lethal but quiet — minimal VFX.
+                bool isStealthKill = hitbox.IsStealthKill;
+                bool isCrit = !isStealthKill && hitbox.Damage >= 3;
 
                 // Hit flash (white blink on the damaged sprite).
                 HitFlash.FlashNode(
                     target.GetNodeOrNull<CanvasItem>("AnimatedSprite2D") ?? target,
-                    Colors.White, 0.12f);
+                    Colors.White, isStealthKill ? 0.06f : 0.12f);
 
-                // Damage number.
-                DamageNumber.Spawn(
-                    target.GetTree().CurrentScene,
-                    target.GlobalPosition + new Vector2(0, -12),
-                    hitbox.Damage, isCrit);
+                // Damage number (suppress for stealth kills — they're silent).
+                if (!isStealthKill)
+                {
+                    DamageNumber.Spawn(
+                        target.GetTree().CurrentScene,
+                        target.GlobalPosition + new Vector2(0, -12),
+                        hitbox.Damage, isCrit);
+                }
 
                 // Blood splatter in knockback direction.
                 BloodSplatter.Spawn(
                     target.GetTree().CurrentScene,
                     target.GlobalPosition,
                     knockbackDir,
-                    isCrit ? 14 : 6);
+                    isStealthKill ? 3 : (isCrit ? 14 : 6));
 
-                // Screen shake scaled to damage.
-                if (isCrit)
-                    CameraShake.Instance?.ShakeHeavy();
-                else
-                    CameraShake.Instance?.ShakeLight();
+                // Screen shake scaled to damage (none for stealth).
+                if (!isStealthKill)
+                {
+                    if (isCrit)
+                        CameraShake.Instance?.ShakeHeavy();
+                    else
+                        CameraShake.Instance?.ShakeLight();
+                }
 
-                // Hit-stop on heavy hits.
-                if (isCrit)
-                    HitStop.Instance?.FreezeHeavy();
-                else if (hitbox.Damage >= 2)
-                    HitStop.Instance?.FreezeLight();
+                // Hit-stop on heavy hits (none for stealth).
+                if (!isStealthKill)
+                {
+                    if (isCrit)
+                        HitStop.Instance?.FreezeHeavy();
+                    else if (hitbox.Damage >= 2)
+                        HitStop.Instance?.FreezeLight();
+                }
             }
         }
     }

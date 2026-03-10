@@ -54,10 +54,9 @@ public partial class RoomManager : Node
 
             // Face the player in the correct direction.
             var facing = DirectionToVector(PendingDirection);
-            if (player.HasMethod("set") || player is CharacterBody2D)
+            if (player is Player.PlayerController pc)
             {
-                // Try to set FacingDirection if the player has it.
-                player.Set("FacingDirection", facing);
+                pc.FacingDirection = facing;
             }
         }
 
@@ -108,6 +107,13 @@ public partial class RoomManager : Node
         rect.Color = new Color(0, 0, 0, 1); // start fully black
         var tween = CreateTween();
         tween.TweenProperty(rect, "color:a", 0.0f, FadeInDuration);
-        await ToSignal(tween, Tween.SignalName.Finished);
+        try
+        {
+            await ToSignal(tween, Tween.SignalName.Finished);
+        }
+        catch (System.Exception)
+        {
+            // Tween or node freed during scene transition — safe to ignore.
+        }
     }
 }

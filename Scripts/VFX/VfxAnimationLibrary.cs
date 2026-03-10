@@ -50,9 +50,10 @@ public partial class VfxAnimationLibrary : Node2D
 
     public override void _Ready()
     {
-        _frames = SpriteSheetAnimator.BuildFromPath(SheetPath, GetVfxAnimations());
+        var anims = GetVfxAnimations();
+        _frames = SpriteSheetAnimator.BuildFromPath(SheetPath, anims);
         if (_frames != null)
-            GD.Print($"VfxAnimationLibrary: Loaded {GetVfxAnimations().Count} VFX animations.");
+            GD.Print($"VfxAnimationLibrary: Loaded {anims.Count} VFX animations.");
     }
 
     /// <summary>
@@ -75,7 +76,9 @@ public partial class VfxAnimationLibrary : Node2D
         };
         sprite.AnimationFinished += () => sprite.QueueFree();
 
-        GetTree().CurrentScene.AddChild(sprite);
+        var currentScene = GetTree().CurrentScene;
+        if (currentScene == null) { sprite.QueueFree(); return; }
+        currentScene.AddChild(sprite);
         sprite.Play(animName);
     }
 
@@ -97,7 +100,9 @@ public partial class VfxAnimationLibrary : Node2D
             ZIndex = 10
         };
 
-        GetTree().CurrentScene.AddChild(sprite);
+        var currentScene = GetTree().CurrentScene;
+        if (currentScene == null) { sprite.QueueFree(); return null; }
+        currentScene.AddChild(sprite);
         sprite.Play(animName);
         return sprite;
     }

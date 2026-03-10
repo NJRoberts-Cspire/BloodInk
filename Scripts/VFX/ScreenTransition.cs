@@ -22,6 +22,11 @@ public partial class ScreenTransition : Node
         _fadeRect = fadeLayer?.GetNodeOrNull<ColorRect>("ColorRect");
     }
 
+    public override void _ExitTree()
+    {
+        if (Instance == this) Instance = null;
+    }
+
     /// <summary>Fade to black over the given duration.</summary>
     public void FadeToBlack(float duration = 0.5f)
     {

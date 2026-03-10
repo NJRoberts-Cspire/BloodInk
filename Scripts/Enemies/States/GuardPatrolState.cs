@@ -22,7 +22,7 @@ public partial class GuardPatrolState : State
 
     public override void Enter()
     {
-        _guard.AnimPlayer.Play("run");
+        _guard.PlayAnimation("walk");
         _isWaiting = false;
         _waitTimer = 0f;
 
@@ -55,7 +55,7 @@ public partial class GuardPatrolState : State
             {
                 _isWaiting = false;
                 _currentWaypoint = _guard.Patrol!.AdvanceToNext();
-                _guard.AnimPlayer.Play("run");
+                _guard.PlayAnimation("walk");
             }
             return;
         }

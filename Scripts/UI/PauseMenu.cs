@@ -15,8 +15,9 @@ public partial class PauseMenu : Control
     private Button? _quitBtn;
     private SettingsPanel? _settingsPanel;
 
-    private static readonly PackedScene SettingsScene =
-        GD.Load<PackedScene>("res://Scenes/UI/SettingsPanel.tscn");
+    private PackedScene? _settingsScene;
+    private PackedScene SettingsScene =>
+        _settingsScene ??= GD.Load<PackedScene>("res://Scenes/UI/SettingsPanel.tscn");
 
     public override void _Ready()
     {
@@ -56,13 +57,13 @@ public partial class PauseMenu : Control
     public void ShowMenu()
     {
         Visible = true;
-        GetTree().Paused = true;
+        Core.GameManager.Instance?.SetPaused(true);
     }
 
     private void OnResume()
     {
         Visible = false;
-        GetTree().Paused = false;
+        Core.GameManager.Instance?.SetPaused(false);
     }
 
     private void OnSave()
@@ -74,8 +75,11 @@ public partial class PauseMenu : Control
     private void OnLoad()
     {
         Core.GameManager.Instance?.Load("slot1");
-        OnResume();
         GD.Print("Game loaded.");
+        // Reload the current scene so the level state matches the loaded data.
+        Core.GameManager.Instance?.SetPaused(false);
+        GetTree().Paused = false;
+        GetTree().ReloadCurrentScene();
     }
 
     private void OnSettings()
@@ -92,6 +96,7 @@ public partial class PauseMenu : Control
 
     private void OnQuitToMenu()
     {
+        Core.GameManager.Instance?.SetPaused(false);
         GetTree().Paused = false;
         GetTree().ChangeSceneToFile("res://Scenes/UI/MainMenu.tscn");
     }

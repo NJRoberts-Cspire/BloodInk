@@ -27,11 +27,17 @@ public partial class DialogueManager : Node
     /// <summary>Active conversation data.</summary>
     private DialogueData? _activeData;
 
+    /// <summary>Tracks visited line IDs within a single advance chain to detect cycles.</summary>
+    private readonly HashSet<string> _visitedLines = new();
+
     /// <summary>Current line being displayed.</summary>
     public DialogueLine? CurrentLine { get; private set; }
 
     /// <summary>Whether a conversation is in progress.</summary>
     public bool IsActive => _activeData != null;
+
+    /// <summary>Tracks whether the game was already paused before dialogue started.</summary>
+    private bool _wasPausedBeforeDialogue;
 
     public override void _Ready()
     {
@@ -50,9 +56,11 @@ public partial class DialogueManager : Node
         }
 
         _activeData = data;
+        _visitedLines.Clear();
         EmitSignal(SignalName.ConversationStarted, data.ConversationId);
 
-        // Pause player input during dialogue.
+        // Pause player input during dialogue, but remember previous pause state.
+        _wasPausedBeforeDialogue = GetTree().Paused;
         GetTree().Paused = true;
         ProcessMode = ProcessModeEnum.Always;
 
@@ -65,7 +73,8 @@ public partial class DialogueManager : Node
         var id = _activeData?.ConversationId ?? "";
         _activeData = null;
         CurrentLine = null;
-        GetTree().Paused = false;
+        // Restore prior pause state instead of unconditionally unpausing.
+        GetTree().Paused = _wasPausedBeforeDialogue;
         EmitSignal(SignalName.ConversationEnded, id);
     }
 
@@ -77,6 +86,9 @@ public partial class DialogueManager : Node
     public void Advance()
     {
         if (_activeData == null || CurrentLine == null) return;
+
+        // Reset cycle detection for each new advance chain.
+        _visitedLines.Clear();
 
         if (CurrentLine.IsEnd)
         {
@@ -140,6 +152,15 @@ public partial class DialogueManager : Node
     {
         if (line == null)
         {
+            EndConversation();
+            return;
+        }
+
+        // Cycle detection: if we've already visited this line in the current
+        // advance chain, stop to prevent StackOverflowException.
+        if (!_visitedLines.Add(line.Id))
+        {
+            GD.PrintErr($"DialogueManager: Cycle detected at line '{line.Id}'. Ending conversation.");
             EndConversation();
             return;
         }

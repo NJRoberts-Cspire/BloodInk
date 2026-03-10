@@ -13,4 +13,7 @@ public partial class Hitbox : Area2D
 
     /// <summary>Owner of this hitbox, used to compute knockback direction.</summary>
     public Node2D? Source { get; set; }
+
+    /// <summary>If true, this hit is a stealth kill — suppress excessive VFX.</summary>
+    public bool IsStealthKill { get; set; } = false;
 }

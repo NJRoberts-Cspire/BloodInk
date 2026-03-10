@@ -160,7 +160,8 @@ public partial class WarbandManager : Node
                 ["end"] = w.Endurance,
                 ["morale"] = w.Morale,
                 ["dead"] = w.IsDead,
-                ["raids"] = w.RaidsSurvived
+                ["raids"] = w.RaidsSurvived,
+                ["lore"] = w.Lore ?? ""
             };
         }
 
@@ -171,5 +172,32 @@ public partial class WarbandManager : Node
             ["supplies"] = WarSupplies,
             ["maxSize"] = MaxWarbandSize
         };
+    }
+
+    public void Deserialize(Dictionary<string, object> data)
+    {
+        _warriors.Clear();
+
+        if (data.TryGetValue("renown", out var r) && r is int ri) Renown = ri;
+        if (data.TryGetValue("supplies", out var s) && s is int si) WarSupplies = si;
+        if (data.TryGetValue("maxSize", out var ms) && ms is int msi) MaxWarbandSize = msi;
+
+        if (data.TryGetValue("warriors", out var wObj) && wObj is Dictionary<string, object> wDict)
+        {
+            foreach (var (id, val) in wDict)
+            {
+                if (val is not Dictionary<string, object> wData) continue;
+                var warrior = new WarriorData { Id = id };
+                if (wData.TryGetValue("name", out var n) && n is string ns) warrior.Name = ns;
+                if (wData.TryGetValue("role", out var ro) && ro is int roi) warrior.Role = (WarriorRole)roi;
+                if (wData.TryGetValue("str", out var st) && st is int sti) warrior.Strength = sti;
+                if (wData.TryGetValue("end", out var en) && en is int eni) warrior.Endurance = eni;
+                if (wData.TryGetValue("morale", out var mo) && mo is int moi) warrior.Morale = moi;
+                if (wData.TryGetValue("dead", out var d) && d is bool db) warrior.IsDead = db;
+                if (wData.TryGetValue("raids", out var ra) && ra is int rai) warrior.RaidsSurvived = rai;
+                if (wData.TryGetValue("lore", out var lo2) && lo2 is string los) warrior.Lore = los;
+                _warriors[id] = warrior;
+            }
+        }
     }
 }

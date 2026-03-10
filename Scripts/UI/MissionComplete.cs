@@ -9,6 +9,16 @@ namespace BloodInk.UI;
 /// </summary>
 public partial class MissionComplete : Control
 {
+    // ─── Static data populated by the level before scene transition ───
+    /// <summary>Target name/title block (e.g. "Lord Harlan Cowl\nGovernor of the Greenhold").</summary>
+    public static string TargetText { get; set; } = "Target Eliminated";
+
+    /// <summary>Atmospheric whisper quote shown after the kill.</summary>
+    public static string WhisperText { get; set; } = "";
+
+    /// <summary>Reward summary text (e.g. "Blood-Ink Acquired: 1× Major Grade").</summary>
+    public static string RewardText { get; set; } = "";
+
     private Label? _titleLabel;
     private Label? _targetLabel;
     private Label? _whisperLabel;
@@ -53,7 +63,7 @@ public partial class MissionComplete : Control
 
         _targetLabel = new Label
         {
-            Text = "Lord Harlan Cowl\nGovernor of the Greenhold\nEdictbearer",
+            Text = TargetText,
             HorizontalAlignment = HorizontalAlignment.Center
         };
         _targetLabel.AddThemeFontSizeOverride("font_size", 14);
@@ -63,7 +73,7 @@ public partial class MissionComplete : Control
 
         _whisperLabel = new Label
         {
-            Text = "\"I never saw the dark as empty.\nI thought it was full of things that loved me.\"",
+            Text = WhisperText,
             HorizontalAlignment = HorizontalAlignment.Center
         };
         _whisperLabel.AddThemeColorOverride("font_color", new Color(0.6f, 0.4f, 0.4f));
@@ -74,7 +84,7 @@ public partial class MissionComplete : Control
 
         _rewardLabel = new Label
         {
-            Text = "Blood-Ink Acquired: 1× Major Grade\nNew Tattoo Available: Shadow Step",
+            Text = RewardText,
             HorizontalAlignment = HorizontalAlignment.Center
         };
         _rewardLabel.AddThemeColorOverride("font_color", new Color(0.4f, 0.7f, 0.5f));
@@ -96,6 +106,11 @@ public partial class MissionComplete : Control
         Modulate = new Color(1, 1, 1, 0);
         var tween = CreateTween();
         tween.TweenProperty(this, "modulate:a", 1.0f, 2.0f);
+
+        // Reset static data after reading — prevents stale text on replay.
+        TargetText = "Target Eliminated";
+        WhisperText = "";
+        RewardText = "";
     }
 
     private void OnContinue()

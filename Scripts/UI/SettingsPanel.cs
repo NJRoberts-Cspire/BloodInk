@@ -30,7 +30,8 @@ public partial class SettingsPanel : Control
 
     // ─── Controls tab ────────────────────────────────────────────
     private KeybindSettings? _keybindSettings;
-
+    // ─── State ──────────────────────────────────────────────────
+    private bool _loading;
     // ─── Tab buttons ─────────────────────────────────────────────
     private Button? _audioTabBtn;
     private Button? _displayTabBtn;
@@ -39,8 +40,9 @@ public partial class SettingsPanel : Control
     private Control? _displayTab;
     private Control? _controlsTab;
 
-    private static readonly PackedScene KeybindScene =
-        GD.Load<PackedScene>("res://Scenes/UI/KeybindSettings.tscn");
+    private PackedScene? _keybindScene;
+    private PackedScene KeybindScene =>
+        _keybindScene ??= GD.Load<PackedScene>("res://Scenes/UI/KeybindSettings.tscn");
 
     // Common resolutions (render-size multipliers of the 640×360 base).
     private static readonly Vector2I[] Resolutions = new[]
@@ -412,6 +414,8 @@ public partial class SettingsPanel : Control
 
     private void SaveSettings()
     {
+        if (_loading) return;
+
         var cfg = new ConfigFile();
 
         // Audio
@@ -431,60 +435,63 @@ public partial class SettingsPanel : Control
 
     private void LoadSettings()
     {
+        _loading = true;
         var cfg = new ConfigFile();
-        if (cfg.Load(ConfigPath) != Error.Ok) return;
+        if (cfg.Load(ConfigPath) != Error.Ok) { _loading = false; return; }
 
         // Audio
         var am = Audio.AudioManager.Instance;
         if (cfg.HasSectionKey("audio", "master"))
         {
-            float v = (float)(double)cfg.GetValue("audio", "master");
-            _masterSlider!.Value = v;
+            float v = System.Convert.ToSingle(cfg.GetValue("audio", "master"));
+            if (_masterSlider != null) _masterSlider.Value = v;
             am?.SetMasterVolume(v);
         }
         if (cfg.HasSectionKey("audio", "music"))
         {
-            float v = (float)(double)cfg.GetValue("audio", "music");
-            _musicSlider!.Value = v;
+            float v = System.Convert.ToSingle(cfg.GetValue("audio", "music"));
+            if (_musicSlider != null) _musicSlider.Value = v;
             am?.SetMusicVolume(v);
         }
         if (cfg.HasSectionKey("audio", "sfx"))
         {
-            float v = (float)(double)cfg.GetValue("audio", "sfx");
-            _sfxSlider!.Value = v;
+            float v = System.Convert.ToSingle(cfg.GetValue("audio", "sfx"));
+            if (_sfxSlider != null) _sfxSlider.Value = v;
             am?.SetSFXVolume(v);
         }
         if (cfg.HasSectionKey("audio", "ambient"))
         {
-            float v = (float)(double)cfg.GetValue("audio", "ambient");
-            _ambientSlider!.Value = v;
+            float v = System.Convert.ToSingle(cfg.GetValue("audio", "ambient"));
+            if (_ambientSlider != null) _ambientSlider.Value = v;
             am?.SetAmbientVolume(v);
         }
         if (cfg.HasSectionKey("audio", "ui"))
         {
-            float v = (float)(double)cfg.GetValue("audio", "ui");
-            _uiSlider!.Value = v;
+            float v = System.Convert.ToSingle(cfg.GetValue("audio", "ui"));
+            if (_uiSlider != null) _uiSlider.Value = v;
             am?.SetUIVolume(v);
         }
 
         // Display
         if (cfg.HasSectionKey("display", "window_mode"))
         {
-            int mode = (int)(long)cfg.GetValue("display", "window_mode");
-            _windowModeOption!.Selected = mode;
+            int mode = System.Convert.ToInt32(cfg.GetValue("display", "window_mode"));
+            if (_windowModeOption != null) _windowModeOption.Selected = mode;
             OnWindowModeChanged(mode);
         }
         if (cfg.HasSectionKey("display", "resolution"))
         {
-            int idx = (int)(long)cfg.GetValue("display", "resolution");
-            _resolutionOption!.Selected = idx;
+            int idx = System.Convert.ToInt32(cfg.GetValue("display", "resolution"));
+            if (_resolutionOption != null) _resolutionOption.Selected = idx;
             OnResolutionChanged(idx);
         }
         if (cfg.HasSectionKey("display", "vsync"))
         {
-            bool on = (bool)cfg.GetValue("display", "vsync");
-            _vsyncToggle!.ButtonPressed = on;
+            bool on = System.Convert.ToBoolean(cfg.GetValue("display", "vsync"));
+            if (_vsyncToggle != null) _vsyncToggle.ButtonPressed = on;
             OnVSyncToggled(on);
         }
+
+        _loading = false;
     }
 }

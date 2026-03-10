@@ -76,6 +76,9 @@ public partial class AmbientZone : Area2D
 
     // ─── Zone Enter/Exit ──────────────────────────────────────────
 
+    /// <summary>Current fade tween — killed before creating a new one.</summary>
+    private Tween? _fadeTween;
+
     private void OnBodyEntered(Node2D body)
     {
         if (!body.IsInGroup("Player")) return;
@@ -87,8 +90,9 @@ public partial class AmbientZone : Area2D
             if (!_loopPlayer.Playing)
                 _loopPlayer.Play();
 
-            var tween = CreateTween();
-            tween.TweenProperty(_loopPlayer, "volume_db", VolumeDb, FadeDuration);
+            _fadeTween?.Kill();
+            _fadeTween = CreateTween();
+            _fadeTween.TweenProperty(_loopPlayer, "volume_db", VolumeDb, FadeDuration);
         }
 
         // Switch music if specified.
@@ -104,9 +108,10 @@ public partial class AmbientZone : Area2D
         // Fade out loop.
         if (_loopPlayer != null && _loopPlayer.Playing)
         {
-            var tween = CreateTween();
-            tween.TweenProperty(_loopPlayer, "volume_db", -80f, FadeDuration);
-            tween.TweenCallback(Callable.From(() =>
+            _fadeTween?.Kill();
+            _fadeTween = CreateTween();
+            _fadeTween.TweenProperty(_loopPlayer, "volume_db", -80f, FadeDuration);
+            _fadeTween.TweenCallback(Callable.From(() =>
             {
                 if (!_playerInside) _loopPlayer.Stop();
             }));

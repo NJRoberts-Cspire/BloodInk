@@ -29,11 +29,11 @@ public partial class EnemyAttackState : State
 
         if (_enemy.Target is Node2D target)
         {
-            var dir = (_enemy.Target!.GlobalPosition - _enemy.GlobalPosition).Normalized();
+            var dir = (target.GlobalPosition - _enemy.GlobalPosition).Normalized();
             _enemy.Hitbox.Position = dir * 18f;
         }
 
-        _enemy.AnimPlayer.Play("attack");
+        _enemy.PlayAnimation("attack");
     }
 
     public override void PhysicsUpdate(double delta)

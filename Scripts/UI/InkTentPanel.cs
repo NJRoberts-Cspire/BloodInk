@@ -72,10 +72,13 @@ public partial class InkTentPanel : Control
 
     // ─── Open / Close ─────────────────────────────────────────────
 
+    private bool _wasPausedBeforeOpen;
+
     public void Open()
     {
         Visible = true;
-        GetTree().Paused = true;
+        _wasPausedBeforeOpen = GetTree().Paused;
+        Core.GameManager.Instance?.SetPaused(true);
         ProcessMode = ProcessModeEnum.Always;
         RefreshInkDisplay();
         ShowSlot(_currentSlot);
@@ -84,7 +87,9 @@ public partial class InkTentPanel : Control
     public void Close()
     {
         Visible = false;
-        GetTree().Paused = false;
+        // Restore prior pause state instead of unconditionally unpausing.
+        if (!_wasPausedBeforeOpen)
+            Core.GameManager.Instance?.SetPaused(false);
         EmitSignal(SignalName.PanelClosed);
     }
 

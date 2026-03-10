@@ -1,5 +1,7 @@
 using Godot;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 
 using FileAccess = Godot.FileAccess;
@@ -94,6 +96,21 @@ public partial class SaveSystem : Node
                 // Re-deserialize the systems portion specifically.
                 string systemsJson = JsonSerializer.Serialize(systems);
                 var result = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object>>>(systemsJson);
+
+                // System.Text.Json deserializes values as JsonElement, not int/bool/string.
+                // Unbox them to their actual CLR types so downstream 'is int' checks work.
+                if (result != null)
+                {
+                    foreach (var key in result.Keys)
+                    {
+                        var inner = result[key];
+                        var unboxed = new Dictionary<string, object>(inner.Count);
+                        foreach (var kv in inner)
+                            unboxed[kv.Key] = UnboxJsonElement(kv.Value);
+                        result[key] = unboxed;
+                    }
+                }
+
                 EmitSignal(SignalName.GameLoaded, slotName);
                 GD.Print($"Game loaded from slot '{slotName}'.");
                 return result;
@@ -108,6 +125,31 @@ public partial class SaveSystem : Node
     }
 
     // ─── Slot Management ──────────────────────────────────────────
+
+    /// <summary>
+    /// Convert System.Text.Json JsonElement values to their CLR equivalents
+    /// so that downstream code using 'is int', 'is bool', etc. works correctly.
+    /// </summary>
+    private static object UnboxJsonElement(object val)
+    {
+        if (val is not JsonElement je) return val;
+
+        return je.ValueKind switch
+        {
+            JsonValueKind.Number => je.TryGetInt32(out var i) ? (object)i
+                                  : je.TryGetSingle(out var f) ? (object)f
+                                  : je.GetDouble(),
+            JsonValueKind.True => (object)true,
+            JsonValueKind.False => (object)false,
+            JsonValueKind.String => (object)(je.GetString() ?? ""),
+            JsonValueKind.Array => je.EnumerateArray()
+                                     .Select(e => UnboxJsonElement(e))
+                                     .ToList(),
+            JsonValueKind.Object => je.EnumerateObject()
+                                      .ToDictionary(p => p.Name, p => UnboxJsonElement(p.Value)),
+            _ => val
+        };
+    }
 
     /// <summary>Check if a save slot exists.</summary>
     public static bool SaveExists(string slotName)

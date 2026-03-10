@@ -22,6 +22,10 @@ public partial class PlayerIdleState : State
 
     public override void PhysicsUpdate(double delta)
     {
+        // Tick down ability cooldowns.
+        PlayerAttackState.CooldownRemaining = Mathf.Max(0, PlayerAttackState.CooldownRemaining - (float)delta);
+        PlayerDodgeState.CooldownRemaining = Mathf.Max(0, PlayerDodgeState.CooldownRemaining - (float)delta);
+
         _player.ApplyKnockback(delta);
         _player.ApplyMovement(Vector2.Zero, 0, delta);
         _player.MoveAndSlide();
@@ -36,9 +40,9 @@ public partial class PlayerIdleState : State
 
     public override void HandleInput(InputEvent @event)
     {
-        if (@event.IsActionPressed("attack"))
+        if (@event.IsActionPressed("attack") && PlayerAttackState.CooldownRemaining <= 0)
             Machine?.TransitionTo("Attack");
-        else if (@event.IsActionPressed("dodge"))
+        else if (@event.IsActionPressed("dodge") && PlayerDodgeState.CooldownRemaining <= 0)
             Machine?.TransitionTo("Dodge");
         else if (@event.IsActionPressed("crouch"))
             Machine?.TransitionTo("Crouch");

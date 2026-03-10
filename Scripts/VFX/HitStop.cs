@@ -19,6 +19,11 @@ public partial class HitStop : Node
         ProcessMode = ProcessModeEnum.Always;
     }
 
+    public override void _ExitTree()
+    {
+        if (Instance == this) Instance = null;
+    }
+
     /// <summary>Freeze the game for the given duration in seconds.</summary>
     public void Freeze(float duration)
     {

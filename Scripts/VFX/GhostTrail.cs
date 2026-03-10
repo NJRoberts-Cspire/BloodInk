@@ -71,13 +71,17 @@ public partial class GhostTrail : Node2D
         };
 
         // Add to scene root so it stays in place.
-        GetTree().CurrentScene.AddChild(ghost);
+        var currentScene = GetTree().CurrentScene;
+        if (currentScene == null) { ghost.QueueFree(); return; }
+        currentScene.AddChild(ghost);
 
-        // Fade out and free.
+        // Fade out and scale up in parallel, then free.
         var tween = ghost.CreateTween();
+        tween.SetParallel(true);
         tween.TweenProperty(ghost, "modulate:a", 0.0f, GhostLifetime)
              .SetEase(Tween.EaseType.In);
         tween.TweenProperty(ghost, "scale", new Vector2(1.1f, 1.1f), GhostLifetime);
+        tween.SetParallel(false);
         tween.TweenCallback(Callable.From(() => ghost.QueueFree()));
     }
 }

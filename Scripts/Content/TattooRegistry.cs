@@ -309,4 +309,18 @@ public static class TattooRegistry
         // Whisper
         FingerWork(), MaskOfAsh(), MercyTouch()
     };
+
+    private static System.Collections.Generic.Dictionary<string, Ink.TattooData>? _byId;
+
+    /// <summary>Find a tattoo by its ID. Returns null if not found.</summary>
+    public static Ink.TattooData? FindById(string id)
+    {
+        if (_byId == null)
+        {
+            _byId = new();
+            foreach (var t in GetAll())
+                _byId[t.Id] = t;
+        }
+        return _byId.TryGetValue(id, out var result) ? result : null;
+    }
 }

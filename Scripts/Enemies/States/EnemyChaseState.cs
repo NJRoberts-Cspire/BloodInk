@@ -17,7 +17,7 @@ public partial class EnemyChaseState : State
 
     public override void Enter()
     {
-        _enemy.AnimPlayer.Play("run");
+        _enemy.PlayAnimation("run");
     }
 
     public override void PhysicsUpdate(double delta)

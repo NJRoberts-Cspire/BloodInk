@@ -51,6 +51,14 @@ public partial class CoverZone : Area2D
         if (Health <= 0)
         {
             GD.Print("Cover destroyed!");
+            // Decrement CoverZoneCount for any players still inside before freeing.
+            foreach (var body in GetOverlappingBodies())
+            {
+                if (body.GetNodeOrNull<StealthProfile>("StealthProfile") is StealthProfile profile)
+                {
+                    profile.CoverZoneCount = Mathf.Max(0, profile.CoverZoneCount - 1);
+                }
+            }
             QueueFree();
         }
     }

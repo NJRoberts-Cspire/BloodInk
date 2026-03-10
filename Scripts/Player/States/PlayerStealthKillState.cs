@@ -50,6 +50,7 @@ public partial class PlayerStealthKillState : State
         {
             // Silent kill — no noise, big damage.
             _player.SwordHitbox.Damage = StealthDamage;
+            _player.SwordHitbox.IsStealthKill = true;
             _player.SwordHitbox.Position = _player.FacingDirection * LungeRange;
             _player.SwordHitbox.Monitoring = true;
             _player.UpdateAnimation("stealth_kill");
@@ -68,6 +69,9 @@ public partial class PlayerStealthKillState : State
         else
         {
             // Not stealthy — just a regular attack that'll make noise.
+            // Apply tattoo damage bonus like a normal attack.
+            float dmgBonus = Core.GameManager.Instance?.TattooSystem?.DamageBonus ?? 0f;
+            _player.SwordHitbox.Damage = (int)Mathf.Max(1, 1 * (1f + dmgBonus));
             _player.SwordHitbox.Position = _player.FacingDirection * 20f;
             _player.SwordHitbox.Monitoring = true;
             _player.UpdateAnimation("attack");
@@ -80,10 +84,19 @@ public partial class PlayerStealthKillState : State
         }
     }
 
+    /// <summary>Brief window during which the lethal hitbox is active.</summary>
+    private const float HitboxActiveWindow = 0.15f;
+
     public override void PhysicsUpdate(double delta)
     {
         _timer -= (float)delta;
         _player.MoveAndSlide();
+
+        // Disable hitbox after the brief active window to prevent multi-kills.
+        if (_timer <= KillDuration - HitboxActiveWindow && _player.SwordHitbox.Monitoring)
+        {
+            _player.SwordHitbox.Monitoring = false;
+        }
 
         if (_timer <= 0)
         {
@@ -95,8 +108,11 @@ public partial class PlayerStealthKillState : State
     public override void Exit()
     {
         _player.SwordHitbox.Monitoring = false;
-        // Restore regular damage.
+        // Restore regular damage and stealth-kill flag.
         _player.SwordHitbox.Damage = 1;
+        _player.SwordHitbox.IsStealthKill = false;
+        // Set attack cooldown so stealth kills can't be spammed.
+        PlayerAttackState.CooldownRemaining = 0.4f;
     }
 
     // ─── Condition Checks ─────────────────────────────────────────
@@ -136,7 +152,7 @@ public partial class PlayerStealthKillState : State
         query.CollideWithBodies = true;
 
         var result = spaceState.IntersectRay(query);
-        if (result.Count == 0) return true; // No enemy to check angle against.
+        if (result.Count == 0) return false; // No enemy in range — can't backstab nothing.
 
         var enemy = result["collider"].As<Node2D>();
         if (enemy == null) return true;
@@ -149,8 +165,8 @@ public partial class PlayerStealthKillState : State
             enemyFacing = body.Velocity.Normalized();
         }
 
-        // The player's approach direction (from player to enemy).
-        var approachDir = (_player.GlobalPosition - enemy.GlobalPosition).Normalized();
+        // The player's approach direction (from player toward enemy).
+        var approachDir = (enemy.GlobalPosition - _player.GlobalPosition).Normalized();
 
         // If the approach direction aligns with the enemy's facing (we're behind them),
         // the dot product of approach and enemyFacing should be positive.

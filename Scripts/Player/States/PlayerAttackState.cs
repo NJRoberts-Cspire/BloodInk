@@ -11,18 +11,30 @@ public partial class PlayerAttackState : State
 {
     [Export] public float AttackDuration { get; set; } = 0.35f;
 
+    /// <summary>Cooldown after attack ends before another attack is allowed (seconds).</summary>
+    [Export] public float AttackCooldown { get; set; } = 0.2f;
+
     private PlayerController _player = null!;
     private float _timer;
+
+    /// <summary>Shared cooldown tracker — checked by IdleState/MoveState. Reset on Init().</summary>
+    public static float CooldownRemaining { get; set; } = 0f;
 
     public override void Init()
     {
         _player = GetOwner<PlayerController>();
+        CooldownRemaining = 0f;
     }
 
     public override void Enter()
     {
         _timer = AttackDuration;
         _player.Velocity = Vector2.Zero;
+
+        // Apply tattoo damage bonus.
+        int baseDamage = 1;
+        float dmgBonus = Core.GameManager.Instance?.TattooSystem?.DamageBonus ?? 0f;
+        _player.SwordHitbox.Damage = (int)Mathf.Max(1, baseDamage * (1f + dmgBonus));
 
         // Position hitbox in facing direction.
         _player.SwordHitbox.Position = _player.FacingDirection * 20f;
@@ -54,5 +66,6 @@ public partial class PlayerAttackState : State
     public override void Exit()
     {
         _player.SwordHitbox.Monitoring = false;
+        CooldownRemaining = AttackCooldown;
     }
 }

@@ -193,15 +193,24 @@ public partial class KingdomState : Node
 
     public void Deserialize(Dictionary<string, object> data)
     {
-        if (data.TryGetValue("alertHeat", out var ah) && ah is float ahf) { AlertHeat = ahf; UpdateAlertLevel(); }
+        // Clear existing state to prevent accumulation on repeated loads.
+        _killedTargets.Clear();
+        _discoveredAreas.Clear();
+        _narrativeFlags.Clear();
+
+        if (data.TryGetValue("alertHeat", out var ah))
+        {
+            AlertHeat = ah switch { int i => i, float f => f, double d => (float)d, _ => AlertHeat };
+            UpdateAlertLevel();
+        }
         if (data.TryGetValue("edictSlain", out var es) && es is bool esb) EdictbearerSlain = esb;
         if (data.TryGetValue("completed", out var comp) && comp is bool cb) IsCompleted = cb;
 
-        if (data.TryGetValue("killed", out var killed) && killed is List<string> kList)
-            foreach (var id in kList) _killedTargets.Add(id);
-        if (data.TryGetValue("areas", out var areas) && areas is List<string> aList)
-            foreach (var id in aList) _discoveredAreas.Add(id);
-        if (data.TryGetValue("flags", out var flags) && flags is List<string> fList)
-            foreach (var f in fList) _narrativeFlags.Add(f);
+        if (data.TryGetValue("killed", out var killed) && killed is List<object> kList)
+            foreach (var id in kList) { if (id is string s) _killedTargets.Add(s); }
+        if (data.TryGetValue("areas", out var areas) && areas is List<object> aList)
+            foreach (var id in aList) { if (id is string s) _discoveredAreas.Add(s); }
+        if (data.TryGetValue("flags", out var flags) && flags is List<object> fList)
+            foreach (var f in fList) { if (f is string s) _narrativeFlags.Add(s); }
     }
 }

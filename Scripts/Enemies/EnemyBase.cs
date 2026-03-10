@@ -37,10 +37,17 @@ public partial class EnemyBase : CharacterBody2D
 
     public override void _Ready()
     {
-        AnimPlayer = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
-        Hurtbox = GetNode<Hurtbox>("Hurtbox");
-        Hitbox = GetNode<Hitbox>("Hitbox");
-        Health = GetNode<HealthComponent>("HealthComponent");
+        AnimPlayer = GetNodeOrNull<AnimatedSprite2D>("AnimatedSprite2D")!;
+        Hurtbox = GetNodeOrNull<Hurtbox>("Hurtbox")!;
+        Hitbox = GetNodeOrNull<Hitbox>("Hitbox")!;
+        Health = GetNodeOrNull<HealthComponent>("HealthComponent")!;
+
+        if (AnimPlayer == null || Hurtbox == null || Hitbox == null || Health == null)
+        {
+            GD.PrintErr($"EnemyBase '{Name}': missing required child nodes (AnimatedSprite2D, Hurtbox, Hitbox, or HealthComponent).");
+            SetPhysicsProcess(false);
+            return;
+        }
 
         Hitbox.Source = this;
         Hitbox.Monitoring = false;
@@ -64,7 +71,10 @@ public partial class EnemyBase : CharacterBody2D
             AnimPlayer.SpriteFrames.GetFrameCount("idle") == 0 ||
             AnimPlayer.SpriteFrames.GetFrameTexture("idle", 0) == null)
         {
-            var placeholder = PlaceholderSprites.GetFrames("slime_frames");
+            // Try guard frames first for GuardEnemy types, fall back to slime.
+            string preferredKey = this is GuardEnemy ? "guard_frames" : "slime_frames";
+            var placeholder = PlaceholderSprites.GetFrames(preferredKey)
+                           ?? PlaceholderSprites.GetFrames("slime_frames");
             if (placeholder != null)
             {
                 AnimPlayer.SpriteFrames = placeholder;
@@ -101,6 +111,15 @@ public partial class EnemyBase : CharacterBody2D
 
     protected virtual void OnDied()
     {
+        // Disable combat and processing before deferred removal.
+        Hitbox.Monitoring = false;
+        Hurtbox.Monitorable = false;
+        SetPhysicsProcess(false);
+        SetProcess(false);
+
+        var sm = GetNodeOrNull<Core.StateMachine>("StateMachine");
+        if (sm != null) sm.ProcessMode = ProcessModeEnum.Disabled;
+
         // Spawn death VFX before removing.
         VFX.DeathEffect.SpawnAt(
             GetTree().CurrentScene,

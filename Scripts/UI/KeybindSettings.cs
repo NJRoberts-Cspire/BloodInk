@@ -311,7 +311,7 @@ public partial class KeybindSettings : Control
             if (!config.HasSectionKey("keybinds", action)) continue;
             if (!InputMap.HasAction(action)) continue;
 
-            var code = (Key)(long)config.GetValue("keybinds", action);
+            var code = (Key)System.Convert.ToInt64(config.GetValue("keybinds", action));
 
             // Remove existing keyboard events.
             var existing = InputMap.ActionGetEvents(action);

@@ -52,12 +52,12 @@ public enum AwarenessLevel
     /// <summary>Suspicious — heard something, will investigate.</summary>
     Suspicious,
 
+    /// <summary>Searching — lost sight but actively looking.</summary>
+    Searching,
+
     /// <summary>Alerted — spotted the player briefly or found evidence.</summary>
     Alerted,
 
     /// <summary>Engaged — actively pursuing/attacking.</summary>
-    Engaged,
-
-    /// <summary>Searching — lost sight but actively looking.</summary>
-    Searching
+    Engaged
 }

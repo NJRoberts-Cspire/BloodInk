@@ -69,6 +69,12 @@ public partial class LevelTransition : Area2D
 
         _transitioning = true;
 
+        // Disable player input during transition to prevent actions/double-transitions.
+        var player = body as CharacterBody2D;
+        var sm = player?.GetNodeOrNull<Core.StateMachine>("StateMachine");
+        if (sm != null) sm.ProcessMode = ProcessModeEnum.Disabled;
+        player?.SetProcessUnhandledInput(false);
+
         // Store spawn info for the RoomManager to read after loading.
         RoomManager.PendingSpawnPoint = TargetSpawnPoint;
         RoomManager.PendingDirection = Direction;

@@ -89,6 +89,7 @@ public partial class InkSwirl : Node2D
             swirl.AddChild(glow);
 
             var gt = glow.CreateTween();
+            gt.SetParallel(true);
             gt.TweenProperty(glow, "modulate:a", 0.0f, 0.3f);
             gt.TweenProperty(glow, "scale", new Vector2(3, 3), 0.3f);
         }));

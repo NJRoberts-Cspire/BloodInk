@@ -35,6 +35,10 @@ public partial class GameHUD : CanvasLayer
     // ─── Crouch indicator ─────────────────────────────────────────
     private Label? _crouchLabel;
 
+    // ─── Cached references ────────────────────────────────────────
+    private Node2D? _cachedPlayer;
+    private StealthProfile? _cachedStealth;
+
     public override void _Ready()
     {
         _healthLabel = GetNodeOrNull<Label>("TopLeft/HealthLabel");
@@ -102,11 +106,15 @@ public partial class GameHUD : CanvasLayer
 
     private void UpdateStealthIndicator()
     {
-        var player = GetTree().GetFirstNodeInGroup("Player") as Node2D;
-        if (player == null) return;
+        // Use cached references; re-lookup only if invalidated.
+        if (_cachedPlayer == null || !IsInstanceValid(_cachedPlayer))
+        {
+            _cachedPlayer = GetTree().GetFirstNodeInGroup("Player") as Node2D;
+            _cachedStealth = _cachedPlayer?.GetNodeOrNull<StealthProfile>("StealthProfile");
+        }
+        if (_cachedPlayer == null || _cachedStealth == null) return;
 
-        var stealth = player.GetNodeOrNull<StealthProfile>("StealthProfile");
-        if (stealth == null) return;
+        var stealth = _cachedStealth;
 
         string visText = stealth.Visibility switch
         {
@@ -158,9 +166,12 @@ public partial class GameHUD : CanvasLayer
 
     // ─── Area Name ────────────────────────────────────────────────
 
+    private Tween? _areaFadeTween;
+
     public void ShowAreaName(string areaName)
     {
         if (_areaLabel == null) return;
+        _areaFadeTween?.Kill();
         _areaLabel.Text = areaName;
         _areaLabel.Modulate = new Color(1, 1, 1, 1);
         _areaFadeTimer = 3f; // Show for 3 seconds then fade.
@@ -174,8 +185,9 @@ public partial class GameHUD : CanvasLayer
         if (_areaFadeTimer <= 0)
         {
             // Fade out over 1 second.
-            var tween = CreateTween();
-            tween.TweenProperty(_areaLabel, "modulate:a", 0.0f, 1.0f);
+            _areaFadeTween?.Kill();
+            _areaFadeTween = CreateTween();
+            _areaFadeTween.TweenProperty(_areaLabel, "modulate:a", 0.0f, 1.0f);
         }
     }
 

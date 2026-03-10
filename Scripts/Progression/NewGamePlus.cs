@@ -103,6 +103,8 @@ public partial class NewGamePlus : Node
             {
                 case "knows_edict_truth": choices.KnowsEdictTruth = true; break;
                 case "senna_died": choices.SennaSurvived = false; break;
+                case "sided_with_thresh": choices.SidedWithThresh = true; break;
+                case "edict_broken": choices.EdictBroken = true; break;
             }
         }
 
@@ -183,18 +185,22 @@ public partial class NewGamePlus : Node
 
     public void Deserialize(Dictionary<string, object> data)
     {
+        _previousKills.Clear();
+        _carryFlags.Clear();
+        _carryTemperament.Clear();
+
         if (data.TryGetValue("cycle", out var c) && c is int ci) CycleCount = ci;
         if (data.TryGetValue("prevEnding", out var pe) && pe is int pei) PreviousEnding = (EndingAlignment)pei;
         if (data.TryGetValue("prevMercy", out var pm) && pm is int pmi) PreviousMercy = pmi;
         if (data.TryGetValue("prevCruelty", out var pc) && pc is int pci) PreviousCruelty = pci;
 
-        if (data.TryGetValue("kills", out var k) && k is List<string> ks)
-            foreach (var id in ks) _previousKills.Add(id);
-        if (data.TryGetValue("flags", out var f) && f is List<string> fs)
-            foreach (var fl in fs) _carryFlags.Add(fl);
-        if (data.TryGetValue("temperament", out var t) && t is Dictionary<string, float> td)
+        if (data.TryGetValue("kills", out var k) && k is List<object> ks)
+            foreach (var id in ks) { if (id is string s) _previousKills.Add(s); }
+        if (data.TryGetValue("flags", out var f) && f is List<object> fs)
+            foreach (var fl in fs) { if (fl is string s) _carryFlags.Add(s); }
+        if (data.TryGetValue("temperament", out var t) && t is Dictionary<string, object> td)
             foreach (var (key, val) in td)
                 if (System.Enum.TryParse<Ink.InkTemperament>(key, out var temp))
-                    _carryTemperament[temp] = val;
+                    _carryTemperament[temp] = val switch { int i => i, float fv => fv, double d => (float)d, _ => 0f };
     }
 }

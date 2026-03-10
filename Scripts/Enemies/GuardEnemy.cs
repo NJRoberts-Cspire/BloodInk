@@ -66,11 +66,17 @@ public partial class GuardEnemy : EnemyBase
     {
         base._PhysicsProcess(delta);
 
-        // Keep sensor facing direction synced.
+        // Keep sensor facing direction synced to actual movement direction.
         if (Sensor != null)
         {
+            if (Velocity.LengthSquared() > 1f)
+                GuardFacingDirection = Velocity.Normalized();
             Sensor.FacingDirection = GuardFacingDirection;
             Sensor.QueueRedraw(); // Update debug draw.
+
+            // Flip sprite based on horizontal velocity.
+            if (Mathf.Abs(Velocity.X) > 1f)
+                AnimPlayer.FlipH = Velocity.X < 0;
         }
     }
 

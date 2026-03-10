@@ -1,5 +1,4 @@
 using Godot;
-using System;
 
 namespace BloodInk.Stealth;
 
@@ -38,7 +37,7 @@ public partial class DetectionSensor : Node2D
 
     [ExportGroup("Awareness")]
     /// <summary>How fast awareness builds when player is visible (per second).</summary>
-    [Export] public float AwarenessGainRate { get; set; } = 40f;
+    [Export] public float AwarenessGainRate { get; set; } = 22f;
 
     /// <summary>How fast awareness decays when player is NOT visible (per second).</summary>
     [Export] public float AwarenessDecayRate { get; set; } = 15f;
@@ -117,7 +116,7 @@ public partial class DetectionSensor : Node2D
         float detectionMult = _playerStealth?.GetDetectionMultiplier() ?? 1.0f;
 
         // Close-range detection (360°, reduced by stealth).
-        if (distance <= CloseDetectRadius * Math.Max(0.3f, detectionMult))
+        if (distance <= CloseDetectRadius * Mathf.Max(0.3f, detectionMult))
         {
             // Even hidden players can be bumped into at very close range.
             if (detectionMult > 0f || distance < CloseDetectRadius * 0.3f)
@@ -169,7 +168,7 @@ public partial class DetectionSensor : Node2D
             // Gain awareness based on visibility level.
             float detectionMult = _playerStealth?.GetDetectionMultiplier() ?? 1.0f;
             float gain = AwarenessGainRate * detectionMult * delta;
-            Awareness = Math.Min(100f, Awareness + gain);
+            Awareness = Mathf.Min(100f, Awareness + gain);
 
             // Track last known position.
             if (_player != null)
@@ -180,20 +179,26 @@ public partial class DetectionSensor : Node2D
             // Decay awareness when player isn't visible.
             // Slower decay at higher awareness levels.
             float decayMult = CurrentAwareness >= AwarenessLevel.Alerted ? 0.5f : 1f;
-            Awareness = Math.Max(0f, Awareness - AwarenessDecayRate * decayMult * delta);
+            Awareness = Mathf.Max(0f, Awareness - AwarenessDecayRate * decayMult * delta);
         }
 
-        // Determine awareness level from value.
-        CurrentAwareness = Awareness switch
-        {
-            >= 90f => AwarenessLevel.Engaged,
-            >= 60f => AwarenessLevel.Alerted,
-            >= 25f => AwarenessLevel.Suspicious,
-            _ => AwarenessLevel.Unaware
-        };
+        // Determine awareness level from value using exported thresholds.
+        if (Awareness >= EngagedThreshold)
+            CurrentAwareness = AwarenessLevel.Engaged;
+        else if (Awareness >= AlertedThreshold)
+            CurrentAwareness = AwarenessLevel.Alerted;
+        else if (Awareness >= SuspiciousThreshold)
+            CurrentAwareness = AwarenessLevel.Suspicious;
+        else
+            CurrentAwareness = AwarenessLevel.Unaware;
 
         // If we've lost sight while engaged, switch to searching.
         if (oldLevel == AwarenessLevel.Engaged && !CanSeePlayer && Awareness > SuspiciousThreshold)
+        {
+            CurrentAwareness = AwarenessLevel.Searching;
+        }
+        // Persist Searching state until awareness drops below suspicious threshold or player re-spotted.
+        else if (oldLevel == AwarenessLevel.Searching && !CanSeePlayer && Awareness > SuspiciousThreshold)
         {
             CurrentAwareness = AwarenessLevel.Searching;
         }
@@ -224,8 +229,8 @@ public partial class DetectionSensor : Node2D
             HasPendingNoise = true;
 
             // Boost awareness from noise.
-            float noiseAwareness = Math.Max(5f, (1f - distance / noiseRadius) * 30f);
-            Awareness = Math.Min(100f, Awareness + noiseAwareness);
+            float noiseAwareness = Mathf.Max(5f, (1f - distance / noiseRadius) * 30f);
+            Awareness = Mathf.Min(100f, Awareness + noiseAwareness);
 
             EmitSignal(SignalName.NoiseHeard, noisePosition);
         }
@@ -246,10 +251,15 @@ public partial class DetectionSensor : Node2D
     /// <summary>Reset awareness (e.g. after investigation timeout).</summary>
     public void ResetAwareness()
     {
+        var wasAware = CurrentAwareness != AwarenessLevel.Unaware;
         Awareness = 0f;
         CurrentAwareness = AwarenessLevel.Unaware;
         CanSeePlayer = false;
         HasPendingNoise = false;
+
+        // Notify listeners that we've lost the player.
+        if (wasAware)
+            EmitSignal(SignalName.PlayerLost);
     }
 
     // ─── Debug Drawing ────────────────────────────────────────────

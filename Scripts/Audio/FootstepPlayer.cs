@@ -36,7 +36,7 @@ public partial class FootstepPlayer : Node
     public override void _Ready()
     {
         _player = new AudioStreamPlayer2D { Bus = "SFX" };
-        GetParent().AddChild(_player);
+        AddChild(_player);
     }
 
     public override void _PhysicsProcess(double delta)

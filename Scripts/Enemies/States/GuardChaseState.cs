@@ -21,11 +21,11 @@ public partial class GuardChaseState : State
     public override void Enter()
     {
         _guard.AnimPlayer.Play("run");
-        _guard.HasCalledBackup = false; // Allow calling backup again next engagement.
         GD.Print($"Guard {_guard.Name} is CHASING!");
 
-        // Call for backup on engage.
-        _guard.CallBackup();
+        // Call for backup on first engagement only.
+        if (!_guard.HasCalledBackup)
+            _guard.CallBackup();
     }
 
     public override void PhysicsUpdate(double delta)

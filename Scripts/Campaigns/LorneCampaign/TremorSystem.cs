@@ -165,9 +165,11 @@ public partial class TremorSystem : Node
 
     public void Deserialize(System.Collections.Generic.Dictionary<string, object> data)
     {
-        if (data.TryGetValue("tremor", out var t) && t is float tf) TremorLevel = tf;
-        if (data.TryGetValue("base", out var b) && b is float bf) BaseTremor = bf;
-        if (data.TryGetValue("flaring", out var f) && f is bool fb) IsFlaring = fb;
+        if (data.TryGetValue("tremor", out var t))
+            TremorLevel = t switch { int i => i, float fv => fv, double d => (float)d, _ => TremorLevel };
+        if (data.TryGetValue("base", out var b))
+            BaseTremor = b switch { int i => i, float fv => fv, double d => (float)d, _ => BaseTremor };
+        if (data.TryGetValue("flaring", out var fl) && fl is bool fb) IsFlaring = fb;
         if (data.TryGetValue("flareTurns", out var ft) && ft is int fti) _flareTurnsRemaining = fti;
         if (data.TryGetValue("herbDoses", out var hd) && hd is int hdi) _herbDosesUsed = hdi;
     }

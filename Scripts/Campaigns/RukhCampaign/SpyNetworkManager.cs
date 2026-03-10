@@ -272,15 +272,115 @@ public partial class SpyNetworkManager : Node
                 ["loyalty"] = agent.Loyalty,
                 ["compromised"] = agent.IsCompromised,
                 ["onMission"] = agent.IsOnMission,
-                ["kingdom"] = agent.KingdomIndex
+                ["kingdom"] = agent.KingdomIndex,
+                ["codeName"] = agent.CodeName ?? "",
+                ["coverRole"] = agent.CoverRole ?? "",
+                ["lore"] = agent.BackgroundLore ?? ""
             };
         }
+
+        // Serialize intel data.
+        var intelStates = new Dictionary<string, Dictionary<string, object>>();
+        foreach (var (id, intel) in _intel)
+        {
+            intelStates[id] = new Dictionary<string, object>
+            {
+                ["type"] = (int)intel.Type,
+                ["kingdom"] = intel.KingdomIndex,
+                ["summary"] = intel.Summary ?? "",
+                ["verified"] = intel.IsVerified,
+                ["effectKey"] = intel.EffectKey ?? "",
+                ["sourceAgent"] = intel.SourceAgentId ?? ""
+            };
+        }
+
+        // Serialize active missions and timers.
+        var missions = new Dictionary<string, int>();
+        foreach (var (agentId, mission) in _activeMissions)
+            missions[agentId] = (int)mission;
+
+        var timers = new Dictionary<string, int>(_missionTimers);
 
         return new Dictionary<string, object>
         {
             ["agents"] = agentStates,
-            ["intelCount"] = _intel.Count,
-            ["heat"] = new Dictionary<int, float>(_kingdomHeat)
+            ["intel"] = intelStates,
+            ["missions"] = missions,
+            ["timers"] = timers,
+            ["heat"] = _kingdomHeat.ToDictionary(kv => kv.Key.ToString(), kv => (object)kv.Value)
         };
+    }
+
+    public void Deserialize(Dictionary<string, object> data)
+    {
+        _agents.Clear();
+        _intel.Clear();
+        _activeMissions.Clear();
+        _missionTimers.Clear();
+        _kingdomHeat.Clear();
+
+        if (data.TryGetValue("agents", out var aObj) && aObj is Dictionary<string, object> aDict)
+        {
+            foreach (var (id, val) in aDict)
+            {
+                if (val is not Dictionary<string, object> aData) continue;
+                var agent = new AgentData { Id = id };
+                if (aData.TryGetValue("skill", out var sk) && sk is int ski) agent.SkillLevel = ski;
+                if (aData.TryGetValue("loyalty", out var lo) && lo is int loi) agent.Loyalty = loi;
+                if (aData.TryGetValue("compromised", out var c) && c is bool cb) agent.IsCompromised = cb;
+                if (aData.TryGetValue("onMission", out var om) && om is bool omb) agent.IsOnMission = omb;
+                if (aData.TryGetValue("kingdom", out var k) && k is int ki) agent.KingdomIndex = ki;
+                if (aData.TryGetValue("codeName", out var cn) && cn is string cns) agent.CodeName = cns;
+                if (aData.TryGetValue("coverRole", out var cr) && cr is string crs) agent.CoverRole = crs;
+                if (aData.TryGetValue("lore", out var lr) && lr is string lrs) agent.BackgroundLore = lrs;
+                _agents[id] = agent;
+            }
+        }
+
+        if (data.TryGetValue("intel", out var iObj) && iObj is Dictionary<string, object> iDict)
+        {
+            foreach (var (id, val) in iDict)
+            {
+                if (val is not Dictionary<string, object> iData) continue;
+                var intel = new IntelData { Id = id };
+                if (iData.TryGetValue("type", out var t) && t is int ti) intel.Type = (IntelType)ti;
+                if (iData.TryGetValue("kingdom", out var ik) && ik is int iki) intel.KingdomIndex = iki;
+                if (iData.TryGetValue("summary", out var su) && su is string sus) intel.Summary = sus;
+                if (iData.TryGetValue("verified", out var v) && v is bool vb) intel.IsVerified = vb;
+                if (iData.TryGetValue("effectKey", out var ek) && ek is string eks) intel.EffectKey = eks;
+                if (iData.TryGetValue("sourceAgent", out var sa) && sa is string sas) intel.SourceAgentId = sas;
+                _intel[id] = intel;
+            }
+        }
+
+        if (data.TryGetValue("missions", out var mObj) && mObj is Dictionary<string, object> mDict)
+        {
+            foreach (var (agentId, val) in mDict)
+                if (val is int mi) _activeMissions[agentId] = (MissionType)mi;
+        }
+
+        if (data.TryGetValue("timers", out var tObj) && tObj is Dictionary<string, object> tDict)
+        {
+            foreach (var (agentId, val) in tDict)
+                if (val is int ti) _missionTimers[agentId] = ti;
+        }
+
+        if (data.TryGetValue("heat", out var hObj) && hObj is Dictionary<string, object> hDict)
+        {
+            foreach (var (key, val) in hDict)
+            {
+                if (int.TryParse(key, out var kIdx))
+                {
+                    float heatVal = val switch
+                    {
+                        int iv => iv,
+                        float fv => fv,
+                        double dv => (float)dv,
+                        _ => 0f
+                    };
+                    _kingdomHeat[kIdx] = heatVal;
+                }
+            }
+        }
     }
 }

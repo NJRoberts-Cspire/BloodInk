@@ -28,6 +28,10 @@ public partial class PlayerCrouchState : State
 
     public override void PhysicsUpdate(double delta)
     {
+        // Tick down ability cooldowns (must happen in every movement state).
+        PlayerAttackState.CooldownRemaining = Mathf.Max(0, PlayerAttackState.CooldownRemaining - (float)delta);
+        PlayerDodgeState.CooldownRemaining = Mathf.Max(0, PlayerDodgeState.CooldownRemaining - (float)delta);
+
         var input = _player.GetInputVector();
         float crouchSpeed = _player.MoveSpeed * (_stealth?.CrouchSpeedMultiplier ?? 0.45f);
 
@@ -50,15 +54,15 @@ public partial class PlayerCrouchState : State
             return;
         }
 
-        // Attack while crouched = stealth kill attempt.
-        if (@event.IsActionPressed("attack"))
+        // Attack while crouched = stealth kill attempt (respects attack cooldown).
+        if (@event.IsActionPressed("attack") && PlayerAttackState.CooldownRemaining <= 0)
         {
             Machine?.TransitionTo("StealthKill");
             return;
         }
 
-        // Dodge still available while crouched (a quick roll).
-        if (@event.IsActionPressed("dodge"))
+        // Dodge still available while crouched (respects dodge cooldown).
+        if (@event.IsActionPressed("dodge") && PlayerDodgeState.CooldownRemaining <= 0)
         {
             Machine?.TransitionTo("Dodge");
         }

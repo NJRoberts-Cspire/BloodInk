@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using BloodInk.Core;
 
 namespace BloodInk.Stealth;
 
@@ -176,7 +177,9 @@ public partial class StealthProfile : Node
         };
 
         // Tattoo stealth bonus reduces effective detection.
-        baseMult = Math.Max(0f, baseMult - StealthModifier);
+        float tattoStealth = Core.GameManager.Instance?.TattooSystem?.StealthBonus ?? 0f;
+        float totalStealth = StealthModifier + Mathf.Clamp(tattoStealth, 0f, 0.9f);
+        baseMult = Math.Max(0f, baseMult - totalStealth);
         return baseMult;
     }
 }

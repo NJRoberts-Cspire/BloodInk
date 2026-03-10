@@ -102,7 +102,7 @@ public partial class BloodEchoManager : Node
         }
 
         ActiveEchoId = echoId;
-        _returnScenePath = GetTree().CurrentScene.SceneFilePath;
+        _returnScenePath = GetTree().CurrentScene?.SceneFilePath ?? "";
 
         EmitSignal(SignalName.EchoStarted, echoId);
         GD.Print($"Starting Blood Echo: {echo.DisplayName} ({echo.Genre})");
@@ -159,9 +159,12 @@ public partial class BloodEchoManager : Node
 
     public void Deserialize(Dictionary<string, object> data)
     {
-        if (data.TryGetValue("unlocked", out var unlocked) && unlocked is List<string> uList)
-            foreach (var id in uList) _unlockedEchoes.Add(id);
-        if (data.TryGetValue("completed", out var completed) && completed is List<string> cList)
-            foreach (var id in cList) _completedEchoes.Add(id);
+        _unlockedEchoes.Clear();
+        _completedEchoes.Clear();
+
+        if (data.TryGetValue("unlocked", out var unlocked) && unlocked is List<object> uList)
+            foreach (var id in uList) { if (id is string s) _unlockedEchoes.Add(s); }
+        if (data.TryGetValue("completed", out var completed) && completed is List<object> cList)
+            foreach (var id in cList) { if (id is string s) _completedEchoes.Add(s); }
     }
 }

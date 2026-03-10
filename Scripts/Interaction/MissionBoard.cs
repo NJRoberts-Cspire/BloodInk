@@ -15,6 +15,14 @@ public partial class MissionBoard : Interactable
     /// <summary>Whether the player has completed the Cowl mission.</summary>
     private bool _cowlCompleted = false;
 
+    /// <summary>Cached callable to prevent identity mismatch on IsConnected/Disconnect.</summary>
+    private readonly Callable _onDialogueEventCallable;
+
+    public MissionBoard()
+    {
+        _onDialogueEventCallable = Callable.From<string>(OnDialogueEvent);
+    }
+
     protected override void InteractableReady()
     {
         DisplayName = "Mission Board";
@@ -72,12 +80,12 @@ public partial class MissionBoard : Interactable
         if (DialogueManager.Instance != null)
         {
             // Disconnect previous if any.
-            if (DialogueManager.Instance.IsConnected(DialogueManager.SignalName.DialogueEventFired, Callable.From<string>(OnDialogueEvent)))
-                DialogueManager.Instance.Disconnect(DialogueManager.SignalName.DialogueEventFired, Callable.From<string>(OnDialogueEvent));
+            if (DialogueManager.Instance.IsConnected(DialogueManager.SignalName.DialogueEventFired, _onDialogueEventCallable))
+                DialogueManager.Instance.Disconnect(DialogueManager.SignalName.DialogueEventFired, _onDialogueEventCallable);
 
             DialogueManager.Instance.Connect(
                 DialogueManager.SignalName.DialogueEventFired,
-                Callable.From<string>(OnDialogueEvent),
+                _onDialogueEventCallable,
                 (uint)GodotObject.ConnectFlags.OneShot
             );
         }

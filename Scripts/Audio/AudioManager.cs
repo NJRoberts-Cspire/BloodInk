@@ -176,6 +176,15 @@ public partial class AudioManager : Node
         var stream = GD.Load<AudioStream>(resourcePath);
         if (stream == null) return;
 
+        // Limit concurrent UI sounds to prevent unbounded node creation.
+        int uiCount = 0;
+        foreach (var child in GetChildren())
+        {
+            if (child is AudioStreamPlayer asp && asp.Bus == "UI" && asp.Playing)
+                uiCount++;
+        }
+        if (uiCount >= 4) return;
+
         // Use a temporary player for UI sounds.
         var player = new AudioStreamPlayer { Bus = "UI", Stream = stream, VolumeDb = volumeDb };
         AddChild(player);

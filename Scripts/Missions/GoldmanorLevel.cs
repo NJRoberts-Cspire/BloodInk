@@ -8,6 +8,7 @@ using BloodInk.Enemies.States;
 using BloodInk.Interaction;
 using BloodInk.Stealth;
 using BloodInk.Tools;
+using BloodInk.UI;
 using BloodInk.World;
 
 namespace BloodInk.Missions;
@@ -17,7 +18,7 @@ namespace BloodInk.Missions;
 /// Three zones: Gardens (entry) → Main Hall → Lord Cowl's Quarters.
 /// Built procedurally from tile maps.
 /// </summary>
-public partial class GoldmanorLevel : Node2D
+public partial class GoldmanorLevel : MissionLevelBase
 {
     // ─── Map Layout ──────────────────────────────────────────────
     // Each zone is a block of ASCII tiles.
@@ -25,61 +26,105 @@ public partial class GoldmanorLevel : Node2D
     // p = path, c = carpet
 
     private static readonly string[] GardenMap = {
-        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,~,,,,,,,,,pppp,,,,,,,,,,~,,,,,,",
-        ",,,,,,,,,,,,,pp....pp,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,p......p,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,p........p,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,p..........p,,,,,,,,,,,,,,",
-        ",,,,,,,,,p............p,,,,,,,,,,,,,",
-        ",,,,,,,,p..............p,,,,,,,,,,,,",
-        ",,~,,,,,p..............p,,,,,,~,,,,,",
-        ",,,,,,,,p..............p,,,,,,,,,,,,",
-        ",,,,,,,,,p............p,,,,,,,,,,,,,",
-        ",,,,,,,,,,p..........p,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,p........p,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,p......p,,,,,,,,,,,,,,,,",
-        ",,,,,~,,,,,,,pp..pp,,,,,,,,,~,,,,,,",
-        ",,,,,,,,,,,,,,pppp,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,~,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,~,,,,,",
+        ",,,,,,,,,,,,pppppppppppppppppppppppppppppppppppppp,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,pp..............................................pp,,",
+        ",,,,,,,,,,pp................................................pp,",
+        ",,,,,,,,,pp..................................................pp",
+        ",,,,,,,,pp.................,,,,,,,,,,................,,,,.....pp",
+        ",,,,,,,pp..........,,,,,,,,,,,,,,,,,,,,,,,......,,,,,,,,,.....p",
+        ",,,,,,pp..........,,,,,,~,,,,,,,,,,,,~,,,,,....,,,,,,,,~,,....p",
+        ",,,,,pp...........,,,,,,,,,,,,,,,,,,,,,,,,,....,,,,,,,,,,,,....,p",
+        ",,,,,p............,,,,,,,,,,,,,,,,,,,,,,,,,....,,,,,,,,,,,,....,p",
+        ",,,,,p............,,,,,,,,,,,,,,pppppp,,,,,....,,,,,,,,,,,....,p",
+        ",,~,,p............,,,,,,,,,,,,pp......pp,,,....,,,,,,~,,,,....p",
+        ",,,,,p............,,,,,,,,,,pp..........pp,,....,,,,,,,,,,,....p",
+        ",,,,,p.............,,,,,,,,p..............p,....,,,,,,,,,,,....p",
+        ",,,,,pp.............,,,,,,p................p....,,,,,,,,,,,....p",
+        ",,,,,,pp.............,,,,,p................p.....,,,,,,,,,,....p",
+        ",,,,,,,pp............,,,,,p................p......,,,,,,,,,....p",
+        ",,,,,,,,pp...........,,,,,p................p.......,,,,,,,,....p",
+        ",,,,,,,,,pp..........,,,,,,p..............p,........,,,,,,....,p",
+        ",,,,,,,,,,pp..........,,,,,pp..........pp,..........,,,,,,....,p",
+        ",,,,,,,,,,,pp..........,,,,,pp........pp,............,,,,....,p",
+        ",,,,,,,,,,,,pp..........,,,,,,pp....pp,,......................,p",
+        ",,,,,,,,,,,,,pp..........,,,,,,,pppp,,,,......................,p",
+        ",,,,,,,,,,,,,,pp..............................................p",
+        ",,,,,,,,,,,,,,,pp............................................pp",
+        ",,,,,,,,,,,,,,,,pp..........................................pp,",
+        ",,,,,~,,,,,,,,,,pppppppppppppppppp....pppppppppppppppppppppp,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,~,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,~,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
     };
 
     private static readonly string[] HallMap = {
-        "####################################",
-        "#wwwwwwwwww#........#wwwwwwwwwwwwww#",
-        "#wwwwwwwwww#........#wwwwwwwwwwwwww#",
-        "#wwwwwwwwww#........#wwwwwwwwwwwwww#",
-        "#wwwwwwwwww....cc....wwwwwwwwwwwwww#",
-        "#wwwwwwwwww....cc....wwwwwwwwwwwwww#",
-        "#wwwwwwwwww#........#wwwwwwwwwwwwww#",
-        "#wwwwwwwwww#........#wwwwwwwwwwwwww#",
-        "#wwwwwwwwww#...cc...#wwwwwwwwwwwwww#",
-        "#wwwwwwwwww#...cc...#wwwwwwwwwwwwww#",
-        "#wwwwwwwwww#........#wwwwwwwwwwwwww#",
-        "#wwwwwwwwww#........#wwwwwwwwwwwwww#",
-        "####################################",
+        "################################################################",
+        "#wwwwww#........#wwwwwwww#..........#wwwwwwww#........#wwwwwwww#",
+        "#wwwwww#........#wwwwwwww#..........#wwwwwwww#........#wwwwwwww#",
+        "#wwwwww#........#wwwwwwww#..........#wwwwwwww#........#wwwwwwww#",
+        "#wwwwww#........#wwwwwwww#..........#wwwwwwww#........#wwwwwwww#",
+        "#wwwwww....cc....wwwwwwww#....cc....#wwwwwwww....cc....wwwwwwww#",
+        "#wwwwww....cc....wwwwwwww#....cc....#wwwwwwww....cc....wwwwwwww#",
+        "#wwwwww#........#wwwwwwww#..........#wwwwwwww#........#wwwwwwww#",
+        "#wwwwww#........#wwwwwwww#..........#wwwwwwww#........#wwwwwwww#",
+        "#wwwwww#........#........#..........#........#........#wwwwwwww#",
+        "#wwwwww#........#........#..........#........#........#wwwwwwww#",
+        "#......#........#........#cccccccccc#........#........#........#",
+        "#......#........#........#cccccccccc#........#........#........#",
+        "#................................................................................#",
+        "#................................................................................#",
+        "#......#........#........#cccccccccc#........#........#........#",
+        "#......#........#........#cccccccccc#........#........#........#",
+        "#wwwwww#........#........#..........#........#........#wwwwwwww#",
+        "#wwwwww#........#........#..........#........#........#wwwwwwww#",
+        "#wwwwww#........#wwwwwwww#..........#wwwwwwww#........#wwwwwwww#",
+        "#wwwwww#........#wwwwwwww#..........#wwwwwwww#........#wwwwwwww#",
+        "#wwwwww....cc....wwwwwwww#....cc....#wwwwwwww....cc....wwwwwwww#",
+        "#wwwwww....cc....wwwwwwww#....cc....#wwwwwwww....cc....wwwwwwww#",
+        "#wwwwww#........#wwwwwwww#..........#wwwwwwww#........#wwwwwwww#",
+        "#wwwwww#...cc...#wwwwwwww#..........#wwwwwwww#...cc...#wwwwwwww#",
+        "#wwwwww#...cc...#wwwwwwww#..........#wwwwwwww#...cc...#wwwwwwww#",
+        "#wwwwww#........#wwwwwwww#..........#wwwwwwww#........#wwwwwwww#",
+        "#wwwwww#........#wwwwwwww#..........#wwwwwwww#........#wwwwwwww#",
+        "################################################################",
     };
 
     private static readonly string[] QuartersMap = {
-        "####################################",
-        "#cccccccccc#wwwwwwww#~~wwwwwwwwwwww#",
-        "#cccccccccc#wwwwwwww#~~wwwwwwwwwwww#",
-        "#cccccccccc#wwwwwwww#wwwwwwwwwwwwww#",
-        "#cccccccccc....wwwww#wwwwwwwwwwwwww#",
-        "#cccccccccc....wwwww#wwwwwwwwwwwwww#",
-        "#cccccccccc#wwwwwwww#wwwwwwwwwwwwww#",
-        "#cccccccccc#wwwwwwww....wwwwwwwwwww#",
-        "#cccccccccc#wwwwwwww....wwwwwwwwwww#",
-        "#cccccccccc#wwwwwwww#wwwwwwwwwwwwww#",
-        "#cccccccccc#wwwwwwww#wwwwwwwwwwwwww#",
-        "####################################",
+        "################################################################",
+        "#cccccccccc#wwwwwwww#........#wwwwwwww#~~wwwwwwwwww#wwwwwwwwww#",
+        "#cccccccccc#wwwwwwww#........#wwwwwwww#~~wwwwwwwwww#wwwwwwwwww#",
+        "#cccccccccc#wwwwwwww#........#wwwwwwww#wwwwwwwwwwww#wwwwwwwwww#",
+        "#cccccccccc#wwwwwwww#........#wwwwwwww#wwwwwwwwwwww#wwwwwwwwww#",
+        "#cccccccccc....wwwww#........#wwwwwwww#wwwwwwwwwwww....wwwwwww#",
+        "#cccccccccc....wwwww#........#wwwwwwww#wwwwwwwwwwww....wwwwwww#",
+        "#cccccccccc#wwwwwwww#........#wwwwwwww#wwwwwwwwwwww#wwwwwwwwww#",
+        "#cccccccccc#wwwwwwww#........#........#wwwwwwwwwwww#wwwwwwwwww#",
+        "#cccccccccc#wwwwwwww#........#........#wwwwwwwwwwww#wwwwwwwwww#",
+        "#..........#wwwwwwww#........#........#wwwwwwwwwwww#..........#",
+        "#..........#wwwwwwww#........#........#wwwwwwwwwwww#..........#",
+        "#..................................................................#",
+        "#..................................................................#",
+        "#..........#wwwwwwww#........#........#wwwwwwwwwwww#..........#",
+        "#..........#wwwwwwww#........#........#wwwwwwwwwwww#..........#",
+        "#cccccccccc#wwwwwwww#........#........#wwwwwwwwwwww#wwwwwwwwww#",
+        "#cccccccccc#wwwwwwww#........#........#wwwwwwwwwwww#wwwwwwwwww#",
+        "#cccccccccc#wwwwwwww....wwwww#wwwwwwww....wwwwwwwww#wwwwwwwwww#",
+        "#cccccccccc#wwwwwwww....wwwww#wwwwwwww....wwwwwwwww#wwwwwwwwww#",
+        "#cccccccccc#wwwwwwww#wwwwwwww#wwwwwwww#~~wwwwwwwwww#wwwwwwwwww#",
+        "#cccccccccc#wwwwwwww#wwwwwwww#wwwwwwww#~~wwwwwwwwww#wwwwwwwwww#",
+        "#cccccccccc#wwwwwwww#wwwwwwww#wwwwwwww#wwwwwwwwwwww#wwwwwwwwww#",
+        "#cccccccccc#wwwwwwww#wwwwwwww#wwwwwwww#wwwwwwwwwwww#wwwwwwwwww#",
+        "################################################################",
     };
 
     // ─── Zone offsets (world positions) ──────────────────────────
-    private static readonly Vector2 GardenOffset = new(0, 288);  // Gardens below
-    private static readonly Vector2 HallOffset = new(0, 0);      // Hall in middle
-    private static readonly Vector2 QuartersOffset = new(0, -208); // Quarters above
+    private static readonly Vector2 GardenOffset = new(0, 864);   // Gardens below (29 rows × 16 + spacing)
+    private static readonly Vector2 HallOffset = new(0, 0);       // Hall in middle
+    private static readonly Vector2 QuartersOffset = new(0, -528); // Quarters above (25 rows × 16 + spacing)
 
     public override void _Ready()
     {
@@ -88,7 +133,7 @@ public partial class GoldmanorLevel : Node2D
         BuildGardens();
         BuildMainHall();
         BuildQuarters();
-        SpawnPlayer();
+        SpawnPlayer(GardenOffset + new Vector2(512, 460));
         SetupHUD();
         RegisterTargets();
 
@@ -107,27 +152,43 @@ public partial class GoldmanorLevel : Node2D
 
         MapBuilder.Build(gardenRoot, GardenMap);
 
-        // Area zone.
-        AddAreaZone(gardenRoot, "Goldmanor Gardens", new Vector2(288, 144), new Vector2(576, 288));
+        // Area zone — covers full garden.
+        AddAreaZone(gardenRoot, "Goldmanor Gardens", new Vector2(512, 264), new Vector2(1024, 528));
 
-        // Shadow zones in corners.
-        AddShadowZone(gardenRoot, new Vector2(80, 40), new Vector2(48, 48));
-        AddShadowZone(gardenRoot, new Vector2(480, 40), new Vector2(48, 48));
-        AddShadowZone(gardenRoot, new Vector2(80, 248), new Vector2(48, 48));
-        AddShadowZone(gardenRoot, new Vector2(480, 248), new Vector2(48, 48));
+        // Shadow zones — dark hedge corners and alcoves.
+        AddShadowZone(gardenRoot, new Vector2(48, 48), new Vector2(64, 64));
+        AddShadowZone(gardenRoot, new Vector2(960, 48), new Vector2(64, 64));
+        AddShadowZone(gardenRoot, new Vector2(48, 460), new Vector2(64, 64));
+        AddShadowZone(gardenRoot, new Vector2(960, 460), new Vector2(64, 64));
+        AddShadowZone(gardenRoot, new Vector2(160, 144), new Vector2(48, 48));
+        AddShadowZone(gardenRoot, new Vector2(800, 144), new Vector2(48, 48));
+        AddShadowZone(gardenRoot, new Vector2(480, 340), new Vector2(40, 40));
 
-        // Hiding spots (bushes).
-        AddHidingSpot(gardenRoot, "Dense Bush", new Vector2(64, 144));
-        AddHidingSpot(gardenRoot, "Hedge", new Vector2(512, 144));
+        // Hiding spots — plenty for multiple stealth routes.
+        AddHidingSpot(gardenRoot, "Dense Bush", new Vector2(64, 200));
+        AddHidingSpot(gardenRoot, "Hedge Alcove", new Vector2(944, 200));
+        AddHidingSpot(gardenRoot, "Rose Trellis", new Vector2(300, 100));
+        AddHidingSpot(gardenRoot, "Overgrown Arch", new Vector2(700, 100));
+        AddHidingSpot(gardenRoot, "Tool Shed", new Vector2(160, 380));
+        AddHidingSpot(gardenRoot, "Fountain Shadow", new Vector2(512, 260));
+        AddHidingSpot(gardenRoot, "Vine Alcove", new Vector2(840, 380));
 
-        // 2 garden patrol guards — waypoints are offsets from guard's local position.
-        AddGuard(gardenRoot, "GardenGuard1", new Vector2(200, 100), new Vector2[]
+        // 4 garden patrol guards — longer routes across the expanded grounds.
+        AddGuard(gardenRoot, "GardenGuard1", new Vector2(280, 120), new Vector2[]
         {
-            new(0, 0), new(0, 100), new(150, 100), new(150, 0)
+            new(0, 0), new(0, 200), new(200, 200), new(200, 0)
         });
-        AddGuard(gardenRoot, "GardenGuard2", new Vector2(400, 180), new Vector2[]
+        AddGuard(gardenRoot, "GardenGuard2", new Vector2(720, 120), new Vector2[]
         {
-            new(0, 0), new(0, -100), new(-220, -100), new(-220, 0)
+            new(0, 0), new(0, 200), new(-200, 200), new(-200, 0)
+        });
+        AddGuard(gardenRoot, "GardenGuard3", new Vector2(512, 380), new Vector2[]
+        {
+            new(-180, 0), new(180, 0)
+        });
+        AddGuard(gardenRoot, "GardenGuard4", new Vector2(160, 300), new Vector2[]
+        {
+            new(0, 0), new(120, 0), new(120, 140), new(0, 140)
         });
     }
 
@@ -143,27 +204,44 @@ public partial class GoldmanorLevel : Node2D
 
         MapBuilder.Build(hallRoot, HallMap);
 
-        // Area zone.
-        AddAreaZone(hallRoot, "Main Hall", new Vector2(288, 104), new Vector2(576, 208), isRestricted: true);
+        // Area zone — covers full hall.
+        AddAreaZone(hallRoot, "Main Hall", new Vector2(512, 232), new Vector2(1024, 464), isRestricted: true);
 
-        // Shadow zone in left wing.
-        AddShadowZone(hallRoot, new Vector2(80, 104), new Vector2(48, 32));
+        // Shadow zones — dark wings and servant corridors.
+        AddShadowZone(hallRoot, new Vector2(64, 64), new Vector2(48, 48));
+        AddShadowZone(hallRoot, new Vector2(960, 64), new Vector2(48, 48));
+        AddShadowZone(hallRoot, new Vector2(64, 400), new Vector2(48, 48));
+        AddShadowZone(hallRoot, new Vector2(960, 400), new Vector2(48, 48));
+        AddShadowZone(hallRoot, new Vector2(256, 232), new Vector2(40, 32));
+        AddShadowZone(hallRoot, new Vector2(768, 232), new Vector2(40, 32));
 
-        // Hiding spot — under banquet table.
-        AddHidingSpot(hallRoot, "Under Table", new Vector2(288, 104));
+        // Hiding spots — multiple options throughout the hall.
+        AddHidingSpot(hallRoot, "Under Table", new Vector2(360, 100));
+        AddHidingSpot(hallRoot, "Behind Pillar", new Vector2(160, 200));
+        AddHidingSpot(hallRoot, "Servant Passage", new Vector2(80, 300));
+        AddHidingSpot(hallRoot, "Banquet Alcove", new Vector2(640, 100));
+        AddHidingSpot(hallRoot, "Wine Rack", new Vector2(900, 300));
 
-        // 3 hall guards — waypoints are local offsets.
-        AddGuard(hallRoot, "HallGuard1", new Vector2(200, 50), new Vector2[]
+        // 5 hall guards — patrols leave gaps for sneaking through corridors.
+        AddGuard(hallRoot, "HallGuard1", new Vector2(300, 80), new Vector2[]
         {
-            new(0, 0), new(0, 110), new(180, 110), new(180, 0)
+            new(0, 0), new(0, 180), new(200, 180), new(200, 0)
         });
-        AddGuard(hallRoot, "HallGuard2", new Vector2(100, 104), new Vector2[]
+        AddGuard(hallRoot, "HallGuard2", new Vector2(700, 80), new Vector2[]
         {
-            new(0, -64), new(0, 66)
+            new(0, 0), new(0, 180), new(-200, 180), new(-200, 0)
         });
-        AddGuard(hallRoot, "HallGuard3", new Vector2(470, 104), new Vector2[]
+        AddGuard(hallRoot, "HallGuard3", new Vector2(120, 232), new Vector2[]
         {
-            new(0, -64), new(0, 66)
+            new(0, -100), new(0, 100)
+        });
+        AddGuard(hallRoot, "HallGuard4", new Vector2(900, 232), new Vector2[]
+        {
+            new(0, -100), new(0, 100)
+        });
+        AddGuard(hallRoot, "HallGuard5", new Vector2(512, 360), new Vector2[]
+        {
+            new(-200, 0), new(200, 0)
         });
     }
 
@@ -179,26 +257,37 @@ public partial class GoldmanorLevel : Node2D
 
         MapBuilder.Build(quartersRoot, QuartersMap);
 
-        // Area zone.
-        AddAreaZone(quartersRoot, "Lord Cowl's Quarters", new Vector2(288, 88), new Vector2(576, 176), isRestricted: true);
+        // Area zone — covers full quarters.
+        AddAreaZone(quartersRoot, "Lord Cowl's Quarters", new Vector2(512, 200), new Vector2(1024, 400), isRestricted: true);
 
-        // Shadow zone in the dark alcove.
-        AddShadowZone(quartersRoot, new Vector2(400, 32), new Vector2(32, 32));
+        // Shadow zones — dark alcoves and corners.
+        AddShadowZone(quartersRoot, new Vector2(64, 48), new Vector2(48, 48));
+        AddShadowZone(quartersRoot, new Vector2(960, 48), new Vector2(48, 48));
+        AddShadowZone(quartersRoot, new Vector2(480, 100), new Vector2(40, 32));
+        AddShadowZone(quartersRoot, new Vector2(64, 340), new Vector2(48, 48));
+        AddShadowZone(quartersRoot, new Vector2(960, 340), new Vector2(48, 48));
 
-        // Hiding spot — wardrobe.
-        AddHidingSpot(quartersRoot, "Wardrobe", new Vector2(48, 48));
+        // Hiding spots — options to approach Cowl from multiple angles.
+        AddHidingSpot(quartersRoot, "Wardrobe", new Vector2(80, 80));
+        AddHidingSpot(quartersRoot, "Behind Curtains", new Vector2(900, 80));
+        AddHidingSpot(quartersRoot, "Under Desk", new Vector2(320, 300));
+        AddHidingSpot(quartersRoot, "Dark Alcove", new Vector2(700, 300));
 
-        // 2 elite guards (tougher) — waypoints are local offsets.
-        AddGuard(quartersRoot, "EliteGuard1", new Vector2(240, 80), new Vector2[]
+        // 3 elite guards — tougher, patrolling the private quarters.
+        AddGuard(quartersRoot, "EliteGuard1", new Vector2(300, 100), new Vector2[]
         {
-            new(0, -40), new(0, 60), new(100, 60), new(100, -40)
+            new(0, -50), new(0, 100), new(150, 100), new(150, -50)
         }, elite: true);
-        AddGuard(quartersRoot, "EliteGuard2", new Vector2(460, 80), new Vector2[]
+        AddGuard(quartersRoot, "EliteGuard2", new Vector2(720, 100), new Vector2[]
         {
-            new(0, -40), new(0, 60)
+            new(0, -50), new(0, 100), new(-150, 100), new(-150, -50)
+        }, elite: true);
+        AddGuard(quartersRoot, "EliteGuard3", new Vector2(512, 280), new Vector2[]
+        {
+            new(-120, 0), new(120, 0)
         }, elite: true);
 
-        // LORD COWL — pacing in his study (left room with carpet).
+        // LORD COWL — pacing in his study.
         SpawnLordCowl(quartersRoot);
     }
 
@@ -210,7 +299,7 @@ public partial class GoldmanorLevel : Node2D
     {
         // Use actual C# types so GetNode<T>/GetOwner<T> work at runtime.
         var cowl = new GuardEnemy { Name = "LordCowl" };
-        cowl.Position = new Vector2(80, 80);
+        cowl.Position = new Vector2(512, 160);
         cowl.CollisionLayer = 1 << 2;  // Enemy layer (layer 3).
         cowl.CollisionMask = 1;          // World.
         cowl.MoveSpeed = 35f;
@@ -266,7 +355,7 @@ public partial class GoldmanorLevel : Node2D
 
         // Patrol route — pacing in study.
         var patrol = new PatrolRoute { Name = "PatrolRoute" };
-        patrol.Waypoints = new Vector2[] { new(0, 0), new(60, 0), new(60, 40), new(0, 40) };
+        patrol.Waypoints = new Vector2[] { new(0, 0), new(100, 0), new(100, 60), new(0, 60) };
         cowl.AddChild(patrol);
 
         // State machine with guard states.
@@ -278,10 +367,10 @@ public partial class GoldmanorLevel : Node2D
         cowl.SetMeta("target_id", "cowl");
         cowl.SetMeta("is_boss", true);
 
-        parent.AddChild(cowl);
-
-        // Set Owner on all descendants so GetOwner<GuardEnemy>() works in states.
+        // Set Owner on all descendants BEFORE AddChild so GetOwner<GuardEnemy>()
+        // works in Init() when _Ready fires.
         SetOwnerRecursive(cowl, cowl);
+        parent.AddChild(cowl);
 
         // Wire death to mission complete.
         health.Died += () => OnCowlKilled(cowl);
@@ -294,19 +383,24 @@ public partial class GoldmanorLevel : Node2D
 
         // Register the kill with KingdomState.
         var gm = GameManager.Instance;
+        string rewardText = "";
         if (gm != null)
         {
-            var target = GreenholdTargets.LordHarlanCowl();
-            gm.Kingdoms[0].RegisterTarget(target);
             var killed = gm.Kingdoms[0].KillTarget("cowl");
 
             // Award ink.
             if (killed != null)
             {
                 gm.InkInventory?.AddInk(killed.InkDrop, killed.InkAmount);
+                rewardText = $"Blood-Ink Acquired: {killed.InkAmount}× {killed.InkDrop} Grade\nNew Tattoo Available: Shadow Step";
                 GD.Print($"Blood-Ink acquired: {killed.InkAmount}x {killed.InkDrop} grade!");
             }
         }
+
+        // Populate MissionComplete screen data.
+        UI.MissionComplete.TargetText = "Lord Harlan Cowl\nGovernor of the Greenhold\nEdictbearer";
+        UI.MissionComplete.WhisperText = "\"I never saw the dark as empty.\nI thought it was full of things that loved me.\"";
+        UI.MissionComplete.RewardText = rewardText;
 
         // Show mission complete after a delay.
         var timer = GetTree().CreateTimer(2.0f);
@@ -317,92 +411,6 @@ public partial class GoldmanorLevel : Node2D
     {
         // Transition to mission complete screen.
         GetTree().ChangeSceneToFile("res://Scenes/UI/MissionComplete.tscn");
-    }
-
-    // ═════════════════════════════════════════════════════════════
-    //  PLAYER SPAWN
-    // ═════════════════════════════════════════════════════════════
-
-    private void SpawnPlayer()
-    {
-        var playerScene = GD.Load<PackedScene>("res://Scenes/Player/Player.tscn");
-        if (playerScene == null)
-        {
-            GD.PrintErr("Cannot load Player.tscn!");
-            return;
-        }
-
-        var player = playerScene.Instantiate<CharacterBody2D>();
-        player.Position = GardenOffset + new Vector2(288, 260); // Bottom of garden.
-        AddChild(player);
-
-        // Assign placeholder sprite color.
-        CallDeferred(MethodName.ApplyPlayerSprite, player);
-    }
-
-    private void ApplyPlayerSprite(CharacterBody2D player)
-    {
-        var sprite = player.GetNodeOrNull<AnimatedSprite2D>("AnimatedSprite2D");
-        if (sprite != null)
-        {
-            var tex = PlaceholderSprites.Get("player");
-            if (tex != null)
-            {
-                // Create a simple SpriteFrames with our placeholder.
-                var frames = new SpriteFrames();
-                frames.AddAnimation("idle");
-                frames.SetAnimationSpeed("idle", 1);
-                frames.SetAnimationLoop("idle", true);
-                frames.AddFrame("idle", tex);
-
-                frames.AddAnimation("run");
-                frames.SetAnimationSpeed("run", 8);
-                frames.SetAnimationLoop("run", true);
-                frames.AddFrame("run", tex);
-
-                frames.AddAnimation("attack");
-                frames.SetAnimationSpeed("attack", 12);
-                frames.SetAnimationLoop("attack", false);
-                frames.AddFrame("attack", tex);
-
-                frames.AddAnimation("dodge");
-                frames.SetAnimationSpeed("dodge", 10);
-                frames.SetAnimationLoop("dodge", false);
-                frames.AddFrame("dodge", tex);
-
-                frames.AddAnimation("death");
-                frames.SetAnimationSpeed("death", 1);
-                frames.SetAnimationLoop("death", false);
-                frames.AddFrame("death", tex);
-
-                frames.AddAnimation("crouch_idle");
-                frames.SetAnimationSpeed("crouch_idle", 1);
-                frames.SetAnimationLoop("crouch_idle", true);
-                var crouchTex = PlaceholderSprites.Get("player_crouch") ?? tex;
-                frames.AddFrame("crouch_idle", crouchTex);
-
-                frames.AddAnimation("crouch_walk");
-                frames.SetAnimationSpeed("crouch_walk", 8);
-                frames.SetAnimationLoop("crouch_walk", true);
-                frames.AddFrame("crouch_walk", crouchTex);
-
-                sprite.SpriteFrames = frames;
-                sprite.Play("idle");
-            }
-        }
-    }
-
-    // ═════════════════════════════════════════════════════════════
-    //  HUD SETUP
-    // ═════════════════════════════════════════════════════════════
-
-    private void SetupHUD()
-    {
-        var hud = GD.Load<PackedScene>("res://Scenes/UI/GameHUD.tscn");
-        if (hud != null)
-        {
-            AddChild(hud.Instantiate());
-        }
     }
 
     // ═════════════════════════════════════════════════════════════
@@ -419,184 +427,5 @@ public partial class GoldmanorLevel : Node2D
         {
             gm.Kingdoms[0].RegisterTarget(target);
         }
-    }
-
-    // ═════════════════════════════════════════════════════════════
-    //  HELPER FACTORIES
-    // ═════════════════════════════════════════════════════════════
-
-    private void AddGuard(Node2D parent, string name, Vector2 pos, Vector2[] waypoints, bool elite = false)
-    {
-        // Use actual C# types so GetNode<T>/GetOwner<T> work at runtime.
-        var guard = new GuardEnemy { Name = name };
-        guard.Position = pos;
-        guard.CollisionLayer = 1 << 2;  // Enemy layer (layer 3).
-        guard.CollisionMask = 1;          // World.
-        guard.PatrolSpeed = elite ? 50f : 40f;
-        guard.AlertedSpeed = elite ? 80f : 70f;
-        guard.ChaseSpeed = elite ? 100f : 90f;
-        guard.DetectRange = elite ? 140f : 100f;
-        guard.AttackRange = 25f;
-
-        // Sprite placeholder.
-        var sprite = new AnimatedSprite2D { Name = "AnimatedSprite2D" };
-        sprite.SpriteFrames = CreateGuardSpriteFrames(elite ? "guard_alert" : "guard");
-        guard.AddChild(sprite);
-
-        // Body collision.
-        var bodyShape = new CollisionShape2D();
-        bodyShape.Shape = new RectangleShape2D { Size = new Vector2(10, 14) };
-        guard.AddChild(bodyShape);
-
-        // Hurtbox.
-        var hurtbox = new Hurtbox { Name = "Hurtbox" };
-        hurtbox.CollisionLayer = 0;
-        hurtbox.CollisionMask = 1 << 3; // PlayerHitbox.
-        var hurtShape = new CollisionShape2D { Name = "HurtboxShape" };
-        hurtShape.Shape = new RectangleShape2D { Size = new Vector2(12, 14) };
-        hurtbox.AddChild(hurtShape);
-        guard.AddChild(hurtbox);
-
-        // Hitbox.
-        var hitbox = new Hitbox { Name = "Hitbox" };
-        hitbox.CollisionLayer = 1 << 4; // EnemyHitbox.
-        hitbox.CollisionMask = 0;
-        hitbox.Damage = elite ? 2 : 1;
-        hitbox.KnockbackForce = new Vector2(80f, 0f);
-        var hitShape = new CollisionShape2D { Name = "HitboxShape" };
-        hitShape.Shape = new RectangleShape2D { Size = new Vector2(16, 12) };
-        hitbox.AddChild(hitShape);
-        guard.AddChild(hitbox);
-
-        // Health.
-        var health = new HealthComponent { Name = "HealthComponent" };
-        health.MaxHealth = elite ? 5 : 3;
-        guard.AddChild(health);
-
-        // Detection sensor.
-        var sensor = new DetectionSensor { Name = "DetectionSensor" };
-        sensor.ViewDistance = elite ? 140f : 120f;
-        sensor.ViewAngle = 55f;
-        guard.AddChild(sensor);
-
-        // Patrol route.
-        var patrol = new PatrolRoute { Name = "PatrolRoute" };
-        patrol.Waypoints = waypoints;
-        guard.AddChild(patrol);
-
-        // State machine with guard states.
-        var stateMachine = new StateMachine { Name = "StateMachine" };
-        guard.AddChild(stateMachine);
-        AddGuardStates(stateMachine);
-
-        parent.AddChild(guard);
-
-        // Set Owner on all descendants so GetOwner<GuardEnemy>() works in states.
-        SetOwnerRecursive(guard, guard);
-    }
-
-    /// <summary>Create all 6 guard AI states and add to the state machine.</summary>
-    private void AddGuardStates(StateMachine stateMachine)
-    {
-        stateMachine.AddChild(new GuardPatrolState { Name = "Patrol" });
-        stateMachine.AddChild(new GuardInvestigateState { Name = "Investigate" });
-        stateMachine.AddChild(new GuardAlertState { Name = "Alert" });
-        stateMachine.AddChild(new GuardChaseState { Name = "Chase" });
-        stateMachine.AddChild(new GuardSearchState { Name = "Search" });
-        stateMachine.AddChild(new GuardAttackState { Name = "Attack" });
-    }
-
-    /// <summary>Recursively set Owner on all descendants so GetOwner works.</summary>
-    private void SetOwnerRecursive(Node node, Node owner)
-    {
-        foreach (var child in node.GetChildren())
-        {
-            child.Owner = owner;
-            SetOwnerRecursive(child, owner);
-        }
-    }
-
-    /// <summary>Create SpriteFrames with placeholder textures for a guard.</summary>
-    private SpriteFrames CreateGuardSpriteFrames(string textureName)
-    {
-        var tex = PlaceholderSprites.Get(textureName) ?? PlaceholderSprites.Get("guard")!;
-        var frames = new SpriteFrames();
-
-        foreach (var animName in new[] { "idle", "run", "walk", "attack" })
-        {
-            frames.AddAnimation(animName);
-            frames.SetAnimationSpeed(animName, animName == "attack" ? 12 : 8);
-            frames.SetAnimationLoop(animName, animName != "attack");
-            frames.AddFrame(animName, tex);
-        }
-
-        return frames;
-    }
-
-    private void SetPatrolWaypoints(CharacterBody2D guard, Vector2[] waypoints)
-    {
-        var patrol = guard.GetNodeOrNull<PatrolRoute>("PatrolRoute");
-        if (patrol != null && waypoints.Length > 0)
-        {
-            patrol.Waypoints = waypoints;
-        }
-    }
-
-    private void AddShadowZone(Node2D parent, Vector2 pos, Vector2 size)
-    {
-        var zone = new ShadowZone { Name = "ShadowZone" };
-        zone.Position = pos;
-        zone.CollisionLayer = 0;
-        zone.CollisionMask = 1 << 1; // Player.
-
-        var shape = new CollisionShape2D();
-        shape.Shape = new RectangleShape2D { Size = size };
-        zone.AddChild(shape);
-
-        // Visual indicator.
-        var visual = new ColorRect();
-        visual.Color = new Color(0.05f, 0.05f, 0.1f, 0.4f);
-        visual.Position = -size / 2;
-        visual.Size = size;
-        zone.AddChild(visual);
-
-        parent.AddChild(zone);
-    }
-
-    private void AddAreaZone(Node2D parent, string areaName, Vector2 center, Vector2 size, bool isRestricted = false)
-    {
-        var zone = new AreaZone { Name = $"Area_{areaName.Replace(" ", "_")}" };
-        zone.Position = center;
-        zone.AreaName = areaName;
-        zone.IsRestricted = isRestricted;
-        zone.CollisionLayer = 0;
-        zone.CollisionMask = 1 << 1; // Player.
-
-        var shape = new CollisionShape2D();
-        shape.Shape = new RectangleShape2D { Size = size };
-        zone.AddChild(shape);
-        parent.AddChild(zone);
-    }
-
-    private void AddHidingSpot(Node2D parent, string spotName, Vector2 pos)
-    {
-        var spot = new HidingSpot { Name = $"HidingSpot_{spotName.Replace(" ", "_")}" };
-        spot.Position = pos;
-        spot.DisplayName = spotName;
-        spot.CollisionLayer = 1 << 5; // Interactable.
-        spot.CollisionMask = 1 << 1;  // Player.
-
-        var shape = new CollisionShape2D();
-        shape.Shape = new RectangleShape2D { Size = new Vector2(16, 16) };
-        spot.AddChild(shape);
-
-        // Visual — slightly darker square.
-        var visual = new ColorRect();
-        visual.Color = new Color(0.15f, 0.25f, 0.1f, 0.6f);
-        visual.Position = new Vector2(-8, -8);
-        visual.Size = new Vector2(16, 16);
-        spot.AddChild(visual);
-
-        parent.AddChild(spot);
     }
 }

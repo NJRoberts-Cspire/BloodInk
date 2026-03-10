@@ -70,6 +70,8 @@ public partial class CampScene : Node2D
 
     private void SpawnHUD()
     {
+        // Prevent duplicate HUDs on camp re-entry.
+        if (GetNodeOrNull("GameHUD") != null) return;
         var hud = GD.Load<PackedScene>("res://Scenes/UI/GameHUD.tscn");
         if (hud != null)
             AddChild(hud.Instantiate());
@@ -110,12 +112,15 @@ public partial class CampScene : Node2D
         missionBoard.DisplayName = "Mission Board";
 
         // Move collision children from old node to new one.
-        foreach (var child in oldBoard.GetChildren())
+        // Snapshot to avoid mutating during iteration.
+        var children = new System.Collections.Generic.List<Node>(oldBoard.GetChildren());
+        foreach (var child in children)
         {
             oldBoard.RemoveChild(child);
             missionBoard.AddChild(child);
         }
 
+        RemoveChild(oldBoard);
         oldBoard.QueueFree();
         AddChild(missionBoard);
     }
@@ -173,7 +178,20 @@ public partial class CampScene : Node2D
     {
         GD.Print($"Camp refreshed — Act {CurrentAct}");
 
-        SetNpcVisible("Needlewise", !NeedlewiseRevealed || CurrentAct < 6);
+        // Reveal Needlewise once any kingdom has been completed.
+        if (!NeedlewiseRevealed && GameManager.Instance != null)
+        {
+            foreach (var kingdom in GameManager.Instance.Kingdoms)
+            {
+                if (kingdom != null && kingdom.IsCompleted)
+                {
+                    NeedlewiseRevealed = true;
+                    break;
+                }
+            }
+        }
+
+        SetNpcVisible("Needlewise", NeedlewiseRevealed);
         SetNpcVisible("Grael", true);
         SetNpcVisible("Rukh", true);
         SetNpcVisible("Senna", true);
@@ -182,7 +200,10 @@ public partial class CampScene : Node2D
     private void SetNpcVisible(string npcName, bool visible)
     {
         var npc = GetNodeOrNull<Node2D>(npcName);
-        if (npc != null) npc.Visible = visible;
+        if (npc == null) return;
+        npc.Visible = visible;
+        // Also disable processing so invisible NPCs can't be interacted with.
+        npc.ProcessMode = visible ? ProcessModeEnum.Inherit : ProcessModeEnum.Disabled;
     }
 
     /// <summary>Deploy to a mission scene.</summary>

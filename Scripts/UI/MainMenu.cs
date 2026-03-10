@@ -14,8 +14,9 @@ public partial class MainMenu : Control
     private Button? _quitBtn;
     private SettingsPanel? _settingsPanel;
 
-    private static readonly PackedScene SettingsScene =
-        GD.Load<PackedScene>("res://Scenes/UI/SettingsPanel.tscn");
+    private PackedScene? _settingsScene;
+    private PackedScene SettingsScene =>
+        _settingsScene ??= GD.Load<PackedScene>("res://Scenes/UI/SettingsPanel.tscn");
 
     public override void _Ready()
     {

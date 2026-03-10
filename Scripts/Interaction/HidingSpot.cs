@@ -19,12 +19,16 @@ public partial class HidingSpot : Interactable
     /// <summary>The player currently hiding.</summary>
     private Node2D? _hiddenPlayer;
 
-    /// <summary>Stored player position to restore on exit.</summary>
-    private Vector2 _storedPosition;
-
     protected override void InteractableReady()
     {
         ActionVerb = "Hide in";
+        TreeExiting += OnTreeExiting;
+    }
+
+    /// <summary>Auto-unhide the player if this node is freed while occupied.</summary>
+    private void OnTreeExiting()
+    {
+        if (IsOccupied) UnhidePlayer();
     }
 
     public override void OnInteract(Node2D interactor)
@@ -43,7 +47,6 @@ public partial class HidingSpot : Interactable
     {
         IsOccupied = true;
         _hiddenPlayer = player;
-        _storedPosition = player.GlobalPosition;
 
         // Move player to hiding spot position.
         player.GlobalPosition = GlobalPosition;
@@ -65,6 +68,11 @@ public partial class HidingSpot : Interactable
         if (sprite != null)
             sprite.Visible = false;
 
+        // Disable state machine so the player can't attack/dodge while hidden.
+        var stateMachine = player.GetNodeOrNull<Core.StateMachine>("StateMachine");
+        if (stateMachine != null)
+            stateMachine.ProcessMode = ProcessModeEnum.Disabled;
+
         ActionVerb = "Exit";
         EmitSignal(SignalName.PlayerHid);
         GD.Print($"Player hidden in {DisplayName}.");
@@ -74,8 +82,9 @@ public partial class HidingSpot : Interactable
     {
         if (_hiddenPlayer == null) return;
 
-        // Restore player position and visibility.
-        _hiddenPlayer.GlobalPosition = _storedPosition;
+        // Restore player near the hiding spot (offset slightly) instead of the
+        // pre-hide position, which could be far away or inside a wall.
+        _hiddenPlayer.GlobalPosition = GlobalPosition + new Vector2(0, 16);
 
         if (_hiddenPlayer is CharacterBody2D body)
         {
@@ -85,12 +94,17 @@ public partial class HidingSpot : Interactable
         var stealth = _hiddenPlayer.GetNodeOrNull<StealthProfile>("StealthProfile");
         if (stealth != null)
         {
-            stealth.CoverZoneCount -= 100;
+            stealth.CoverZoneCount = System.Math.Max(0, stealth.CoverZoneCount - 100);
         }
 
         var sprite = _hiddenPlayer.GetNodeOrNull<AnimatedSprite2D>("AnimatedSprite2D");
         if (sprite != null)
             sprite.Visible = true;
+
+        // Re-enable state machine.
+        var stateMachine = _hiddenPlayer.GetNodeOrNull<Core.StateMachine>("StateMachine");
+        if (stateMachine != null)
+            stateMachine.ProcessMode = ProcessModeEnum.Inherit;
 
         IsOccupied = false;
         _hiddenPlayer = null;

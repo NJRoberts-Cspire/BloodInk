@@ -63,6 +63,7 @@ public partial class TattooSystem : Node
         EmitSignal(SignalName.TemperamentChanged, (int)temperament, _temperamentScores[temperament]);
         CheckForEvolutions();
         CheckForConflicts();
+        RecalculateStats();
     }
 
     public int GetTemperamentScore(InkTemperament temperament) => _temperamentScores[temperament];
@@ -97,7 +98,6 @@ public partial class TattooSystem : Node
         // Push temperament from the tattoo itself.
         RecordAction(tattoo.PrimaryTemperament, tattoo.TemperamentWeight);
 
-        RecalculateStats();
         EmitSignal(SignalName.TattooApplied, tattoo.Id, (int)tattoo.Slot);
         GD.Print($"Tattoo applied: {tattoo.DisplayName} ({tattoo.Slot})");
         return true;
@@ -127,7 +127,6 @@ public partial class TattooSystem : Node
                 {
                     var oldId = tattoo.Id;
                     tattoos[i] = tattoo.EvolvedForm;
-                    RecalculateStats();
                     EmitSignal(SignalName.TattooEvolved, oldId, tattoo.EvolvedForm.Id);
                     GD.Print($"Tattoo evolved: {oldId} → {tattoo.EvolvedForm.Id}");
                 }
@@ -264,6 +263,55 @@ public partial class TattooSystem : Node
         {
             _temperamentScores[kv.Key] = (int)(kv.Value * carryOverRate);
         }
+        RecalculateStats();
+    }
+
+    /// <summary>Restore tattoo and temperament state from a save.</summary>
+    public void Deserialize(Dictionary<string, object> data)
+    {
+        // Clear current state.
+        foreach (var slot in _appliedTattoos.Keys)
+            _appliedTattoos[slot].Clear();
+
+        // Restore temperament scores.
+        if (data.TryGetValue("temperaments", out var tempObj) && tempObj is Dictionary<string, object> temps)
+        {
+            foreach (var kv in temps)
+            {
+                if (Enum.TryParse<InkTemperament>(kv.Key, out var temperament))
+                {
+                    _temperamentScores[temperament] = kv.Value switch
+                    {
+                        int i => i,
+                        float fv => (int)fv,
+                        double d => (int)d,
+                        long l => (int)l,
+                        _ => 0
+                    };
+                }
+            }
+        }
+
+        // Restore tattoos by looking up IDs in the registry.
+        if (data.TryGetValue("tattoos", out var tatObj) && tatObj is List<object> tattooIds)
+        {
+            foreach (var idObj in tattooIds)
+            {
+                if (idObj is string id)
+                {
+                    var tattoo = Content.TattooRegistry.FindById(id);
+                    if (tattoo != null)
+                    {
+                        _appliedTattoos[tattoo.Slot].Add(tattoo);
+                    }
+                    else
+                    {
+                        GD.PrintErr($"TattooSystem.Deserialize: Unknown tattoo ID '{id}'");
+                    }
+                }
+            }
+        }
+
         RecalculateStats();
     }
 }

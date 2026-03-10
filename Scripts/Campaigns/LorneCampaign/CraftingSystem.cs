@@ -194,4 +194,40 @@ public partial class CraftingSystem : Node
             ["craftCounts"] = new Dictionary<string, int>(_craftCount)
         };
     }
+
+    public void Deserialize(Dictionary<string, object> data)
+    {
+        _materials.Clear();
+        _knownRecipes.Clear();
+        _craftCount.Clear();
+
+        if (data.TryGetValue("materials", out var mObj) && mObj is Dictionary<string, object> mDict)
+        {
+            foreach (var (key, val) in mDict)
+            {
+                if (Enum.TryParse<MaterialType>(key, out var matType) && val is int count)
+                    _materials[matType] = count;
+            }
+        }
+
+        if (data.TryGetValue("knownRecipes", out var kr) && kr is List<object> krList)
+        {
+            foreach (var item in krList)
+            {
+                if (item is string recipeId && !_knownRecipes.ContainsKey(recipeId)
+                    && _allRecipes.TryGetValue(recipeId, out var recipe))
+                {
+                    _knownRecipes[recipeId] = recipe;
+                }
+            }
+        }
+
+        if (data.TryGetValue("craftCounts", out var cc) && cc is Dictionary<string, object> ccDict)
+        {
+            foreach (var (key, val) in ccDict)
+            {
+                if (val is int count) _craftCount[key] = count;
+            }
+        }
+    }
 }
