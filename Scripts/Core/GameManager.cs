@@ -89,7 +89,7 @@ public partial class GameManager : Node
         AddChild(noiseProp);
 
         // Kingdom states.
-        string[] kingdomNames = { "Ashenmarch", "Veilgard", "Thornwall", "Duskhollow", "Irontide", "The Pale" };
+        string[] kingdomNames = { "The Greenhold", "The Drench", "The Fane of Flensing", "The Verdancy", "The Crucible of the Named", "The Accord Spire" };
         for (int i = 0; i < 6; i++)
         {
             Kingdoms[i] = new Progression.KingdomState
@@ -117,6 +117,10 @@ public partial class GameManager : Node
                 EchoManager?.UnlockEcho(tattoo.BloodEchoId);
             }
         };
+
+        // Register all kingdom targets globally so MissionBoard works before entering any level.
+        foreach (var target in Content.GreenholdTargets.GetAll())
+            Kingdoms[0].RegisterTarget(target);
 
         // Register all crafting recipes.
         foreach (var recipe in Content.CraftingRecipeRegistry.GetAll())

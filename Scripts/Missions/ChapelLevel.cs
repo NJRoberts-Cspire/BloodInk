@@ -148,7 +148,6 @@ public partial class ChapelLevel : MissionLevelBase
         BuildRelicChamber();
         SpawnPlayer(GroundsOffset + new Vector2(1280, 540));
         SetupHUD();
-        RegisterTargets();
 
         // Camera bounds encompass all three zones (Relic top → Grounds bottom).
         SetCameraLimits(0, -640, 2560, 1840);
@@ -419,18 +418,6 @@ public partial class ChapelLevel : MissionLevelBase
         health.Died += () => OnTargetKilled("blessing", 0,
             "Sister Blessing\nHead of the Greenhold Chapel",
             "\"We prayed for them too. I want you to know that.\"");
-    }
-
-    // ═════════════════════════════════════════════════════════════
-    //  TARGETS
-    // ═════════════════════════════════════════════════════════════
-
-    private void RegisterTargets()
-    {
-        var gm = GameManager.Instance;
-        if (gm == null) return;
-        foreach (var target in GreenholdTargets.GetAll())
-            gm.Kingdoms[0].RegisterTarget(target);
     }
 
 }

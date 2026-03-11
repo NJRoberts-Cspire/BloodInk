@@ -131,7 +131,6 @@ public partial class LaborCampLevel : MissionLevelBase
         BuildOffice();
         SpawnPlayer(YardOffset + new Vector2(1280, 480));
         SetupHUD();
-        RegisterTargets();
 
         // Camera bounds encompass all three zones (Office top → Yard bottom).
         SetCameraLimits(0, -544, 2560, 1600);
@@ -414,18 +413,6 @@ public partial class LaborCampLevel : MissionLevelBase
         health.Died += () => OnTargetKilled("maren", 0,
             "Reeve Maren\nOverseer of the Labor Camps",
             "\"The dogs didn't bark. That's what I can't understand.\"");
-    }
-
-    // ═════════════════════════════════════════════════════════════
-    //  TARGETS
-    // ═════════════════════════════════════════════════════════════
-
-    private void RegisterTargets()
-    {
-        var gm = GameManager.Instance;
-        if (gm == null) return;
-        foreach (var target in GreenholdTargets.GetAll())
-            gm.Kingdoms[0].RegisterTarget(target);
     }
 
 }

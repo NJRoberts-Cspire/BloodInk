@@ -135,7 +135,6 @@ public partial class BarracksLevel : MissionLevelBase
         BuildTrophyRoom();
         SpawnPlayer(YardOffset + new Vector2(1280, 420));
         SetupHUD();
-        RegisterTargets();
 
         // Camera bounds encompass all three zones (Trophy top → Yard bottom).
         SetCameraLimits(0, -640, 2560, 1520);
@@ -416,20 +415,6 @@ public partial class BarracksLevel : MissionLevelBase
             "\"He went down swinging. They all do. …Why didn't I?\"");
     }
 
-    // ═════════════════════════════════════════════════════════════
-    //  TARGETS
-    // ═════════════════════════════════════════════════════════════
-
-    private void RegisterTargets()
-    {
-        var gm = GameManager.Instance;
-        if (gm == null) return;
-        foreach (var target in GreenholdTargets.GetAll())
-            gm.Kingdoms[0].RegisterTarget(target);
-    }
-
-    // ═════════════════════════════════════════════════════════════
-    //  HELPER: HARDER GUARDS (difficulty 7 — custom elite stats)
     // ═════════════════════════════════════════════════════════════
 
     /// <summary>

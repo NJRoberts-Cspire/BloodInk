@@ -313,7 +313,8 @@ public abstract partial class MissionLevelBase : Node2D
 
     /// <summary>
     /// Common target kill handler — registers the kill, awards ink,
-    /// populates MissionComplete screen, and transitions after delay.
+    /// tracks moral choices, unlocks Blood Echoes, populates
+    /// MissionComplete screen, and transitions after delay.
     /// </summary>
     protected void OnTargetKilled(
         string targetId,
@@ -332,9 +333,21 @@ public abstract partial class MissionLevelBase : Node2D
             var killed = gm.Kingdoms[kingdomIndex].KillTarget(targetId);
             if (killed != null)
             {
+                // Award ink.
                 gm.InkInventory?.AddInk(killed.InkDrop, killed.InkAmount);
                 rewardText = $"Blood-Ink Acquired: {killed.InkAmount}× {killed.InkDrop} Grade";
                 GD.Print($"Blood-Ink acquired: {killed.InkAmount}x {killed.InkDrop} grade!");
+
+                // Track moral choices — optional kills increase cruelty.
+                if (!killed.IsMandatory)
+                    gm.Choices?.RecordOptionalKill();
+
+                // Unlock Blood Echo for Edictbearer kills.
+                if (killed.IsEdictbearer && !string.IsNullOrEmpty(killed.BloodEchoId))
+                {
+                    gm.EchoManager?.UnlockEcho(killed.BloodEchoId);
+                    rewardText += "\nBlood Echo Unlocked";
+                }
             }
         }
 

@@ -189,7 +189,6 @@ public partial class GoldmanorLevel : MissionLevelBase
         BuildQuarters();
         SpawnPlayer(GardenOffset + new Vector2(1280, 740));
         SetupHUD();
-        RegisterTargets();
 
         // Camera bounds encompass all three zones (Quarters top → Garden bottom).
         SetCameraLimits(0, -1040, 2560, 2240);
@@ -503,60 +502,9 @@ public partial class GoldmanorLevel : MissionLevelBase
         SetOwnerRecursive(cowl, cowl);
         parent.AddChild(cowl);
 
-        // Wire death to mission complete.
-        health.Died += () => OnCowlKilled(cowl);
-    }
-
-    private void OnCowlKilled(Node2D cowl)
-    {
-        GD.Print("═══ LORD COWL SLAIN ═══");
-        GD.Print("\"I never saw the dark as empty. I thought it was full of things that loved me.\"");
-
-        // Register the kill with KingdomState.
-        var gm = GameManager.Instance;
-        string rewardText = "";
-        if (gm != null)
-        {
-            var killed = gm.Kingdoms[0].KillTarget("cowl");
-
-            // Award ink.
-            if (killed != null)
-            {
-                gm.InkInventory?.AddInk(killed.InkDrop, killed.InkAmount);
-                rewardText = $"Blood-Ink Acquired: {killed.InkAmount}× {killed.InkDrop} Grade\nNew Tattoo Available: Shadow Step";
-                GD.Print($"Blood-Ink acquired: {killed.InkAmount}x {killed.InkDrop} grade!");
-            }
-        }
-
-        // Populate MissionComplete screen data.
-        UI.MissionComplete.TargetText = "Lord Harlan Cowl\nGovernor of the Greenhold\nEdictbearer";
-        UI.MissionComplete.WhisperText = "\"I never saw the dark as empty.\nI thought it was full of things that loved me.\"";
-        UI.MissionComplete.RewardText = rewardText;
-
-        // Show mission complete after a delay.
-        var timer = GetTree().CreateTimer(2.0f);
-        timer.Timeout += ShowMissionComplete;
-    }
-
-    private void ShowMissionComplete()
-    {
-        // Transition to mission complete screen.
-        GetTree().ChangeSceneToFile("res://Scenes/UI/MissionComplete.tscn");
-    }
-
-    // ═════════════════════════════════════════════════════════════
-    //  TARGET REGISTRATION
-    // ═════════════════════════════════════════════════════════════
-
-    private void RegisterTargets()
-    {
-        var gm = GameManager.Instance;
-        if (gm == null) return;
-
-        // Register all Greenhold targets.
-        foreach (var target in GreenholdTargets.GetAll())
-        {
-            gm.Kingdoms[0].RegisterTarget(target);
-        }
+        // Wire death to mission complete via the shared base handler.
+        health.Died += () => OnTargetKilled("cowl", 0,
+            "Lord Harlan Cowl\nGovernor of the Greenhold\nEdictbearer",
+            "\"I never saw the dark as empty. I thought it was full of things that loved me.\"");
     }
 }

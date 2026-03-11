@@ -85,6 +85,7 @@ public static class PlaceholderSprites
         CreateRect("npc_grael",     14, 18, new Color(0.5f, 0.35f, 0.2f));
         CreateRect("npc_rukh",      12, 14, new Color(0.4f, 0.4f, 0.5f));
         CreateRect("npc_senna",     10, 14, new Color(0.6f, 0.5f, 0.3f));
+        CreateRect("npc_lorne",     10, 14, new Color(0.55f, 0.4f, 0.45f));
 
         // ─── Props – kept procedural for now ─────────────────────
         CreateRect("campfire",      10, 10, new Color(0.9f, 0.5f, 0.15f));
@@ -354,6 +355,7 @@ public static class PlaceholderSprites
         CreateRect("npc_grael",     14, 18, new Color(0.5f, 0.35f, 0.2f));
         CreateRect("npc_rukh",     12, 14, new Color(0.4f, 0.4f, 0.5f));
         CreateRect("npc_senna",    10, 14, new Color(0.6f, 0.5f, 0.3f));
+        CreateRect("npc_lorne",    10, 14, new Color(0.55f, 0.4f, 0.45f));
 
         // Props
         CreateRect("campfire",      10, 10, new Color(0.9f, 0.5f, 0.15f));

@@ -42,7 +42,7 @@ public partial class MainMenu : Control
 
     private void OnNewGame()
     {
-        GetTree().ChangeSceneToFile("res://Scenes/World/TestWorld.tscn");
+        GetTree().ChangeSceneToFile("res://Scenes/World/Camp.tscn");
     }
 
     private void OnContinue()

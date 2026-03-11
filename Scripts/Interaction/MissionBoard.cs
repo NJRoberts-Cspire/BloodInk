@@ -1,20 +1,19 @@
 using Godot;
-using BloodInk.Content;
 using BloodInk.Core;
 using BloodInk.Dialogue;
+using BloodInk.Progression;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BloodInk.Interaction;
 
 /// <summary>
-/// The Mission Board in camp. When interacted, presents available targets
-/// and lets the player choose a mission to deploy to.
-/// For the vertical slice, only Lord Cowl's mission is available.
+/// The Mission Board in camp. When interacted, presents all living targets
+/// from the current kingdom and lets the player choose a mission to deploy to.
+/// Dynamically generates dialogue from KingdomState target data.
 /// </summary>
 public partial class MissionBoard : Interactable
 {
-    /// <summary>Whether the player has completed the Cowl mission.</summary>
-    private bool _cowlCompleted = false;
-
     /// <summary>Cached callable to prevent identity mismatch on IsConnected/Disconnect.</summary>
     private readonly Callable _onDialogueEventCallable;
 
@@ -31,57 +30,167 @@ public partial class MissionBoard : Interactable
 
     public override void OnInteract(Node2D interactor)
     {
-        // Check if Cowl is already dead.
-        var gm = GameManager.Instance;
-        if (gm != null)
-        {
-            var greenhold = gm.Kingdoms[0];
-            _cowlCompleted = greenhold?.IsTargetKilled("cowl") ?? false;
-        }
-
-        if (_cowlCompleted)
-        {
-            // Show completion dialogue.
-            ShowCompletionDialogue();
-        }
-        else
-        {
-            // Show mission briefing with deploy option.
-            ShowMissionBriefing();
-        }
-
+        ShowMissionList();
         base.OnInteract(interactor);
     }
 
-    private void ShowMissionBriefing()
+    private void ShowMissionList()
     {
+        var gm = GameManager.Instance;
+        if (gm == null) return;
+
+        // For the vertical slice, work with Kingdom 0 (Greenhold).
+        var kingdom = gm.Kingdoms[0];
+        var living = kingdom.GetLivingTargets().ToList();
+        var killed = kingdom.GetKilledTargets().ToList();
+
+        var lines = new List<DialogueLine>();
+
+        // ── Header ────────────────────────────────────────────
+        lines.Add(new DialogueLine
+        {
+            Id = "header",
+            Speaker = "",
+            Text = "═══ MISSION BOARD ═══\nThe Greenhold — Active Targets",
+            IsEntry = true,
+            NextLineId = killed.Count > 0 ? "status" : (living.Count > 0 ? "choose" : "done")
+        });
+
+        // ── Show killed targets summary if any ────────────────
+        if (killed.Count > 0)
+        {
+            string statusText = string.Join("\n",
+                killed.Select(t => $"  ✓ {t.Name} — ELIMINATED"));
+            lines.Add(new DialogueLine
+            {
+                Id = "status",
+                Speaker = "",
+                Text = statusText,
+                NextLineId = living.Count > 0 ? "choose" : "done"
+            });
+        }
+
+        // ── All targets dead ──────────────────────────────────
+        if (living.Count == 0)
+        {
+            lines.Add(new DialogueLine
+            {
+                Id = "done",
+                Speaker = "",
+                Text = "All Greenhold targets eliminated.\nThe Edict's grip on this kingdom is broken.\nVisit the Needlewise to receive your tattoo."
+            });
+        }
+        else
+        {
+            // ── Build target choices ──────────────────────────
+            var choices = new List<string>();
+            foreach (var target in living.OrderBy(t => t.Difficulty))
+            {
+                // Only show targets whose mission scene exists.
+                bool sceneExists = ResourceLoader.Exists(target.MissionScenePath);
+                string stars = new string('★', target.Difficulty)
+                             + new string('☆', 10 - target.Difficulty);
+                string label;
+                if (target.IsEdictbearer)
+                    label = $"{target.Name} ({stars}) [EDICTBEARER]";
+                else
+                    label = $"{target.Name} ({stars})";
+
+                if (sceneExists)
+                    choices.Add($"{label}|brief_{target.Id}");
+                else
+                    choices.Add($"{label} [INTEL NEEDED]|unavail_{target.Id}");
+            }
+            choices.Add("Not yet.|cancel");
+
+            lines.Add(new DialogueLine
+            {
+                Id = "choose",
+                Speaker = "",
+                Text = "Select a target:",
+                Choices = choices.ToArray()
+            });
+
+            // ── Generate briefing + deploy for each target ────
+            foreach (var target in living)
+            {
+                bool sceneExists = ResourceLoader.Exists(target.MissionScenePath);
+
+                if (!sceneExists)
+                {
+                    // Unavailable target — intel not yet gathered.
+                    lines.Add(new DialogueLine
+                    {
+                        Id = $"unavail_{target.Id}",
+                        Speaker = "",
+                        Text = $"TARGET: {target.Name}\n{target.Title}\n\nRukh's spies haven't mapped this location yet.\nComplete other missions to gather more intel.",
+                        NextLineId = "choose"
+                    });
+                    continue;
+                }
+
+                // Briefing line.
+                string diffStars = new string('★', target.Difficulty) + new string('☆', 10 - target.Difficulty);
+                lines.Add(new DialogueLine
+                {
+                    Id = $"brief_{target.Id}",
+                    Speaker = "",
+                    Text = $"TARGET: {target.Name}\n{target.Title}\nDIFFICULTY: {diffStars}",
+                    NextLineId = $"intel_{target.Id}"
+                });
+
+                // Intel + deploy choice.
+                string gradeText = target.InkDrop.ToString();
+                string echoBonus = target.IsEdictbearer ? "\nBlood Echo: Yes" : "";
+                lines.Add(new DialogueLine
+                {
+                    Id = $"intel_{target.Id}",
+                    Speaker = "",
+                    Text = $"REWARD: {target.InkAmount}× {gradeText} Blood-Ink{echoBonus}",
+                    Choices = new[]
+                    {
+                        $"Deploy.|deploy_{target.Id}",
+                        "Back.|choose"
+                    }
+                });
+
+                // Deploy confirmation.
+                lines.Add(new DialogueLine
+                {
+                    Id = $"deploy_{target.Id}",
+                    Speaker = "",
+                    Text = "Preparing for deployment...",
+                    Event = $"deploy:{target.MissionScenePath}"
+                });
+            }
+
+            lines.Add(new DialogueLine
+            {
+                Id = "cancel",
+                Speaker = "",
+                Text = "The board awaits your decision."
+            });
+        }
+
         var dialogue = new DialogueData
         {
-            ConversationId = "mission_board_cowl",
-            Lines = new DialogueLine[]
-            {
-                new() { Id = "1", Speaker = "", Text = "═══ MISSION BOARD ═══", IsEntry = true, NextLineId = "2" },
-                new() { Id = "2", Speaker = "", Text = "TARGET: Lord Harlan Cowl\nLOCATION: Goldmanor, The Greenhold\nDIFFICULTY: ★★★★★★★★☆☆", NextLineId = "3" },
-                new() { Id = "3", Speaker = "", Text = "INTEL: Evening walk on west balcony. Wine cellar entry. Servant entrance after sundown.", NextLineId = "4" },
-                new() { Id = "4", Speaker = "", Text = "REWARD: Major Blood-Ink (Shadow Step tattoo)", NextLineId = "5" },
-                new() { Id = "5", Speaker = "", Text = "Deploy to Goldmanor?", Choices = new[]
-                {
-                    "Deploy.|deploy",
-                    "Not yet.|cancel"
-                }},
-                new() { Id = "deploy", Speaker = "", Text = "Preparing for deployment...", Event = "deploy_goldmanor" },
-                new() { Id = "cancel", Speaker = "", Text = "The board awaits your decision." },
-            }
+            ConversationId = "mission_board",
+            Lines = lines.ToArray()
         };
 
         DialogueManager.Instance?.StartConversation(dialogue);
 
-        // Listen for the deploy event.
+        // Listen for deploy events.
         if (DialogueManager.Instance != null)
         {
-            // Disconnect previous if any.
-            if (DialogueManager.Instance.IsConnected(DialogueManager.SignalName.DialogueEventFired, _onDialogueEventCallable))
-                DialogueManager.Instance.Disconnect(DialogueManager.SignalName.DialogueEventFired, _onDialogueEventCallable);
+            if (DialogueManager.Instance.IsConnected(
+                    DialogueManager.SignalName.DialogueEventFired,
+                    _onDialogueEventCallable))
+            {
+                DialogueManager.Instance.Disconnect(
+                    DialogueManager.SignalName.DialogueEventFired,
+                    _onDialogueEventCallable);
+            }
 
             DialogueManager.Instance.Connect(
                 DialogueManager.SignalName.DialogueEventFired,
@@ -91,39 +200,23 @@ public partial class MissionBoard : Interactable
         }
     }
 
-    private void ShowCompletionDialogue()
-    {
-        var dialogue = new DialogueData
-        {
-            ConversationId = "mission_board_complete",
-            Lines = new DialogueLine[]
-            {
-                new() { Id = "1", Speaker = "", Text = "═══ MISSION BOARD ═══", IsEntry = true, NextLineId = "2" },
-                new() { Id = "2", Speaker = "", Text = "TARGET: Lord Harlan Cowl — ELIMINATED ✓\nThe Greenhold's Edict anchor is broken.", NextLineId = "3" },
-                new() { Id = "3", Speaker = "", Text = "Visit the Needlewise to receive your tattoo." },
-            }
-        };
-
-        DialogueManager.Instance?.StartConversation(dialogue);
-    }
-
     private void OnDialogueEvent(string eventKey)
     {
-        if (eventKey == "deploy_goldmanor")
+        if (eventKey.StartsWith("deploy:"))
         {
-            // Wait for dialogue to end, then deploy.
-            CallDeferred(MethodName.DeployToGoldmanor);
+            string scenePath = eventKey.Substring("deploy:".Length);
+            CallDeferred(MethodName.DeployToMission, scenePath);
         }
     }
 
-    private void DeployToGoldmanor()
+    private void DeployToMission(string scenePath)
     {
         // Small delay to let dialogue close.
         var timer = GetTree().CreateTimer(0.5f);
         timer.Timeout += () =>
         {
-            GD.Print("Deploying to Goldmanor...");
-            GetTree().ChangeSceneToFile("res://Scenes/Missions/Greenhold/Goldmanor.tscn");
+            GD.Print($"Deploying to {scenePath}...");
+            GetTree().ChangeSceneToFile(scenePath);
         };
     }
 }
