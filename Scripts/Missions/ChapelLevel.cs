@@ -23,94 +23,121 @@ public partial class ChapelLevel : MissionLevelBase
 {
     // ─── Map Layout ──────────────────────────────────────────────
 
-    // Chapel Grounds — walled garden with a stone path to the entrance
+    // Chapel Grounds — sprawling walled compound with graveyard, meditation garden, bell tower approach
     private static readonly string[] GroundsMap = {
-        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,,,,,,pppppppppppppp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,,,,,pp............pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,,,,pp..............pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,,,pp................pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,,pp..................pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,pp....................pp,,,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,pp......................pp,,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,pp........................pp,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,pp..........................pp,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,pp............................pp,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,p..............................p,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,p..............................p,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,pp..............................pp,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,p................................p,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,p................................p,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,pp..............................pp,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,p..............................p,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,p..............................p,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,pp............................pp,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,pp..........................pp,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,pp........................pp,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,pp......................pp,,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,pp....................pp,,,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,,pp..................pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,~,,,,,,,,,,,,pppppp....pppppp,,,,,,,,,,,,,~,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,,,,,,,,,,pppp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,~,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pppppppp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,~,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,pppppppppp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp........pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pppppppp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,pp..........pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp............pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp..........pp,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,pp............pp,,,,,,,,,,,,,,,,ppppppp,,,,,,,,,,,,,,,,pp................pp,,,,,,,,,,,,,,,,ppppppp,,,,,,,,,,pp..............pp,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,pp..............pp,,,,,,,,,,,,,ppp.....ppp,,,,,,,,,,,,,pp..................pp,,,,,,,,,,,,,ppp.....ppp,,,,,,pp................pp,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,pp................pp,,,,,,,,,,ppp.........ppp,,,,,,,,,pp......................pp,,,,,,,,,,ppp.........ppp,pp..................pp,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,pp..................pp,,,,,,,ppp.............ppp,,,,,,pp........................pp,,,,,,ppp.............ppp....................pp,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,pp....................pp,,,,,pp.................pp,,,pp..........................pp,,,,,pp.................pp....................pp,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,pp......................pp,,,pp...................pppp..............................pp,,pp...................pp..................pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,pp........................pp,pp.....................pp................................pppp.....................pp................pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,p..........................ppp.......................................................................................pp..........pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,p..........................pp.........................................................................................pp......pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,pp..........................p...........................................................................................pp....pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,p...........................p.............................................................................................pppppp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,p...........................p...........................................................................................pp....pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,pp..........................p.........................................................................................pp......pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,p..........................pp.......................................................................................pp..........pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,p..........................ppp.......................pp................................pppp.....................pp................pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,pp........................pp,pp.....................pppp..............................pp,,pp...................pp..................pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,pp......................pp,,,pp...................pp,,,pp..........................pp,,,,,pp.................pp....................pp,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,pp....................pp,,,,,ppp.............ppp,,,,,,pp........................pp,,,,,,ppp.............ppp....................pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,pp..................pp,,,,,,,,,ppp.........ppp,,,,,,,,,pp......................pp,,,,,,,,,,ppp.........ppp,pp..................pp,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,pp................pp,,,,,,,,,,,,ppp.....ppp,,,,,,,,,,,,,pp..................pp,,,,,,,,,,,,,ppp.....ppp,,,,,,pp................pp,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,pp..............pp,,,,,,,,,,,,,,,ppppppp,,,,,,,,,,,,,,,,pp................pp,,,,,,,,,,,,,,,,ppppppp,,,,,,,,,,pp..............pp,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,pp............pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp............pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp..........pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,pp..........pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp........pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pppppppp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,~,,,,,,,,,,,,,,pppppppppp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pppppppp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,~,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,~,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,~,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,~,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,~,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,~,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
     };
 
-    // Nave & Vestry — interior with carpeted aisle and side rooms
+    // Nave & Vestry — grand interior with twin aisles, side chapels, confessionals, sacristy, clergy hall, scriptorium
     private static readonly string[] NaveMap = {
-        "################################################################",
-        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwww#",
-        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwww#",
-        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwww#",
-        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwww#",
-        "#wwwwww...cccccc...wwwwwwww.wwwwww...cccccc...wwwwwwww.wwwwwww#",
-        "#wwwwww...cccccc...wwwwwwww.wwwwww...cccccc...wwwwwwww.wwwwwww#",
-        "#wwwwww...cccccc...wwwwwwww.wwwwww...cccccc...wwwwwwww.wwwwwww#",
-        "#wwwwww...cccccc...wwwwwwww.wwwwww...cccccc...wwwwwwww.wwwwwww#",
-        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwww#",
-        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwww#",
-        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwww#",
-        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwww#",
-        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwww#",
-        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwww#",
-        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwww#",
-        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwww#",
-        "#wwwwww#cccccccccc#~~wwwwww#wwwwww#cccccccccc#~~wwwwww#wwwwwww#",
-        "#wwwwww#cccccccccc#~~wwwwww#wwwwww#cccccccccc#~~wwwwww#wwwwwww#",
-        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwww#",
-        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwww#",
-        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwww#",
-        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwww#",
-        "################################################################",
+        "################################################################################################################################################################",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww...cccccc...wwwwwwww.wwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww.wwwwwww#",
+        "#wwwwww...cccccc...wwwwwwww.wwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww.wwwwwww#",
+        "#wwwwww...cccccc...wwwwwwww.wwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww.wwwwwww#",
+        "#wwwwww...cccccc...wwwwwwww.wwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww.wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww...cccccc...wwwwwwww.wwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww.wwwwwww#",
+        "#wwwwww...cccccc...wwwwwwww.wwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww.wwwwwww#",
+        "#wwwwww#cccccccccc#~~wwwwww#wwwwww#cccccccccc#~~wwwwww#wwwwwwww#cccccccccc#~~wwwwww#wwwwwwww#cccccccccc#~~wwwwww#wwwwwwww#cccccccccc#~~wwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#~~wwwwww#wwwwww#cccccccccc#~~wwwwww#wwwwwwww#cccccccccc#~~wwwwww#wwwwwwww#cccccccccc#~~wwwwww#wwwwwwww#cccccccccc#~~wwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww...cccccc...wwwwwwww.wwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww.wwwwwww#",
+        "#wwwwww...cccccc...wwwwwwww.wwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww...cccccc...wwwwwwww.wwwwwwww.wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "#wwwwww#cccccccccc#wwwwwwww#wwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#cccccccccc#wwwwwwww#wwwwwwww#wwwwwww#",
+        "################################################################################################################################################################",
     };
 
-    // Relic Chamber — underground, dark, cramped stone corridors
+    // Relic Chamber — sprawling underground catacombs with burial niches, winding corridors, central shrine
     private static readonly string[] RelicMap = {
-        "################################################################",
-        "#......~~#........#~~.....#........#~~.....#........#~~........#",
-        "#........#........#.......#........#.......#........#..........#",
-        "#........#........#.......#........#.......#........#..........#",
-        "#........#........#.......#........#.......#........#..........#",
-        "#.............##..........#.............##..........#..........#",
-        "#.............##..........#.............##..........#..........#",
-        "#.............##..........#.............##..........#..........#",
-        "#.............##..........#.............##..........#..........#",
-        "#........#........#.......#........#.......#........#..........#",
-        "#........#........#.......#........#.......#........#..........#",
-        "#........#........#.......#........#.......#........#..........#",
-        "#........#........#.......#........#.......#........#..........#",
-        "#.............##..........#.............##..........#..........#",
-        "#.............##..........#.............##..........#..........#",
-        "#........#........#.......#........#.......#........#..........#",
-        "#........#........#.......#........#.......#........#..........#",
-        "#......~~#........#~~.....#........#~~.....#........#~~........#",
-        "################################################################",
+        "################################################################################################################################################################",
+        "#......~~#........#~~.....#........#~~.....#........#~~........#......~~#........#~~.....#........#~~.....#........#~~........#........#~~.....#........#~~......#",
+        "#........#........#.......#........#.......#........#..........#........#........#.......#........#.......#........#..........#........#.......#........#........#",
+        "#........#........#.......#........#.......#........#..........#........#........#.......#........#.......#........#..........#........#.......#........#........#",
+        "#........#........#.......#........#.......#........#..........#........#........#.......#........#.......#........#..........#........#.......#........#........#",
+        "#.............##..........#.............##..........#..........#.............##..........#.............##..........#..........#.............##..........#..........#",
+        "#.............##..........#.............##..........#..........#.............##..........#.............##..........#..........#.............##..........#..........#",
+        "#.............##..........#.............##..........#..........#.............##..........#.............##..........#..........#.............##..........#..........#",
+        "#.............##..........#.............##..........#..........#.............##..........#.............##..........#..........#.............##..........#..........#",
+        "#........#........#.......#........#.......#........#..........#........#........#.......#........#.......#........#..........#........#.......#........#........#",
+        "#........#........#.......#........#.......#........#..........#........#........#.......#........#.......#........#..........#........#.......#........#........#",
+        "#........#........#.......#........#.......#........#..........#........#........#.......#........#.......#........#..........#........#.......#........#........#",
+        "#........#........#.......#........#.......#........#..........#........#........#.......#........#.......#........#..........#........#.......#........#........#",
+        "#.............##..........#.............##..........#..........#.............##..........#.............##..........#..........#.............##..........#..........#",
+        "#.............##..........#.............##..........#..........#.............##..........#.............##..........#..........#.............##..........#..........#",
+        "#........#........#.......#........#.......#........#..........#........#........#.......#........#.......#........#..........#........#.......#........#........#",
+        "#........#........#.......#........#.......#........#..........#........#........#.......#........#.......#........#..........#........#.......#........#........#",
+        "#........#........#.......#........#.......#........#..........#........#........#.......#........#.......#........#..........#........#.......#........#........#",
+        "#........#........#.......#........#.......#........#..........#........#........#.......#........#.......#........#..........#........#.......#........#........#",
+        "#.............##..........#.............##..........#..........#.............##..........#.............##..........#..........#.............##..........#..........#",
+        "#.............##..........#.............##..........#..........#.............##..........#.............##..........#..........#.............##..........#..........#",
+        "#........#........#.......#........#.......#........#..........#........#........#.......#........#.......#........#..........#........#.......#........#........#",
+        "#........#........#.......#........#.......#........#..........#........#........#.......#........#.......#........#..........#........#.......#........#........#",
+        "#......~~#........#~~.....#........#~~.....#........#~~........#......~~#........#~~.....#........#~~.....#........#~~........#........#~~.....#........#~~......#",
+        "################################################################################################################################################################",
     };
 
-    private static readonly Vector2 GroundsOffset = new(0, 688);
+    private static readonly Vector2 GroundsOffset = new(0, 1200);
     private static readonly Vector2 NaveOffset = new(0, 0);
-    private static readonly Vector2 RelicOffset = new(0, -400);
+    private static readonly Vector2 RelicOffset = new(0, -640);
 
     public override void _Ready()
     {
@@ -119,9 +146,12 @@ public partial class ChapelLevel : MissionLevelBase
         BuildGrounds();
         BuildNave();
         BuildRelicChamber();
-        SpawnPlayer(GroundsOffset + new Vector2(440, 430));
+        SpawnPlayer(GroundsOffset + new Vector2(1280, 540));
         SetupHUD();
         RegisterTargets();
+
+        // Camera bounds encompass all three zones (Relic top → Grounds bottom).
+        SetCameraLimits(0, -640, 2560, 1840);
 
         GD.Print("═══ CHAPEL LOADED ═══");
     }
@@ -139,34 +169,51 @@ public partial class ChapelLevel : MissionLevelBase
         MapBuilder.Build(root, GroundsMap);
 
         // Area zone — full expanded grounds.
-        AddAreaZone(root, "Chapel Grounds", new Vector2(512, 240), new Vector2(1024, 480));
+        AddAreaZone(root, "Chapel Grounds", new Vector2(1280, 320), new Vector2(2560, 640));
 
-        // Shadow at edges and hedgerows.
-        AddShadowZone(root, new Vector2(40, 416), new Vector2(40, 40));
-        AddShadowZone(root, new Vector2(720, 416), new Vector2(40, 40));
-        AddShadowZone(root, new Vector2(200, 100), new Vector2(40, 40));
-        AddShadowZone(root, new Vector2(680, 100), new Vector2(40, 40));
-        AddShadowZone(root, new Vector2(440, 200), new Vector2(40, 32));
+        // Shadow at edges, hedgerows, and among the graves.
+        AddShadowZone(root, new Vector2(64, 32), new Vector2(40, 40));
+        AddShadowZone(root, new Vector2(2496, 32), new Vector2(40, 40));
+        AddShadowZone(root, new Vector2(64, 560), new Vector2(40, 40));
+        AddShadowZone(root, new Vector2(2496, 560), new Vector2(40, 40));
+        AddShadowZone(root, new Vector2(480, 140), new Vector2(40, 40));
+        AddShadowZone(root, new Vector2(1280, 260), new Vector2(40, 32));
+        AddShadowZone(root, new Vector2(2080, 140), new Vector2(40, 40));
+        AddShadowZone(root, new Vector2(720, 480), new Vector2(40, 40));
+        AddShadowZone(root, new Vector2(1840, 480), new Vector2(40, 40));
 
-        // Hiding spots — cemetery, graves, bushes.
-        AddHidingSpot(root, "Hedgerow", new Vector2(120, 200));
-        AddHidingSpot(root, "Gravestone", new Vector2(660, 200));
-        AddHidingSpot(root, "Cemetery Tree", new Vector2(300, 140));
-        AddHidingSpot(root, "Stone Bench", new Vector2(550, 340));
-        AddHidingSpot(root, "Overgrown Arch", new Vector2(440, 100));
+        // Hiding spots — cemetery, graves, bushes, memorial statues.
+        AddHidingSpot(root, "Hedgerow", new Vector2(240, 300));
+        AddHidingSpot(root, "Gravestone", new Vector2(1480, 300));
+        AddHidingSpot(root, "Cemetery Tree", new Vector2(640, 180));
+        AddHidingSpot(root, "Stone Bench", new Vector2(1080, 420));
+        AddHidingSpot(root, "Overgrown Arch", new Vector2(880, 140));
+        AddHidingSpot(root, "Memorial Statue", new Vector2(1680, 180));
+        AddHidingSpot(root, "Collapsed Tomb", new Vector2(400, 480));
+        AddHidingSpot(root, "Flower Garden", new Vector2(2160, 300));
+        AddHidingSpot(root, "Bell Tower Base", new Vector2(1280, 100));
+        AddHidingSpot(root, "Iron Gate", new Vector2(2000, 480));
 
-        // 3 gate guards — wider patrols across the grounds.
-        AddGuard(root, "GateGuard1", new Vector2(350, 160), new Vector2[]
+        // 5 gate guards — wider patrols across the sprawling grounds.
+        AddGuard(root, "GateGuard1", new Vector2(640, 200), new Vector2[]
         {
-            new(0, 0), new(150, 0), new(150, 120), new(0, 120)
+            new(0, 0), new(200, 0), new(200, 160), new(0, 160)
         });
-        AddGuard(root, "GateGuard2", new Vector2(550, 280), new Vector2[]
+        AddGuard(root, "GateGuard2", new Vector2(1920, 200), new Vector2[]
         {
-            new(0, 0), new(-120, 0), new(-120, -100), new(0, -100)
+            new(0, 0), new(-200, 0), new(-200, 160), new(0, 160)
         });
-        AddGuard(root, "GateGuard3", new Vector2(300, 360), new Vector2[]
+        AddGuard(root, "GateGuard3", new Vector2(600, 460), new Vector2[]
         {
-            new(-80, 0), new(100, 0)
+            new(-120, 0), new(200, 0)
+        });
+        AddGuard(root, "GateGuard4", new Vector2(1960, 460), new Vector2[]
+        {
+            new(-200, 0), new(120, 0)
+        });
+        AddGuard(root, "GateGuard5", new Vector2(1280, 340), new Vector2[]
+        {
+            new(-300, 0), new(300, 0)
         });
     }
 
@@ -183,37 +230,59 @@ public partial class ChapelLevel : MissionLevelBase
         MapBuilder.Build(root, NaveMap);
 
         // Area zone — full expanded nave.
-        AddAreaZone(root, "Chapel Nave", new Vector2(512, 192), new Vector2(1024, 384),
+        AddAreaZone(root, "Chapel Nave", new Vector2(1280, 280), new Vector2(2560, 560),
             isRestricted: true);
 
-        // Shadow zones — dark vestry corners.
-        AddShadowZone(root, new Vector2(396, 280), new Vector2(32, 32));
-        AddShadowZone(root, new Vector2(900, 280), new Vector2(32, 32));
+        // Shadow zones — dark vestry corners and side chapel alcoves.
+        AddShadowZone(root, new Vector2(396, 440), new Vector2(32, 32));
+        AddShadowZone(root, new Vector2(900, 440), new Vector2(32, 32));
+        AddShadowZone(root, new Vector2(1660, 440), new Vector2(32, 32));
+        AddShadowZone(root, new Vector2(2164, 440), new Vector2(32, 32));
         AddShadowZone(root, new Vector2(64, 48), new Vector2(40, 32));
-        AddShadowZone(root, new Vector2(960, 48), new Vector2(40, 32));
+        AddShadowZone(root, new Vector2(2496, 48), new Vector2(40, 32));
+        AddShadowZone(root, new Vector2(1280, 60), new Vector2(40, 32));
+        AddShadowZone(root, new Vector2(640, 240), new Vector2(32, 32));
+        AddShadowZone(root, new Vector2(1920, 240), new Vector2(32, 32));
 
-        // Hiding spots — pews, confessionals, behind pillars.
-        AddHidingSpot(root, "Confessional", new Vector2(80, 80));
-        AddHidingSpot(root, "Behind Altar", new Vector2(400, 40));
-        AddHidingSpot(root, "Pew Alcove", new Vector2(700, 160));
-        AddHidingSpot(root, "Vestry Closet", new Vector2(920, 80));
+        // Hiding spots — pews, confessionals, behind pillars, side chapels, sacristy.
+        AddHidingSpot(root, "Confessional", new Vector2(160, 120));
+        AddHidingSpot(root, "Behind Altar", new Vector2(800, 60));
+        AddHidingSpot(root, "Pew Alcove", new Vector2(1400, 240));
+        AddHidingSpot(root, "Vestry Closet", new Vector2(2400, 120));
+        AddHidingSpot(root, "Side Chapel", new Vector2(400, 380));
+        AddHidingSpot(root, "Scriptorium Desk", new Vector2(2000, 120));
+        AddHidingSpot(root, "Choir Loft", new Vector2(1280, 440));
+        AddHidingSpot(root, "Clergy Quarters", new Vector2(600, 60));
+        AddHidingSpot(root, "Sacristy Cabinet", new Vector2(1800, 380));
 
-        // 4 nave guards — patrols with openings.
-        AddGuard(root, "NaveGuard1", new Vector2(300, 80), new Vector2[]
+        // 7 nave guards — patrols with openings along both aisles.
+        AddGuard(root, "NaveGuard1", new Vector2(500, 120), new Vector2[]
         {
-            new(0, 0), new(0, 180)
+            new(0, 0), new(0, 280)
         });
-        AddGuard(root, "NaveGuard2", new Vector2(700, 80), new Vector2[]
+        AddGuard(root, "NaveGuard2", new Vector2(1100, 120), new Vector2[]
         {
-            new(0, 0), new(0, 180)
+            new(0, 0), new(0, 280)
         });
-        AddGuard(root, "NaveGuard3", new Vector2(512, 300), new Vector2[]
+        AddGuard(root, "NaveGuard3", new Vector2(1700, 120), new Vector2[]
         {
-            new(-180, 0), new(180, 0)
+            new(0, 0), new(0, 280)
         });
-        AddGuard(root, "NaveGuard4", new Vector2(160, 192), new Vector2[]
+        AddGuard(root, "NaveGuard4", new Vector2(2300, 120), new Vector2[]
         {
-            new(0, -80), new(0, 80)
+            new(0, 0), new(0, 280)
+        });
+        AddGuard(root, "NaveGuard5", new Vector2(1280, 460), new Vector2[]
+        {
+            new(-400, 0), new(400, 0)
+        });
+        AddGuard(root, "NaveGuard6", new Vector2(320, 280), new Vector2[]
+        {
+            new(0, -120), new(0, 120)
+        });
+        AddGuard(root, "NaveGuard7", new Vector2(2240, 280), new Vector2[]
+        {
+            new(0, -120), new(0, 120)
         });
     }
 
@@ -230,31 +299,50 @@ public partial class ChapelLevel : MissionLevelBase
         MapBuilder.Build(root, RelicMap);
 
         // Area zone — full expanded relic chamber.
-        AddAreaZone(root, "Relic Chamber", new Vector2(512, 152), new Vector2(1024, 304),
+        AddAreaZone(root, "Relic Chamber", new Vector2(1280, 200), new Vector2(2560, 400),
             isRestricted: true);
 
-        // Heavy shadow underground — many dark alcoves.
+        // Heavy shadow underground — many dark alcoves across the catacombs.
         AddShadowZone(root, new Vector2(120, 24), new Vector2(32, 24));
-        AddShadowZone(root, new Vector2(120, 280), new Vector2(32, 24));
+        AddShadowZone(root, new Vector2(120, 360), new Vector2(32, 24));
         AddShadowZone(root, new Vector2(520, 24), new Vector2(32, 24));
-        AddShadowZone(root, new Vector2(520, 280), new Vector2(32, 24));
+        AddShadowZone(root, new Vector2(520, 360), new Vector2(32, 24));
         AddShadowZone(root, new Vector2(900, 24), new Vector2(32, 24));
-        AddShadowZone(root, new Vector2(900, 280), new Vector2(32, 24));
+        AddShadowZone(root, new Vector2(900, 360), new Vector2(32, 24));
+        AddShadowZone(root, new Vector2(1280, 100), new Vector2(40, 24));
+        AddShadowZone(root, new Vector2(1660, 24), new Vector2(32, 24));
+        AddShadowZone(root, new Vector2(1660, 360), new Vector2(32, 24));
+        AddShadowZone(root, new Vector2(2040, 24), new Vector2(32, 24));
+        AddShadowZone(root, new Vector2(2040, 360), new Vector2(32, 24));
+        AddShadowZone(root, new Vector2(2440, 24), new Vector2(32, 24));
+        AddShadowZone(root, new Vector2(2440, 360), new Vector2(32, 24));
 
-        // Hiding spots — sarcophagi and rubble piles.
-        AddHidingSpot(root, "Sarcophagus", new Vector2(80, 100));
-        AddHidingSpot(root, "Rubble Nook", new Vector2(400, 60));
-        AddHidingSpot(root, "Stone Column", new Vector2(700, 200));
-        AddHidingSpot(root, "Collapsed Wall", new Vector2(950, 100));
+        // Hiding spots — sarcophagi, rubble piles, burial niches, collapsed passages.
+        AddHidingSpot(root, "Sarcophagus", new Vector2(160, 140));
+        AddHidingSpot(root, "Rubble Nook", new Vector2(700, 80));
+        AddHidingSpot(root, "Stone Column", new Vector2(1400, 260));
+        AddHidingSpot(root, "Collapsed Wall", new Vector2(2360, 140));
+        AddHidingSpot(root, "Burial Niche", new Vector2(400, 300));
+        AddHidingSpot(root, "Bone Pile", new Vector2(1000, 200));
+        AddHidingSpot(root, "Fallen Archway", new Vector2(1800, 100));
+        AddHidingSpot(root, "Relic Pedestal", new Vector2(2100, 300));
 
-        // 2 elite guards protecting the relic.
-        AddGuard(root, "RelicGuard1", new Vector2(350, 100), new Vector2[]
+        // 4 elite guards protecting the relic across the expanded catacombs.
+        AddGuard(root, "RelicGuard1", new Vector2(600, 140), new Vector2[]
         {
-            new(0, -40), new(0, 80), new(100, 80), new(100, -40)
+            new(0, -60), new(0, 100), new(140, 100), new(140, -60)
         }, elite: true);
-        AddGuard(root, "RelicGuard2", new Vector2(700, 100), new Vector2[]
+        AddGuard(root, "RelicGuard2", new Vector2(1960, 140), new Vector2[]
         {
-            new(0, -40), new(0, 80)
+            new(0, -60), new(0, 100)
+        }, elite: true);
+        AddGuard(root, "RelicGuard3", new Vector2(1280, 320), new Vector2[]
+        {
+            new(-200, 0), new(200, 0)
+        }, elite: true);
+        AddGuard(root, "RelicGuard4", new Vector2(2300, 200), new Vector2[]
+        {
+            new(-100, -60), new(100, 60)
         }, elite: true);
 
         // Sister Blessing — praying near the relic in the center.
@@ -268,7 +356,7 @@ public partial class ChapelLevel : MissionLevelBase
     private void SpawnSisterBlessing(Node2D parent)
     {
         var blessing = new GuardEnemy { Name = "SisterBlessing" };
-        blessing.Position = new Vector2(512, 152);
+        blessing.Position = new Vector2(1280, 200);
         blessing.CollisionLayer = 1 << 2;
         blessing.CollisionMask = 1;
         blessing.MoveSpeed = 25f;

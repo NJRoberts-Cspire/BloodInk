@@ -38,6 +38,35 @@ public abstract partial class MissionLevelBase : Node2D
         CallDeferred(MethodName.ApplyPlayerSprite, player);
     }
 
+    // ─── Camera Limits ────────────────────────────────────────────
+
+    /// <summary>
+    /// Configure the player camera so it can't scroll past the map edges.
+    /// Call after SpawnPlayer(). Pass the world-space bounding box that
+    /// encompasses all zones of the level.
+    /// </summary>
+    protected void SetCameraLimits(int left, int top, int right, int bottom)
+    {
+        // The camera is a child of the player node which is a direct child of this level.
+        CallDeferred(MethodName.ApplyCameraLimits, left, top, right, bottom);
+    }
+
+    private void ApplyCameraLimits(int left, int top, int right, int bottom)
+    {
+        foreach (var child in GetChildren())
+        {
+            if (child is CharacterBody2D player && player.IsInGroup("Player"))
+            {
+                var cam = player.GetNodeOrNull<VFX.CameraShake>("Camera2D");
+                if (cam != null)
+                {
+                    cam.SetLimits(left, top, right, bottom);
+                    return;
+                }
+            }
+        }
+    }
+
     /// <summary>Apply placeholder sprite frames to the player.</summary>
     protected void ApplyPlayerSprite(CharacterBody2D player)
     {

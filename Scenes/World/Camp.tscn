@@ -7,22 +7,62 @@
 script = ExtResource("1")
 
 [node name="Ground" type="ColorRect" parent="."]
-offset_left = -320.0
-offset_top = -180.0
-offset_right = 320.0
-offset_bottom = 180.0
-color = Color(0.12, 0.15, 0.08, 1)
+offset_left = -640.0
+offset_top = -480.0
+offset_right = 640.0
+offset_bottom = 480.0
+color = Color(0.10, 0.13, 0.06, 1)
+
+[node name="ClearingGround" type="ColorRect" parent="."]
+offset_left = -200.0
+offset_top = -120.0
+offset_right = 200.0
+offset_bottom = 120.0
+color = Color(0.14, 0.17, 0.09, 1)
+
+[node name="StreamBed" type="ColorRect" parent="."]
+offset_left = 360.0
+offset_top = -300.0
+offset_right = 400.0
+offset_bottom = 300.0
+color = Color(0.12, 0.18, 0.25, 0.6)
+
+[node name="TrailNorth" type="ColorRect" parent="."]
+offset_left = -16.0
+offset_top = -480.0
+offset_right = 16.0
+offset_bottom = -120.0
+color = Color(0.18, 0.16, 0.10, 0.5)
+
+[node name="TrailSouth" type="ColorRect" parent="."]
+offset_left = -16.0
+offset_top = 120.0
+offset_right = 16.0
+offset_bottom = 480.0
+color = Color(0.18, 0.16, 0.10, 0.5)
 
 [node name="CampfireGlow" type="PointLight2D" parent="."]
 color = Color(0.9, 0.5, 0.15, 1)
 energy = 0.6
-texture_scale = 2.0
+texture_scale = 4.0
+
+[node name="CampfireGlow2" type="PointLight2D" parent="."]
+position = Vector2(-350, -200)
+color = Color(0.8, 0.4, 0.1, 1)
+energy = 0.3
+texture_scale = 1.5
+
+[node name="WatchpostLight" type="PointLight2D" parent="."]
+position = Vector2(0, -380)
+color = Color(0.7, 0.5, 0.2, 1)
+energy = 0.25
+texture_scale = 1.5
 
 [node name="SpawnPoint" type="Marker2D" parent="."]
-position = Vector2(0, 80)
+position = Vector2(0, 200)
 
 [node name="Needlewise" type="CharacterBody2D" parent="."]
-position = Vector2(-80, -40)
+position = Vector2(-350, -200)
 
 [node name="NeedlewiseSprite" type="AnimatedSprite2D" parent="Needlewise"]
 
@@ -36,7 +76,7 @@ ActionVerb = "Talk"
 [node name="NeedlewiseShape" type="CollisionShape2D" parent="Needlewise/NeedlewiseInteract"]
 
 [node name="Grael" type="CharacterBody2D" parent="."]
-position = Vector2(80, -30)
+position = Vector2(200, -60)
 
 [node name="GraelSprite" type="AnimatedSprite2D" parent="Grael"]
 
@@ -50,7 +90,7 @@ ActionVerb = "Talk"
 [node name="GraelShape" type="CollisionShape2D" parent="Grael/GraelInteract"]
 
 [node name="Rukh" type="CharacterBody2D" parent="."]
-position = Vector2(-100, 50)
+position = Vector2(-220, 160)
 
 [node name="RukhSprite" type="AnimatedSprite2D" parent="Rukh"]
 
@@ -64,7 +104,7 @@ ActionVerb = "Talk"
 [node name="RukhShape" type="CollisionShape2D" parent="Rukh/RukhInteract"]
 
 [node name="Senna" type="CharacterBody2D" parent="."]
-position = Vector2(100, 60)
+position = Vector2(280, 200)
 
 [node name="SennaSprite" type="AnimatedSprite2D" parent="Senna"]
 
@@ -77,16 +117,72 @@ ActionVerb = "Talk"
 
 [node name="SennaShape" type="CollisionShape2D" parent="Senna/SennaInteract"]
 
+[node name="Lorne" type="CharacterBody2D" parent="."]
+position = Vector2(-400, 80)
+
+[node name="LorneSprite" type="AnimatedSprite2D" parent="Lorne"]
+
+[node name="LorneInteract" type="Area2D" parent="Lorne"]
+collision_layer = 32
+collision_mask = 2
+script = ExtResource("2")
+DisplayName = "Lorne"
+ActionVerb = "Talk"
+
+[node name="LorneShape" type="CollisionShape2D" parent="Lorne/LorneInteract"]
+
 [node name="InkTent" type="Area2D" parent="."]
-position = Vector2(-80, -80)
+position = Vector2(-350, -200)
 collision_layer = 32
 collision_mask = 2
 
 [node name="InkTentShape" type="CollisionShape2D" parent="InkTent"]
 
 [node name="MissionBoard" type="Area2D" parent="."]
-position = Vector2(0, -80)
+position = Vector2(0, -300)
 collision_layer = 32
 collision_mask = 2
 
 [node name="MissionBoardShape" type="CollisionShape2D" parent="MissionBoard"]
+
+[node name="SupplyCache" type="ColorRect" parent="."]
+offset_left = 400.0
+offset_top = -80.0
+offset_right = 480.0
+offset_bottom = 0.0
+color = Color(0.2, 0.18, 0.12, 0.8)
+
+[node name="SleepingArea" type="ColorRect" parent="."]
+offset_left = -500.0
+offset_top = 40.0
+offset_right = -320.0
+offset_bottom = 160.0
+color = Color(0.15, 0.14, 0.10, 0.6)
+
+[node name="TrainingDummy" type="ColorRect" parent="."]
+offset_left = 440.0
+offset_top = 200.0
+offset_right = 470.0
+offset_bottom = 250.0
+color = Color(0.25, 0.20, 0.12, 0.9)
+
+[node name="LookoutRockNorth" type="ColorRect" parent="."]
+offset_left = -30.0
+offset_top = -420.0
+offset_right = 30.0
+offset_bottom = -380.0
+color = Color(0.22, 0.20, 0.18, 1)
+
+[node name="TreeLine_W" type="ColorRect" parent="."]
+offset_left = -640.0
+offset_top = -480.0
+offset_right = -560.0
+offset_bottom = 480.0
+color = Color(0.06, 0.10, 0.04, 0.8)
+
+[node name="TreeLine_E" type="ColorRect" parent="."]
+offset_left = 540.0
+offset_top = -480.0
+offset_right = 640.0
+offset_bottom = 480.0
+color = Color(0.06, 0.10, 0.04, 0.8)

@@ -52,9 +52,26 @@ public partial class TestWorld : Node2D
         AddWallVisual("WallLeft", new Color(0.2f, 0.2f, 0.22f));
         AddWallVisual("WallRight", new Color(0.2f, 0.2f, 0.22f));
 
-        // Add shadow zones for stealth testing.
-        AddShadowZone(new Vector2(-200, -80), new Vector2(80, 60));
-        AddShadowZone(new Vector2(150, 50), new Vector2(70, 70));
+        // Make pillars visible.
+        AddWallVisual("Pillar1", new Color(0.25f, 0.22f, 0.2f));
+        AddWallVisual("Pillar2", new Color(0.25f, 0.22f, 0.2f));
+        AddWallVisual("Pillar3", new Color(0.25f, 0.22f, 0.2f));
+        AddWallVisual("Pillar4", new Color(0.25f, 0.22f, 0.2f));
+
+        // Add shadow zones for stealth testing — spread across the larger arena.
+        AddShadowZone(new Vector2(-700, -350), new Vector2(120, 80));
+        AddShadowZone(new Vector2(580, -300), new Vector2(100, 100));
+        AddShadowZone(new Vector2(-500, 200), new Vector2(80, 80));
+        AddShadowZone(new Vector2(400, 300), new Vector2(100, 60));
+        AddShadowZone(new Vector2(-100, -200), new Vector2(60, 60));
+        AddShadowZone(new Vector2(700, 0), new Vector2(80, 80));
+
+        // Set camera limits to map bounds so we don't scroll past the walls.
+        if (player != null)
+        {
+            var cam = player.GetNodeOrNull<VFX.CameraShake>("Camera2D");
+            cam?.SetLimits(-960, -540, 960, 540);
+        }
     }
 
     private void AddWallVisual(string wallNodeName, Color color)

@@ -23,88 +23,104 @@ public partial class LaborCampLevel : MissionLevelBase
 {
     // ─── Map Layout ──────────────────────────────────────────────
 
-    // Quarry Yard — open area with tool shacks, wagons, shadow edges
+    // Quarry Yard — sprawling open area with tool shacks, wagons, captive pens, quarry pits, overseer platforms
     private static readonly string[] YardMap = {
-        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,~,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,~,,,,",
-        ",,,,,,,,,,,,,,,pppppppp,,,,,,,,pppppppp,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,,,pp......pp,,,,pp..........pp,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,,p..........p,,p..............p,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,p............pp................p,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,p..............................p,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,p................................p,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,p..................................p,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,p....................................p,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,p....................................p,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,p......................................p,,,,,,,,,,,,,,,,,",
-        ",,,,,,,p......................................p,,,,,,,,,,,,,,,,,",
-        ",,,,,,p........................................p,,,,,,,,,,,,,,,,",
-        ",,,,,,p........................................p,,,,,,,,,,,,,,,,",
-        ",,,,,,,p......................................p,,,,,,,,,,,,,,,,,",
-        ",,,,,,,p......................................p,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,p....................................p,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,p....................................p,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,p..................................p,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,p................................p,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,p..............................p,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,p............pp................p,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,,p..........p,,p..............p,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,,,pp......pp,,,,pp..........pp,,,,,,,,,,,,,,,,,,,,,,",
-        ",,,,,,,,,,,,,,,pppppppp,,,,,,,,pppppppp,,,,,,,,,,,,,,,,,,,,,,,,,",
-        ",,~,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,~,,,,",
-        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,~,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,~,,,,,,",
+        ",,,,,,,,,,,,,,,pppppppp,,,,,,,,pppppppp,,,,,,,,,,,,,,,,,,pppppppppppppppppp,,,,,,,,,,,,,,,,,,pppppppp,,,,,,,,pppppppp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,pp......pp,,,,pp..........pp,,,,,,,,,,,,ppp..................ppp,,,,,,,,,,,,,,pp......pp,,,,pp..........pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,p..........p,,p..............p,,,,,,,,,,pp......................pp,,,,,,,,,,,,p..........p,,p..............p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,p............pp................p,,,,,,,,pp........................pp,,,,,,,,,,p............pp................p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,p..............................p,,,,,,,,p..........................p,,,,,,,,,p..............................p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,p................................p,,,,,,p............................p,,,,,,,,p................................p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,p..................................p,,,,p..............................p,,,,,,p..................................p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,p....................................p,,p................................p,,,,p....................................p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,p....................................pppp................................pppp......................................p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,p.......................................................................................................p.........p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,p.......................................................................................................p.........p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,p........................................................................................................p..........p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,p........................................................................................................p..........p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,p.......................................................................................................p.........p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,p.......................................................................................................p.........p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,p....................................pppp................................pppp......................................p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,p....................................p,,p................................p,,,,p....................................p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,p..................................p,,,,p..............................p,,,,,,p..................................p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,p................................p,,,,,,p............................p,,,,,,,,p................................p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,p..............................p,,,,,,,,p..........................p,,,,,,,,,p..............................p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,p............pp................p,,,,,,,,pp........................pp,,,,,,,,,,p............pp................p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,p..........p,,p..............p,,,,,,,,,,pp......................pp,,,,,,,,,,,,p..........p,,p..............p,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,pp......pp,,,,pp..........pp,,,,,,,,,,,,ppp..................ppp,,,,,,,,,,,,,,pp......pp,,,,pp..........pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,pppppppp,,,,,,,,pppppppp,,,,,,,,,,,,,,,,,,pppppppppppppppppp,,,,,,,,,,,,,,,,,,pppppppp,,,,,,,,pppppppp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,~,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,~,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,~,,,,,,,,,,,,,,,,,,,,,~,,,,,,,,,,,,,,,,,,,,~,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,~,,,,,,,,,,,,,,,,,,,,~,,,,,,,,,,,,,,,,,,,,~,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
+        ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
     };
 
-    // Tunnel Passage — narrow corridors with hiding alcoves
+    // Tunnel Passage — extended mining network with alcoves, support beams, mine cart tracks, and intersections
     private static readonly string[] TunnelMap = {
-        "################################################################",
-        "#......~~#......#~~.........#......#~~.........#......~~........#",
-        "#........#......#..........#........#..........#...............#",
-        "#........#......#..........#........#..........#...............#",
-        "#........#......#..........#........#..........#...............#",
-        "#..............#...........#.................#.................#",
-        "#..............#...........#.................#.................#",
-        "#..............#...........#.................#.................#",
-        "#..............#...........#.................#.................#",
-        "#........#.....#..........#........#..........#...............#",
-        "#........#.....#..........#........#..........#...............#",
-        "#........#.....#..........#........#..........#...............#",
-        "#........#.....#..........#........#..........#...............#",
-        "#..............#...........#.................#.................#",
-        "#..............#...........#.................#.................#",
-        "#..............#...........#.................#.................#",
-        "#..............#...........#.................#.................#",
-        "#........#.....#..........#........#..........#...............#",
-        "#........#.....#..........#........#..........#...............#",
-        "#........#.....#..........#........#..........#...............#",
-        "#......~~#.....#~~.........#......~~#~~.........#......~~......#",
-        "################################################################",
+        "################################################################################################################################################################",
+        "#......~~#......#~~.........#......#~~.........#......~~........#......~~#......#~~.........#......#~~.........#......~~........#......~~#......#~~.........#......#",
+        "#........#......#..........#........#..........#...............#........#......#..........#........#..........#...............#........#......#..........#........#",
+        "#........#......#..........#........#..........#...............#........#......#..........#........#..........#...............#........#......#..........#........#",
+        "#........#......#..........#........#..........#...............#........#......#..........#........#..........#...............#........#......#..........#........#",
+        "#..............#...........#.................#.................#..............#...........#.................#.................#..............#...........#..........#",
+        "#..............#...........#.................#.................#..............#...........#.................#.................#..............#...........#..........#",
+        "#..............#...........#.................#.................#..............#...........#.................#.................#..............#...........#..........#",
+        "#..............#...........#.................#.................#..............#...........#.................#.................#..............#...........#..........#",
+        "#........#.....#..........#........#..........#...............#........#.....#..........#........#..........#...............#........#.....#..........#..........#",
+        "#........#.....#..........#........#..........#...............#........#.....#..........#........#..........#...............#........#.....#..........#..........#",
+        "#........#.....#..........#........#..........#...............#........#.....#..........#........#..........#...............#........#.....#..........#..........#",
+        "#........#.....#..........#........#..........#...............#........#.....#..........#........#..........#...............#........#.....#..........#..........#",
+        "#..............#...........#.................#.................#..............#...........#.................#.................#..............#...........#..........#",
+        "#..............#...........#.................#.................#..............#...........#.................#.................#..............#...........#..........#",
+        "#..............#...........#.................#.................#..............#...........#.................#.................#..............#...........#..........#",
+        "#..............#...........#.................#.................#..............#...........#.................#.................#..............#...........#..........#",
+        "#........#.....#..........#........#..........#...............#........#.....#..........#........#..........#...............#........#.....#..........#..........#",
+        "#........#.....#..........#........#..........#...............#........#.....#..........#........#..........#...............#........#.....#..........#..........#",
+        "#........#.....#..........#........#..........#...............#........#.....#..........#........#..........#...............#........#.....#..........#..........#",
+        "#..............#...........#.................#.................#..............#...........#.................#.................#..............#...........#..........#",
+        "#..............#...........#.................#.................#..............#...........#.................#.................#..............#...........#..........#",
+        "#........#.....#..........#........#..........#...............#........#.....#..........#........#..........#...............#........#.....#..........#..........#",
+        "#........#.....#..........#........#..........#...............#........#.....#..........#........#..........#...............#........#.....#..........#..........#",
+        "#......~~#.....#~~.........#......~~#~~.........#......~~......#......~~#.....#~~.........#......~~#~~.........#......~~......#......~~#.....#~~.........#......~~#",
+        "################################################################################################################################################################",
     };
 
-    // Maren's Office — walled compound with study and side rooms
+    // Maren's Office — expanded compound with study, trophy display, guard quarters, records room, storage
     private static readonly string[] OfficeMap = {
-        "################################################################",
-        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#",
-        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#",
-        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#",
-        "#wwwwwwww....cc....wwwwwwwwwwww#wwwwwwww....cc....wwwwwwwwwwww#",
-        "#wwwwwwww....cc....wwwwwwwwwwww.wwwwwwww....cc....wwwwwwwwwwww#",
-        "#wwwwwwww....cc....wwwwwwwwwwww.wwwwwwww....cc....wwwwwwwwwwww#",
-        "#wwwwwwww....cc....wwwwwwwwwwww#wwwwwwww....cc....wwwwwwwwwwww#",
-        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#",
-        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#",
-        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#",
-        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#",
-        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#",
-        "#wwwwwwww#cccccccc#~~wwwwwwwwww#wwwwwwww#cccccccc#~~wwwwwwwwww#",
-        "#wwwwwwww#cccccccc#~~wwwwwwwwww#wwwwwwww#cccccccc#~~wwwwwwwwww#",
-        "################################################################",
+        "################################################################################################################################################################",
+        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwwwwwww#",
+        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwwwwwww#",
+        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwwwwwww#",
+        "#wwwwwwww....cc....wwwwwwwwwwww#wwwwwwww....cc....wwwwwwwwwwww#wwwwwwww....cc....wwwwwwwwwwww#wwwwwwww....cc....wwwwwwwwwwww#wwwwwwww....cc....wwwwwwwwwwwwwwww#",
+        "#wwwwwwww....cc....wwwwwwwwwwww.wwwwwwww....cc....wwwwwwwwwwww.wwwwwwww....cc....wwwwwwwwwwww.wwwwwwww....cc....wwwwwwwwwwww.wwwwwwww....cc....wwwwwwwwwwwwwwww#",
+        "#wwwwwwww....cc....wwwwwwwwwwww.wwwwwwww....cc....wwwwwwwwwwww.wwwwwwww....cc....wwwwwwwwwwww.wwwwwwww....cc....wwwwwwwwwwww.wwwwwwww....cc....wwwwwwwwwwwwwwww#",
+        "#wwwwwwww....cc....wwwwwwwwwwww#wwwwwwww....cc....wwwwwwwwwwww#wwwwwwww....cc....wwwwwwwwwwww#wwwwwwww....cc....wwwwwwwwwwww#wwwwwwww....cc....wwwwwwwwwwwwwwww#",
+        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwwwwwww#",
+        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwwwwwww#",
+        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwwwwwww#",
+        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwwwwwww#",
+        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwwwwwww#",
+        "#wwwwwwww....cc....wwwwwwwwwwww#wwwwwwww....cc....wwwwwwwwwwww#wwwwwwww....cc....wwwwwwwwwwww#wwwwwwww....cc....wwwwwwwwwwww#wwwwwwww....cc....wwwwwwwwwwwwwwww#",
+        "#wwwwwwww....cc....wwwwwwwwwwww.wwwwwwww....cc....wwwwwwwwwwww.wwwwwwww....cc....wwwwwwwwwwww.wwwwwwww....cc....wwwwwwwwwwww.wwwwwwww....cc....wwwwwwwwwwwwwwww#",
+        "#wwwwwwww....cc....wwwwwwwwwwww#wwwwwwww....cc....wwwwwwwwwwww#wwwwwwww....cc....wwwwwwwwwwww#wwwwwwww....cc....wwwwwwwwwwww#wwwwwwww....cc....wwwwwwwwwwwwwwww#",
+        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwwwwwww#",
+        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwwwwwww#",
+        "#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwww#wwwwwwww#cccccccc#wwwwwwwwwwwwwwww#",
+        "#wwwwwwww#cccccccc#~~wwwwwwwwww#wwwwwwww#cccccccc#~~wwwwwwwwww#wwwwwwww#cccccccc#~~wwwwwwwwww#wwwwwwww#cccccccc#~~wwwwwwwwww#wwwwwwww#cccccccc#~~wwwwwwwwwwwwww#",
+        "#wwwwwwww#cccccccc#~~wwwwwwwwww#wwwwwwww#cccccccc#~~wwwwwwwwww#wwwwwwww#cccccccc#~~wwwwwwwwww#wwwwwwww#cccccccc#~~wwwwwwwwww#wwwwwwww#cccccccc#~~wwwwwwwwwwwwww#",
+        "################################################################################################################################################################",
     };
 
     // Zone offsets
-    private static readonly Vector2 YardOffset = new(0, 608);
+    private static readonly Vector2 YardOffset = new(0, 1056);
     private static readonly Vector2 TunnelOffset = new(0, 0);
-    private static readonly Vector2 OfficeOffset = new(0, -368);
+    private static readonly Vector2 OfficeOffset = new(0, -544);
 
     public override void _Ready()
     {
@@ -113,9 +129,12 @@ public partial class LaborCampLevel : MissionLevelBase
         BuildYard();
         BuildTunnels();
         BuildOffice();
-        SpawnPlayer(YardOffset + new Vector2(512, 380));
+        SpawnPlayer(YardOffset + new Vector2(1280, 480));
         SetupHUD();
         RegisterTargets();
+
+        // Camera bounds encompass all three zones (Office top → Yard bottom).
+        SetCameraLimits(0, -544, 2560, 1600);
 
         GD.Print("═══ LABOR CAMP LOADED ═══");
     }
@@ -133,39 +152,59 @@ public partial class LaborCampLevel : MissionLevelBase
         MapBuilder.Build(root, YardMap);
 
         // Area zone — full expanded yard.
-        AddAreaZone(root, "Quarry Yard", new Vector2(512, 224), new Vector2(1024, 448));
+        AddAreaZone(root, "Quarry Yard", new Vector2(1280, 272), new Vector2(2560, 544));
 
         // Shadow zones in the quarry corners and edges.
         AddShadowZone(root, new Vector2(40, 24), new Vector2(48, 40));
-        AddShadowZone(root, new Vector2(960, 24), new Vector2(48, 40));
-        AddShadowZone(root, new Vector2(40, 420), new Vector2(48, 40));
-        AddShadowZone(root, new Vector2(960, 420), new Vector2(48, 40));
-        AddShadowZone(root, new Vector2(300, 140), new Vector2(40, 32));
-        AddShadowZone(root, new Vector2(700, 140), new Vector2(40, 32));
+        AddShadowZone(root, new Vector2(2520, 24), new Vector2(48, 40));
+        AddShadowZone(root, new Vector2(40, 480), new Vector2(48, 40));
+        AddShadowZone(root, new Vector2(2520, 480), new Vector2(48, 40));
+        AddShadowZone(root, new Vector2(600, 180), new Vector2(40, 32));
+        AddShadowZone(root, new Vector2(1960, 180), new Vector2(40, 32));
+        AddShadowZone(root, new Vector2(1280, 140), new Vector2(40, 32));
+        AddShadowZone(root, new Vector2(800, 380), new Vector2(40, 32));
+        AddShadowZone(root, new Vector2(1760, 380), new Vector2(40, 32));
 
-        // Hiding spots — tool shacks, wagons, crates.
-        AddHidingSpot(root, "Tool Shack", new Vector2(120, 200));
-        AddHidingSpot(root, "Supply Wagon", new Vector2(880, 200));
-        AddHidingSpot(root, "Rock Pile", new Vector2(350, 100));
-        AddHidingSpot(root, "Ore Cart", new Vector2(650, 100));
-        AddHidingSpot(root, "Crate Stack", new Vector2(512, 320));
+        // Hiding spots — tool shacks, wagons, crates, quarry equipment.
+        AddHidingSpot(root, "Tool Shack", new Vector2(240, 260));
+        AddHidingSpot(root, "Supply Wagon", new Vector2(2320, 260));
+        AddHidingSpot(root, "Rock Pile", new Vector2(700, 140));
+        AddHidingSpot(root, "Ore Cart", new Vector2(1860, 140));
+        AddHidingSpot(root, "Crate Stack", new Vector2(1280, 400));
+        AddHidingSpot(root, "Captive Pen", new Vector2(480, 380));
+        AddHidingSpot(root, "Overseer Platform", new Vector2(1080, 200));
+        AddHidingSpot(root, "Crane Base", new Vector2(1480, 200));
+        AddHidingSpot(root, "Rubble Heap", new Vector2(2080, 380));
+        AddHidingSpot(root, "Quarry Ledge", new Vector2(400, 160));
 
-        // 4 yard patrol guards — wider patrols across the expanded yard.
-        AddGuard(root, "YardGuard1", new Vector2(300, 140), new Vector2[]
+        // 7 yard patrol guards — wider patrols across the expanded quarry.
+        AddGuard(root, "YardGuard1", new Vector2(600, 180), new Vector2[]
         {
-            new(0, 0), new(200, 0), new(200, 120), new(0, 120)
+            new(0, 0), new(300, 0), new(300, 160), new(0, 160)
         });
-        AddGuard(root, "YardGuard2", new Vector2(700, 140), new Vector2[]
+        AddGuard(root, "YardGuard2", new Vector2(1960, 180), new Vector2[]
         {
-            new(0, 0), new(-200, 0), new(-200, 120), new(0, 120)
+            new(0, 0), new(-300, 0), new(-300, 160), new(0, 160)
         });
-        AddGuard(root, "YardGuard3", new Vector2(512, 280), new Vector2[]
+        AddGuard(root, "YardGuard3", new Vector2(1280, 360), new Vector2[]
         {
-            new(-150, 0), new(150, 0)
+            new(-300, 0), new(300, 0)
         });
-        AddGuard(root, "YardGuard4", new Vector2(200, 320), new Vector2[]
+        AddGuard(root, "YardGuard4", new Vector2(400, 380), new Vector2[]
         {
-            new(0, 0), new(100, 0), new(100, 80), new(0, 80)
+            new(0, 0), new(160, 0), new(160, 100), new(0, 100)
+        });
+        AddGuard(root, "YardGuard5", new Vector2(2160, 380), new Vector2[]
+        {
+            new(0, 0), new(-160, 0), new(-160, 100), new(0, 100)
+        });
+        AddGuard(root, "YardGuard6", new Vector2(1000, 240), new Vector2[]
+        {
+            new(-100, 0), new(100, 0)
+        });
+        AddGuard(root, "YardGuard7", new Vector2(1560, 240), new Vector2[]
+        {
+            new(-100, 0), new(100, 0)
         });
     }
 
@@ -182,39 +221,62 @@ public partial class LaborCampLevel : MissionLevelBase
         MapBuilder.Build(root, TunnelMap);
 
         // Area zone — spans the full expanded tunnel network.
-        AddAreaZone(root, "Mining Tunnels", new Vector2(512, 176), new Vector2(1024, 352),
+        AddAreaZone(root, "Mining Tunnels", new Vector2(1280, 208), new Vector2(2560, 416),
             isRestricted: true);
 
-        // Shadow alcoves for stealth throughout the tunnels.
+        // Shadow alcoves for stealth throughout the expanded tunnels.
         AddShadowZone(root, new Vector2(120, 24), new Vector2(32, 24));
-        AddShadowZone(root, new Vector2(120, 320), new Vector2(32, 24));
+        AddShadowZone(root, new Vector2(120, 388), new Vector2(32, 24));
         AddShadowZone(root, new Vector2(520, 24), new Vector2(32, 24));
-        AddShadowZone(root, new Vector2(520, 320), new Vector2(32, 24));
+        AddShadowZone(root, new Vector2(520, 388), new Vector2(32, 24));
         AddShadowZone(root, new Vector2(900, 24), new Vector2(32, 24));
-        AddShadowZone(root, new Vector2(900, 320), new Vector2(32, 24));
+        AddShadowZone(root, new Vector2(900, 388), new Vector2(32, 24));
+        AddShadowZone(root, new Vector2(1280, 100), new Vector2(40, 24));
+        AddShadowZone(root, new Vector2(1660, 24), new Vector2(32, 24));
+        AddShadowZone(root, new Vector2(1660, 388), new Vector2(32, 24));
+        AddShadowZone(root, new Vector2(2040, 24), new Vector2(32, 24));
+        AddShadowZone(root, new Vector2(2040, 388), new Vector2(32, 24));
+        AddShadowZone(root, new Vector2(2440, 24), new Vector2(32, 24));
+        AddShadowZone(root, new Vector2(2440, 388), new Vector2(32, 24));
 
-        // Hiding spots — rubble and support beams throughout.
-        AddHidingSpot(root, "Rubble Pile", new Vector2(256, 176));
-        AddHidingSpot(root, "Support Beam", new Vector2(600, 80));
-        AddHidingSpot(root, "Collapsed Tunnel", new Vector2(850, 176));
-        AddHidingSpot(root, "Mine Cart", new Vector2(400, 280));
+        // Hiding spots — rubble, support beams, mine carts throughout the network.
+        AddHidingSpot(root, "Rubble Pile", new Vector2(400, 208));
+        AddHidingSpot(root, "Support Beam", new Vector2(900, 100));
+        AddHidingSpot(root, "Collapsed Tunnel", new Vector2(1600, 208));
+        AddHidingSpot(root, "Mine Cart", new Vector2(700, 350));
+        AddHidingSpot(root, "Ore Chute", new Vector2(1100, 100));
+        AddHidingSpot(root, "Tool Cache", new Vector2(1900, 340));
+        AddHidingSpot(root, "Rock Overhang", new Vector2(2200, 140));
+        AddHidingSpot(root, "Ventilation Shaft", new Vector2(1280, 300));
 
-        // 4 tunnel guards — patrols in the corridors leave windows for sneaking.
-        AddGuard(root, "TunnelGuard1", new Vector2(200, 80), new Vector2[]
+        // 7 tunnel guards — patrols in the corridors leave windows for sneaking.
+        AddGuard(root, "TunnelGuard1", new Vector2(380, 100), new Vector2[]
         {
-            new(0, 0), new(0, 160)
+            new(0, 0), new(0, 220)
         });
-        AddGuard(root, "TunnelGuard2", new Vector2(450, 120), new Vector2[]
+        AddGuard(root, "TunnelGuard2", new Vector2(800, 160), new Vector2[]
         {
-            new(0, 0), new(0, -60), new(80, -60), new(80, 0)
+            new(0, 0), new(0, -80), new(120, -80), new(120, 0)
         });
-        AddGuard(root, "TunnelGuard3", new Vector2(700, 80), new Vector2[]
+        AddGuard(root, "TunnelGuard3", new Vector2(1200, 100), new Vector2[]
         {
-            new(0, 0), new(0, 160)
+            new(0, 0), new(0, 220)
         });
-        AddGuard(root, "TunnelGuard4", new Vector2(900, 200), new Vector2[]
+        AddGuard(root, "TunnelGuard4", new Vector2(1600, 260), new Vector2[]
         {
-            new(0, 0), new(-100, 0), new(-100, 80), new(0, 80)
+            new(0, 0), new(-160, 0), new(-160, 100), new(0, 100)
+        });
+        AddGuard(root, "TunnelGuard5", new Vector2(2000, 100), new Vector2[]
+        {
+            new(0, 0), new(0, 200)
+        });
+        AddGuard(root, "TunnelGuard6", new Vector2(2400, 200), new Vector2[]
+        {
+            new(-120, 0), new(120, 0)
+        });
+        AddGuard(root, "TunnelGuard7", new Vector2(1280, 350), new Vector2[]
+        {
+            new(-200, 0), new(200, 0)
         });
     }
 
@@ -231,27 +293,43 @@ public partial class LaborCampLevel : MissionLevelBase
         MapBuilder.Build(root, OfficeMap);
 
         // Area zone — covers expanded office compound.
-        AddAreaZone(root, "Reeve Maren's Office", new Vector2(512, 128),
-            new Vector2(1024, 256), isRestricted: true);
+        AddAreaZone(root, "Reeve Maren's Office", new Vector2(1280, 176),
+            new Vector2(2560, 352), isRestricted: true);
 
-        // Shadow in corner storage rooms.
-        AddShadowZone(root, new Vector2(430, 216), new Vector2(32, 32));
-        AddShadowZone(root, new Vector2(940, 216), new Vector2(32, 32));
+        // Shadow in corner storage rooms and corridors.
+        AddShadowZone(root, new Vector2(430, 320), new Vector2(32, 32));
+        AddShadowZone(root, new Vector2(940, 320), new Vector2(32, 32));
         AddShadowZone(root, new Vector2(64, 32), new Vector2(40, 32));
+        AddShadowZone(root, new Vector2(1700, 320), new Vector2(32, 32));
+        AddShadowZone(root, new Vector2(2200, 320), new Vector2(32, 32));
+        AddShadowZone(root, new Vector2(2496, 32), new Vector2(40, 32));
+        AddShadowZone(root, new Vector2(1280, 120), new Vector2(40, 32));
 
-        // Hiding spots — filing cabinets and desk alcoves.
-        AddHidingSpot(root, "Filing Cabinet", new Vector2(80, 64));
-        AddHidingSpot(root, "Under Desk", new Vector2(600, 64));
-        AddHidingSpot(root, "Storage Closet", new Vector2(880, 128));
+        // Hiding spots — filing cabinets, desk alcoves, guard quarters, records room.
+        AddHidingSpot(root, "Filing Cabinet", new Vector2(160, 80));
+        AddHidingSpot(root, "Under Desk", new Vector2(1100, 80));
+        AddHidingSpot(root, "Storage Closet", new Vector2(2400, 176));
+        AddHidingSpot(root, "Records Room", new Vector2(600, 280));
+        AddHidingSpot(root, "Guard Quarters", new Vector2(1800, 80));
+        AddHidingSpot(root, "Trophy Alcove", new Vector2(1400, 280));
+        AddHidingSpot(root, "Supply Locker", new Vector2(2100, 280));
 
-        // 2 elite guards — one at each wing entrance.
-        AddGuard(root, "OfficeElite1", new Vector2(300, 100), new Vector2[]
+        // 4 elite guards — one at each wing entrance plus roaming.
+        AddGuard(root, "OfficeElite1", new Vector2(500, 140), new Vector2[]
         {
-            new(0, -40), new(0, 60)
+            new(0, -60), new(0, 80)
         }, elite: true);
-        AddGuard(root, "OfficeElite2", new Vector2(720, 100), new Vector2[]
+        AddGuard(root, "OfficeElite2", new Vector2(2060, 140), new Vector2[]
         {
-            new(0, -40), new(0, 60)
+            new(0, -60), new(0, 80)
+        }, elite: true);
+        AddGuard(root, "OfficeElite3", new Vector2(1280, 280), new Vector2[]
+        {
+            new(-200, 0), new(200, 0)
+        }, elite: true);
+        AddGuard(root, "OfficeElite4", new Vector2(1700, 80), new Vector2[]
+        {
+            new(-120, 0), new(120, 0)
         }, elite: true);
 
         // Reeve Maren — seated in the central carpeted study.
@@ -265,7 +343,7 @@ public partial class LaborCampLevel : MissionLevelBase
     private void SpawnReeveMaren(Node2D parent)
     {
         var maren = new GuardEnemy { Name = "ReeveMaren" };
-        maren.Position = new Vector2(512, 128);
+        maren.Position = new Vector2(1280, 176);
         maren.CollisionLayer = 1 << 2;
         maren.CollisionMask = 1;
         maren.MoveSpeed = 30f;

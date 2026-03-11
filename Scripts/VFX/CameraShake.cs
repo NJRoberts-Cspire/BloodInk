@@ -3,7 +3,8 @@ using Godot;
 namespace BloodInk.VFX;
 
 /// <summary>
-/// Camera shake system. Attach to a Camera2D (or access via singleton).
+/// Camera shake system with smooth scrolling, look-ahead, and map limits.
+/// Attach to a Camera2D that is a child of the player.
 /// Uses a trauma/decay model: add trauma on hits, trauma² drives shake intensity.
 /// </summary>
 public partial class CameraShake : Camera2D
@@ -20,14 +21,36 @@ public partial class CameraShake : Camera2D
     /// <summary>Noise frequency — higher = more jittery.</summary>
     [Export] public float NoiseSpeed { get; set; } = 30f;
 
+    // ─── Look-Ahead ──────────────────────────────────────────────
+
+    /// <summary>How far ahead (px) the camera leads in the player's movement direction.</summary>
+    [Export] public float LookAheadDistance { get; set; } = 40f;
+
+    /// <summary>How quickly the look-ahead offset catches up (higher = snappier).</summary>
+    [Export] public float LookAheadSmoothing { get; set; } = 3f;
+
     public static CameraShake? Instance { get; private set; }
 
     private float _trauma;
     private float _noiseY;
+    private Vector2 _lookAheadTarget;
+    private Vector2 _lookAheadCurrent;
 
     public override void _Ready()
     {
         Instance = this;
+
+        // Enable built-in smooth following so the camera glides toward the player.
+        PositionSmoothingEnabled = true;
+        PositionSmoothingSpeed = 5f;
+
+        // Drag margins give a slight dead-zone so micro-movements don't jitter.
+        DragHorizontalEnabled = true;
+        DragVerticalEnabled = true;
+        DragLeftMargin = 0.15f;
+        DragRightMargin = 0.15f;
+        DragTopMargin = 0.15f;
+        DragBottomMargin = 0.15f;
     }
 
     public override void _ExitTree()
@@ -37,27 +60,66 @@ public partial class CameraShake : Camera2D
 
     public override void _Process(double delta)
     {
-        if (_trauma <= 0)
+        float dt = (float)delta;
+
+        // ── Look-Ahead ──────────────────────────────────────────
+        var player = GetParentOrNull<CharacterBody2D>();
+        if (player != null)
         {
-            Offset = Vector2.Zero;
-            Rotation = 0;
-            return;
+            var vel = player.Velocity;
+            if (vel.LengthSquared() > 100f) // Moving meaningfully
+                _lookAheadTarget = vel.Normalized() * LookAheadDistance;
+            else
+                _lookAheadTarget = Vector2.Zero;
         }
 
-        _trauma = Mathf.Max(_trauma - TraumaDecayRate * (float)delta, 0);
+        _lookAheadCurrent = _lookAheadCurrent.Lerp(_lookAheadTarget, LookAheadSmoothing * dt);
 
-        _noiseY += NoiseSpeed * (float)delta;
-        float shake = _trauma * _trauma; // Quadratic falloff.
+        // ── Shake ───────────────────────────────────────────────
+        Vector2 shakeOffset = Vector2.Zero;
+        float shakeRot = 0f;
 
-        Offset = new Vector2(
-            MaxOffset * shake * (float)(Mathf.Sin(_noiseY * 1.3f + 0.7f)),
-            MaxOffset * shake * (float)(Mathf.Cos(_noiseY * 1.7f + 1.1f))
-        );
+        if (_trauma > 0)
+        {
+            _trauma = Mathf.Max(_trauma - TraumaDecayRate * dt, 0);
+            _noiseY += NoiseSpeed * dt;
+            float shake = _trauma * _trauma;
 
-        Rotation = Mathf.DegToRad(MaxRoll * shake * (float)Mathf.Sin(_noiseY * 2.3f));
+            shakeOffset = new Vector2(
+                MaxOffset * shake * Mathf.Sin(_noiseY * 1.3f + 0.7f),
+                MaxOffset * shake * Mathf.Cos(_noiseY * 1.7f + 1.1f)
+            );
+            shakeRot = Mathf.DegToRad(MaxRoll * shake * Mathf.Sin(_noiseY * 2.3f));
+        }
+
+        Offset = _lookAheadCurrent + shakeOffset;
+        Rotation = shakeRot;
     }
 
-    // ─── Public API ───────────────────────────────────────────────
+    // ─── Camera Limits ────────────────────────────────────────────
+
+    /// <summary>
+    /// Set the camera's world-space bounding limits so it won't scroll past
+    /// the edges of the map. Call this from the level script after building.
+    /// </summary>
+    public void SetLimits(int left, int top, int right, int bottom)
+    {
+        LimitLeft = left;
+        LimitTop = top;
+        LimitRight = right;
+        LimitBottom = bottom;
+        LimitSmoothed = true; // Smoothly approach the limit instead of hard-clamping.
+    }
+
+    /// <summary>Convenience overload using a Rect2I.</summary>
+    public void SetLimits(Rect2I bounds)
+    {
+        SetLimits(bounds.Position.X, bounds.Position.Y,
+                  bounds.Position.X + bounds.Size.X,
+                  bounds.Position.Y + bounds.Size.Y);
+    }
+
+    // ─── Public Shake API ─────────────────────────────────────────
 
     /// <summary>Add trauma (0-1). Values are clamped and stack additively.</summary>
     public void AddTrauma(float amount)

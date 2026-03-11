@@ -6,4 +6,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+  <!-- Exclude addon C# files that have incompatible code / their own project structure -->
+  <ItemGroup>
+    <Compile Remove="addons/phantom_camera/**/*.cs" />
+    <Compile Remove="addons/gdUnit4/**/*.cs" />
+    <Compile Remove="addons/event_audio/**/*.cs" />
+  </ItemGroup>
 </Project>

@@ -23,81 +23,108 @@ public partial class BarracksLevel : MissionLevelBase
 {
     // ─── Map Layout ──────────────────────────────────────────────
 
-    // Training Yard — open ground with weapon racks, stone border
+    // Training Yard — ~160 wide × 40 tall — sprawling drill grounds with
+    // weapon racks, supply wagons, archery range, stables, and stone perimeter.
     private static readonly string[] YardMap = {
-        "################################################################",
-        "#pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp#",
-        "#pp,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pp#",
-        "#pp,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pp#",
-        "#pp,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pp#",
-        "#pp,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pp#",
-        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
-        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
-        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
-        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
-        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
-        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
-        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
-        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
-        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
-        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
-        "#pp,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pp#",
-        "#pp,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pp#",
-        "#pp,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pp#",
-        "#pp,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pp#",
-        "#pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp#",
-        "#pppppppppppppppppppppppppp....pppppppppppppppppppppppppppppppp#",
-        "################################################################",
+        "################################################################################################################################################################",
+        "#pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp#",
+        "#pp,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pp#",
+        "#pp,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pp#",
+        "#pp,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pp#",
+        "#pp,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,pp#",
+        "#pp,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pp#",
+        "#pp,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pp#",
+        "#pp,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pp#",
+        "#pp,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,,,,,,,pppppppppppp,,,,,,,,pppppppppp,,pp#",
+        "#pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp#",
+        "#pppppppppppppppppppppppppppppppppppppppppppppppp....pppppppppppppppppppppppppppppp....pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp#",
+        "################################################################################################################################################################",
     };
 
-    // Barracks Interior — bunks, mess hall, corridors
+    // Barracks Interior — ~160 wide × 40 tall — bunks, mess hall, armory,
+    // kitchen, latrines, officer lounge, supply rooms, narrow corridors.
     private static readonly string[] InteriorMap = {
-        "################################################################",
-        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#",
-        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#",
-        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#",
-        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#",
-        "#wwwww.............................................wwwwwwwwww#",
-        "#wwwww.............................................wwwwwwwwww#",
-        "#wwwww.............................................wwwwwwwwww#",
-        "#wwwww.............................................wwwwwwwwww#",
-        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#",
-        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#",
-        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#",
-        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#",
-        "#wwwww.............................................wwwwwwwwww#",
-        "#wwwww.............................................wwwwwwwwww#",
-        "#wwwww.............................................wwwwwwwwww#",
-        "#wwwww.............................................wwwwwwwwww#",
-        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#",
-        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#",
-        "#wwwww#..~~..#..~~..#wwwwwwwww#wwwww#..~~..#..~~..#wwwwwwwwww#",
-        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#",
-        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#",
-        "################################################################",
+        "################################################################################################################################################################",
+        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#",
+        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#",
+        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#",
+        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#",
+        "#wwwww.............................................wwwwwwwwww#wwwww.............................................wwwwwwwwww#wwwww...........................wwwwwwwww#",
+        "#wwwww.............................................wwwwwwwwww#wwwww.............................................wwwwwwwwww#wwwww...........................wwwwwwwww#",
+        "#wwwww.............................................wwwwwwwwww#wwwww.............................................wwwwwwwwww#wwwww...........................wwwwwwwww#",
+        "#wwwww.............................................wwwwwwwwww#wwwww.............................................wwwwwwwwww#wwwww...........................wwwwwwwww#",
+        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#",
+        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#",
+        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#",
+        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#",
+        "#wwwww.............................................wwwwwwwwww#wwwww.............................................wwwwwwwwww#wwwww...........................wwwwwwwww#",
+        "#wwwww.............................................wwwwwwwwww#wwwww.............................................wwwwwwwwww#wwwww...........................wwwwwwwww#",
+        "#wwwww.............................................wwwwwwwwww#wwwww.............................................wwwwwwwwww#wwwww...........................wwwwwwwww#",
+        "#wwwww.............................................wwwwwwwwww#wwwww.............................................wwwwwwwwww#wwwww...........................wwwwwwwww#",
+        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#",
+        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#",
+        "#wwwww#..~~..#..~~..#wwwwwwwww#wwwww#..~~..#..~~..#wwwwwwwwww#wwwww#..~~..#..~~..#wwwwwwwww#wwwww#..~~..#..~~..#wwwwwwwwww#wwwww#..~~..#..~~..#wwwwwwwww#",
+        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#",
+        "#wwwww.............................................wwwwwwwwww#wwwww.............................................wwwwwwwwww#wwwww...........................wwwwwwwww#",
+        "#wwwww.............................................wwwwwwwwww#wwwww.............................................wwwwwwwwww#wwwww...........................wwwwwwwww#",
+        "#wwwww.............................................wwwwwwwwww#wwwww.............................................wwwwwwwwww#wwwww...........................wwwwwwwww#",
+        "#wwwww.............................................wwwwwwwwww#wwwww.............................................wwwwwwwwww#wwwww...........................wwwwwwwww#",
+        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#",
+        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#",
+        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#",
+        "#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#wwwww#......#......#wwwwwwwwww#wwwww#......#......#wwwwwwwww#",
+        "################################################################################################################################################################",
     };
 
-    // Trophy Room — Captain Thorne's private sanctum
+    // Trophy Room — ~160 wide × 28 tall — Captain Thorne's private sanctum with
+    // display cases, war trophies, private dining room, study, and armory.
     private static readonly string[] TrophyMap = {
-        "################################################################",
-        "#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#",
-        "#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#",
-        "#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#",
-        "#cccccccccccc#....#cccccccccccc#cccccccccccc#....#cccccccccccc#",
-        "#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#",
-        "#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#",
-        "#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#",
-        "#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#",
-        "#cccccccccccc#....#cccccccccccc#cccccccccccc#....#cccccccccccc#",
-        "#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#",
-        "#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#",
-        "#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#",
-        "################################################################",
+        "################################################################################################################################################################",
+        "#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#",
+        "#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#",
+        "#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#",
+        "#cccccccccccc#....#cccccccccccc#cccccccccccc#....#cccccccccccc#cccccccccccc#....#cccccccccccc#cccccccccccc#....#cccccccccccc#cccccccccccc#....#cccccccccccc#",
+        "#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#cccccccccccc......cccccccccccc#",
+        "#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#cccccccccccc......cccccccccccc#",
+        "#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#cccccccccccc......cccccccccccc#",
+        "#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#cccccccccccc......cccccccccccc#",
+        "#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#",
+        "#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#",
+        "#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#",
+        "#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#",
+        "#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#cccccccccccc......cccccccccccc#",
+        "#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#cccccccccccc......cccccccccccc#",
+        "#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#cccccccccccc......cccccccccccc#",
+        "#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#cccccccccccc......cccccccccccc.cccccccccccc......cccccccccccc#cccccccccccc......cccccccccccc#",
+        "#cccccccccccc#....#cccccccccccc#cccccccccccc#....#cccccccccccc#cccccccccccc#....#cccccccccccc#cccccccccccc#....#cccccccccccc#cccccccccccc#....#cccccccccccc#",
+        "#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#",
+        "#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#",
+        "#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#cccccccccccc#~~~~#cccccccccccc#",
+        "################################################################################################################################################################",
     };
 
-    private static readonly Vector2 YardOffset = new(0, 624);
+    private static readonly Vector2 YardOffset = new(0, 1008);
     private static readonly Vector2 InteriorOffset = new(0, 0);
-    private static readonly Vector2 TrophyOffset = new(0, -384);
+    private static readonly Vector2 TrophyOffset = new(0, -640);
 
     public override void _Ready()
     {
@@ -106,9 +133,12 @@ public partial class BarracksLevel : MissionLevelBase
         BuildYard();
         BuildInterior();
         BuildTrophyRoom();
-        SpawnPlayer(YardOffset + new Vector2(512, 320));
+        SpawnPlayer(YardOffset + new Vector2(1280, 420));
         SetupHUD();
         RegisterTargets();
+
+        // Camera bounds encompass all three zones (Trophy top → Yard bottom).
+        SetCameraLimits(0, -640, 2560, 1520);
 
         GD.Print("═══ BARRACKS LOADED ═══");
     }
@@ -126,42 +156,60 @@ public partial class BarracksLevel : MissionLevelBase
         MapBuilder.Build(root, YardMap);
 
         // Area zone — full expanded yard.
-        AddAreaZone(root, "Training Yard", new Vector2(512, 184), new Vector2(1024, 368));
+        AddAreaZone(root, "Training Yard", new Vector2(1280, 264), new Vector2(2560, 528));
 
-        // Shadow behind the equipment racks.
-        AddShadowZone(root, new Vector2(56, 56), new Vector2(32, 48));
-        AddShadowZone(root, new Vector2(960, 56), new Vector2(32, 48));
-        AddShadowZone(root, new Vector2(56, 280), new Vector2(32, 48));
-        AddShadowZone(root, new Vector2(960, 280), new Vector2(32, 48));
-        AddShadowZone(root, new Vector2(400, 160), new Vector2(32, 32));
+        // Shadow behind the equipment racks and stables.
+        AddShadowZone(root, new Vector2(96, 80), new Vector2(48, 64));
+        AddShadowZone(root, new Vector2(2464, 80), new Vector2(48, 64));
+        AddShadowZone(root, new Vector2(96, 420), new Vector2(48, 64));
+        AddShadowZone(root, new Vector2(2464, 420), new Vector2(48, 64));
+        AddShadowZone(root, new Vector2(800, 220), new Vector2(40, 40));
+        AddShadowZone(root, new Vector2(1760, 220), new Vector2(40, 40));
+        AddShadowZone(root, new Vector2(1280, 100), new Vector2(48, 40));
 
-        // Hiding spots — weapon racks, crates, training dummies.
-        AddHidingSpot(root, "Weapon Rack", new Vector2(80, 120));
-        AddHidingSpot(root, "Supply Crates", new Vector2(920, 120));
-        AddHidingSpot(root, "Training Dummy", new Vector2(350, 200));
-        AddHidingSpot(root, "Equipment Shed", new Vector2(650, 200));
-        AddHidingSpot(root, "Hay Bales", new Vector2(200, 300));
+        // Hiding spots — weapon racks, crates, training dummies, stables.
+        AddHidingSpot(root, "Weapon Rack", new Vector2(160, 160));
+        AddHidingSpot(root, "Supply Crates", new Vector2(2400, 160));
+        AddHidingSpot(root, "Training Dummy", new Vector2(600, 300));
+        AddHidingSpot(root, "Equipment Shed", new Vector2(1800, 300));
+        AddHidingSpot(root, "Hay Bales", new Vector2(400, 420));
+        AddHidingSpot(root, "Archery Range Cover", new Vector2(1000, 200));
+        AddHidingSpot(root, "Stable Stall", new Vector2(1600, 200));
+        AddHidingSpot(root, "Siege Engine", new Vector2(1280, 360));
+        AddHidingSpot(root, "Watchtower Base", new Vector2(2200, 420));
 
-        // 5 guards patrolling the open yard — the most dangerous zone.
-        AddGuard(root, "YardGuard1", new Vector2(200, 100), new Vector2[]
+        // 8 guards patrolling the open yard — the most dangerous zone.
+        AddGuard(root, "YardGuard1", new Vector2(400, 140), new Vector2[]
         {
-            new(0, 0), new(180, 0), new(180, 100), new(0, 100)
+            new(0, 0), new(300, 0), new(300, 160), new(0, 160)
         });
-        AddGuard(root, "YardGuard2", new Vector2(700, 100), new Vector2[]
+        AddGuard(root, "YardGuard2", new Vector2(2160, 140), new Vector2[]
         {
-            new(0, 0), new(-180, 0), new(-180, 100), new(0, 100)
+            new(0, 0), new(-300, 0), new(-300, 160), new(0, 160)
         });
-        AddGuard(root, "YardGuard3", new Vector2(512, 260), new Vector2[]
+        AddGuard(root, "YardGuard3", new Vector2(1280, 400), new Vector2[]
         {
-            new(-200, 0), new(200, 0)
+            new(-400, 0), new(400, 0)
         });
-        AddGuard(root, "YardGuard4", new Vector2(320, 180), new Vector2[]
+        AddGuard(root, "YardGuard4", new Vector2(640, 260), new Vector2[]
         {
-            new(0, 0), new(0, 80), new(80, 80), new(80, 0)
+            new(0, 0), new(0, 120), new(120, 120), new(120, 0)
         });
-        AddGuard(root, "YardGuard5", new Vector2(800, 180), new Vector2[]
+        AddGuard(root, "YardGuard5", new Vector2(1920, 260), new Vector2[]
         {
-            new(0, 0), new(-100, 0), new(-100, -60), new(0, -60)
+            new(0, 0), new(-150, 0), new(-150, -80), new(0, -80)
+        });
+        AddGuard(root, "YardGuard6", new Vector2(1000, 160), new Vector2[]
+        {
+            new(0, 0), new(200, 0), new(200, 140), new(0, 140)
+        });
+        AddGuard(root, "YardGuard7", new Vector2(1560, 160), new Vector2[]
+        {
+            new(0, 0), new(-200, 0), new(-200, 140), new(0, 140)
+        });
+        AddGuard(root, "YardGuard8", new Vector2(1280, 200), new Vector2[]
+        {
+            new(-120, 0), new(120, 0)
         });
     }
 
@@ -178,43 +226,61 @@ public partial class BarracksLevel : MissionLevelBase
         MapBuilder.Build(root, InteriorMap);
 
         // Area zone — full expanded interior.
-        AddAreaZone(root, "Barracks", new Vector2(512, 184), new Vector2(1024, 368),
+        AddAreaZone(root, "Barracks", new Vector2(1280, 240), new Vector2(2560, 480),
             isRestricted: true);
 
-        // Shadow in bunk corners.
-        AddShadowZone(root, new Vector2(120, 312), new Vector2(24, 24));
-        AddShadowZone(root, new Vector2(288, 312), new Vector2(24, 24));
-        AddShadowZone(root, new Vector2(620, 312), new Vector2(24, 24));
-        AddShadowZone(root, new Vector2(788, 312), new Vector2(24, 24));
-        AddShadowZone(root, new Vector2(512, 100), new Vector2(32, 24));
+        // Shadow in bunk corners and corridors.
+        AddShadowZone(root, new Vector2(200, 480), new Vector2(32, 32));
+        AddShadowZone(root, new Vector2(500, 480), new Vector2(32, 32));
+        AddShadowZone(root, new Vector2(1100, 480), new Vector2(32, 32));
+        AddShadowZone(root, new Vector2(1460, 480), new Vector2(32, 32));
+        AddShadowZone(root, new Vector2(1280, 140), new Vector2(40, 32));
+        AddShadowZone(root, new Vector2(2000, 240), new Vector2(32, 32));
+        AddShadowZone(root, new Vector2(600, 240), new Vector2(32, 32));
 
-        // Hiding spots — under bunks and in supply rooms.
-        AddHidingSpot(root, "Under Bunks", new Vector2(80, 80));
-        AddHidingSpot(root, "Supply Room", new Vector2(900, 184));
-        AddHidingSpot(root, "Mess Table", new Vector2(400, 280));
-        AddHidingSpot(root, "Locker Room", new Vector2(700, 80));
-        AddHidingSpot(root, "Behind Barrels", new Vector2(250, 184));
+        // Hiding spots — under bunks, supply rooms, kitchen, armory.
+        AddHidingSpot(root, "Under Bunks", new Vector2(160, 120));
+        AddHidingSpot(root, "Supply Room", new Vector2(2400, 240));
+        AddHidingSpot(root, "Mess Table", new Vector2(800, 380));
+        AddHidingSpot(root, "Locker Room", new Vector2(1600, 120));
+        AddHidingSpot(root, "Behind Barrels", new Vector2(500, 240));
+        AddHidingSpot(root, "Kitchen Pantry", new Vector2(1000, 120));
+        AddHidingSpot(root, "Armory Rack", new Vector2(2100, 120));
+        AddHidingSpot(root, "Latrine Stall", new Vector2(300, 380));
+        AddHidingSpot(root, "Officer Lounge", new Vector2(1900, 380));
 
-        // 5 interior guards — 3 patrol, 2 elite standing.
-        AddGuard(root, "BunkGuard1", new Vector2(200, 80), new Vector2[]
+        // 8 interior guards — 5 patrol, 3 elite standing.
+        AddGuard(root, "BunkGuard1", new Vector2(400, 120), new Vector2[]
         {
-            new(0, 0), new(0, 140), new(120, 140), new(120, 0)
+            new(0, 0), new(0, 200), new(200, 200), new(200, 0)
         });
-        AddGuard(root, "BunkGuard2", new Vector2(700, 80), new Vector2[]
+        AddGuard(root, "BunkGuard2", new Vector2(2160, 120), new Vector2[]
         {
-            new(0, 0), new(0, 140), new(-120, 140), new(-120, 0)
+            new(0, 0), new(0, 200), new(-200, 200), new(-200, 0)
         });
-        AddGuard(root, "BunkGuard3", new Vector2(512, 260), new Vector2[]
+        AddGuard(root, "BunkGuard3", new Vector2(1280, 380), new Vector2[]
         {
-            new(-150, 0), new(150, 0)
+            new(-300, 0), new(300, 0)
         });
-        AddGuard(root, "CorridorElite1", new Vector2(350, 100), new Vector2[]
+        AddGuard(root, "BunkGuard4", new Vector2(800, 240), new Vector2[]
         {
-            new(-80, 0), new(80, 0)
+            new(0, -100), new(0, 100)
+        });
+        AddGuard(root, "BunkGuard5", new Vector2(1760, 240), new Vector2[]
+        {
+            new(0, -100), new(0, 100)
+        });
+        AddGuard(root, "CorridorElite1", new Vector2(600, 160), new Vector2[]
+        {
+            new(-120, 0), new(120, 0)
         }, elite: true);
-        AddGuard(root, "CorridorElite2", new Vector2(750, 260), new Vector2[]
+        AddGuard(root, "CorridorElite2", new Vector2(1960, 380), new Vector2[]
         {
-            new(-80, 0), new(80, 0)
+            new(-120, 0), new(120, 0)
+        }, elite: true);
+        AddGuard(root, "CorridorElite3", new Vector2(1280, 160), new Vector2[]
+        {
+            new(-100, 0), new(100, 0)
         }, elite: true);
     }
 
@@ -231,34 +297,47 @@ public partial class BarracksLevel : MissionLevelBase
         MapBuilder.Build(root, TrophyMap);
 
         // Area zone — full expanded trophy room.
-        AddAreaZone(root, "Trophy Room", new Vector2(512, 112), new Vector2(1024, 224),
+        AddAreaZone(root, "Trophy Room", new Vector2(1280, 176), new Vector2(2560, 352),
             isRestricted: true);
 
         // Heavy shadow around the trophies.
-        AddShadowZone(root, new Vector2(224, 24), new Vector2(64, 32));
-        AddShadowZone(root, new Vector2(736, 24), new Vector2(64, 32));
-        AddShadowZone(root, new Vector2(224, 176), new Vector2(64, 32));
-        AddShadowZone(root, new Vector2(736, 176), new Vector2(64, 32));
-        AddShadowZone(root, new Vector2(480, 100), new Vector2(48, 32));
+        AddShadowZone(root, new Vector2(400, 40), new Vector2(80, 40));
+        AddShadowZone(root, new Vector2(2160, 40), new Vector2(80, 40));
+        AddShadowZone(root, new Vector2(400, 280), new Vector2(80, 40));
+        AddShadowZone(root, new Vector2(2160, 280), new Vector2(80, 40));
+        AddShadowZone(root, new Vector2(1200, 160), new Vector2(64, 40));
+        AddShadowZone(root, new Vector2(800, 100), new Vector2(48, 40));
+        AddShadowZone(root, new Vector2(1760, 100), new Vector2(48, 40));
 
-        // Hiding spots — trophy cases and tapestries.
-        AddHidingSpot(root, "Trophy Case", new Vector2(80, 112));
-        AddHidingSpot(root, "Tapestry", new Vector2(920, 112));
-        AddHidingSpot(root, "Weapon Display", new Vector2(350, 40));
-        AddHidingSpot(root, "Dark Alcove", new Vector2(700, 180));
+        // Hiding spots — trophy cases, tapestries, weapon display, private study.
+        AddHidingSpot(root, "Trophy Case", new Vector2(160, 176));
+        AddHidingSpot(root, "Tapestry", new Vector2(2400, 176));
+        AddHidingSpot(root, "Weapon Display", new Vector2(600, 60));
+        AddHidingSpot(root, "Dark Alcove", new Vector2(1960, 280));
+        AddHidingSpot(root, "Private Study Desk", new Vector2(1000, 60));
+        AddHidingSpot(root, "War Banner", new Vector2(1560, 60));
+        AddHidingSpot(root, "Armor Stand", new Vector2(800, 280));
 
-        // 3 elite bodyguards — the toughest protection in the game.
-        AddGuard(root, "Bodyguard1", new Vector2(280, 112), new Vector2[]
+        // 5 elite bodyguards — the toughest protection in the game.
+        AddGuard(root, "Bodyguard1", new Vector2(500, 176), new Vector2[]
         {
-            new(0, -50), new(0, 50)
+            new(0, -80), new(0, 80)
         }, elite: true);
-        AddGuard(root, "Bodyguard2", new Vector2(740, 112), new Vector2[]
+        AddGuard(root, "Bodyguard2", new Vector2(2060, 176), new Vector2[]
         {
-            new(0, -50), new(0, 50)
+            new(0, -80), new(0, 80)
         }, elite: true);
-        AddGuard(root, "Bodyguard3", new Vector2(512, 60), new Vector2[]
+        AddGuard(root, "Bodyguard3", new Vector2(1280, 80), new Vector2[]
         {
-            new(-100, 0), new(100, 0)
+            new(-200, 0), new(200, 0)
+        }, elite: true);
+        AddGuard(root, "Bodyguard4", new Vector2(800, 120), new Vector2[]
+        {
+            new(0, -60), new(0, 60)
+        }, elite: true);
+        AddGuard(root, "Bodyguard5", new Vector2(1760, 120), new Vector2[]
+        {
+            new(0, -60), new(0, 60)
         }, elite: true);
 
         // Captain Thorne is the big-bad of the Barracks.
@@ -272,7 +351,7 @@ public partial class BarracksLevel : MissionLevelBase
     private void SpawnCaptainThorne(Node2D parent)
     {
         var thorne = new GuardEnemy { Name = "CaptainThorne" };
-        thorne.Position = new Vector2(512, 112);
+        thorne.Position = new Vector2(1280, 176);
         thorne.CollisionLayer = 1 << 2;
         thorne.CollisionMask = 1;
         thorne.MoveSpeed = 40f;

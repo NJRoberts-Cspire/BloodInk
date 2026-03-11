@@ -3,6 +3,7 @@ using BloodInk.Content;
 using BloodInk.Core;
 using BloodInk.Interaction;
 using BloodInk.Tools;
+using BloodInk.VFX;
 
 namespace BloodInk.World;
 
@@ -66,6 +67,16 @@ public partial class CampScene : Node2D
         else
             _player.Position = new Vector2(0, 80);
         AddChild(_player);
+
+        // Set camera limits to the camp bounds (-640,-480 to 640,480).
+        CallDeferred(nameof(ApplyCampCameraLimits));
+    }
+
+    private void ApplyCampCameraLimits()
+    {
+        if (_player == null) return;
+        var cam = _player.GetNodeOrNull<VFX.CameraShake>("Camera2D");
+        cam?.SetLimits(-640, -480, 640, 480);
     }
 
     private void SpawnHUD()
