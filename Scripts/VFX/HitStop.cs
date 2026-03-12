@@ -22,6 +22,9 @@ public partial class HitStop : Node
     public override void _ExitTree()
     {
         if (Instance == this) Instance = null;
+        // Restore time scale to prevent permanent freeze if freed mid-freeze.
+        Engine.TimeScale = 1.0;
+        _frozen = false;
     }
 
     /// <summary>Freeze the game for the given duration in seconds.</summary>
@@ -30,7 +33,16 @@ public partial class HitStop : Node
         if (_frozen) return;
         _frozen = true;
         Engine.TimeScale = 0.05; // Near-stop instead of full stop (feels better).
-        GetTree().CreateTimer(duration, true, false, true).Timeout += Unfreeze;
+
+        // Capture a weak reference so the timer callback is safe if this node is freed.
+        var self = GodotObject.WeakRef(this);
+        GetTree().CreateTimer(duration, true, false, true).Timeout += () =>
+        {
+            var resolved = self?.GetRef();
+            var obj = resolved?.As<HitStop>();
+            if (obj != null && IsInstanceValid(obj))
+                obj.Unfreeze();
+        };
     }
 
     private void Unfreeze()

@@ -211,12 +211,13 @@ public partial class MissionBoard : Interactable
 
     private void DeployToMission(string scenePath)
     {
-        // Small delay to let dialogue close.
-        var timer = GetTree().CreateTimer(0.5f);
+        // Capture tree reference before timer to avoid ObjectDisposedException if node freed.
+        var tree = GetTree();
+        var timer = tree.CreateTimer(0.5f);
         timer.Timeout += () =>
         {
             GD.Print($"Deploying to {scenePath}...");
-            GetTree().ChangeSceneToFile(scenePath);
+            tree.ChangeSceneToFile(scenePath);
         };
     }
 }

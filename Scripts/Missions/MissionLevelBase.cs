@@ -33,6 +33,13 @@ public abstract partial class MissionLevelBase : Node2D
 
         var player = playerScene.Instantiate<CharacterBody2D>();
         player.Position = spawnPos;
+
+        // Ensure player has an inventory for keys and items.
+        if (player.GetNodeOrNull<PlayerInventory>("PlayerInventory") == null)
+        {
+            player.AddChild(new PlayerInventory { Name = "PlayerInventory" });
+        }
+
         AddChild(player);
 
         CallDeferred(MethodName.ApplyPlayerSprite, player);
@@ -309,6 +316,203 @@ public abstract partial class MissionLevelBase : Node2D
         parent.AddChild(spot);
     }
 
+    // ─── Puzzle Element Factories ─────────────────────────────────
+
+    /// <summary>Place a locked door that requires a specific key to open.</summary>
+    protected static Door AddLockedDoor(Node2D parent, string name, Vector2 pos, string requiredKeyId, bool isVertical = false)
+    {
+        var door = new Door { Name = $"Door_{name.Replace(" ", "_")}" };
+        door.Position = pos;
+        door.IsLocked = true;
+        door.RequiredKeyId = requiredKeyId;
+        door.DisplayName = name;
+        door.CollisionLayer = 1 << 5; // Interactable.
+        door.CollisionMask = 1 << 1;  // Player.
+
+        var shape = new CollisionShape2D();
+        shape.Shape = new RectangleShape2D { Size = new Vector2(16, 16) };
+        door.AddChild(shape);
+
+        // Door collision body.
+        var body = new StaticBody2D { Name = "StaticBody2D" };
+        body.CollisionLayer = 1;
+        body.CollisionMask = 0;
+        var bodyShape = new CollisionShape2D();
+        float w = isVertical ? 6 : 32;
+        float h = isVertical ? 32 : 6;
+        bodyShape.Shape = new RectangleShape2D { Size = new Vector2(w, h) };
+        body.AddChild(bodyShape);
+        door.AddChild(body);
+
+        // Visual — door rectangle with lock indicator.
+        float vw = isVertical ? 8 : 32;
+        float vh = isVertical ? 32 : 8;
+        var visual = new Sprite2D { Name = "Sprite2D" };
+        var img = Image.CreateEmpty((int)vw, (int)vh, false, Image.Format.Rgba8);
+        img.Fill(new Color(0.5f, 0.3f, 0.15f, 1.0f));
+        // Lock indicator — small yellow square in center.
+        int cx = (int)vw / 2 - 2; int cy = (int)vh / 2 - 2;
+        for (int x = cx; x < cx + 4 && x < (int)vw; x++)
+            for (int y = cy; y < cy + 4 && y < (int)vh; y++)
+                img.SetPixel(x, y, new Color(0.8f, 0.7f, 0.2f, 1.0f));
+        visual.Texture = ImageTexture.CreateFromImage(img);
+        visual.ZIndex = 2;
+        door.AddChild(visual);
+
+        parent.AddChild(door);
+        return door;
+    }
+
+    /// <summary>Place an unlocked door (can be opened freely).</summary>
+    protected static Door AddDoor(Node2D parent, string name, Vector2 pos, bool isVertical = false)
+    {
+        var door = new Door { Name = $"Door_{name.Replace(" ", "_")}" };
+        door.Position = pos;
+        door.IsLocked = false;
+        door.DisplayName = name;
+        door.CollisionLayer = 1 << 5;
+        door.CollisionMask = 1 << 1;
+
+        var shape = new CollisionShape2D();
+        shape.Shape = new RectangleShape2D { Size = new Vector2(16, 16) };
+        door.AddChild(shape);
+
+        var body = new StaticBody2D { Name = "StaticBody2D" };
+        body.CollisionLayer = 1;
+        body.CollisionMask = 0;
+        var bodyShape = new CollisionShape2D();
+        float w = isVertical ? 6 : 32;
+        float h = isVertical ? 32 : 6;
+        bodyShape.Shape = new RectangleShape2D { Size = new Vector2(w, h) };
+        body.AddChild(bodyShape);
+        door.AddChild(body);
+
+        float vw = isVertical ? 8 : 32;
+        float vh = isVertical ? 32 : 8;
+        var visual = new Sprite2D { Name = "Sprite2D" };
+        var img = Image.CreateEmpty((int)vw, (int)vh, false, Image.Format.Rgba8);
+        img.Fill(new Color(0.45f, 0.3f, 0.15f, 1.0f));
+        visual.Texture = ImageTexture.CreateFromImage(img);
+        visual.ZIndex = 2;
+        door.AddChild(visual);
+
+        parent.AddChild(door);
+        return door;
+    }
+
+    /// <summary>Place a chest containing a key.</summary>
+    protected static Chest AddKeyChest(Node2D parent, string name, Vector2 pos, string keyId, string keyDisplayName = "Key")
+    {
+        var chest = new Chest { Name = $"Chest_{name.Replace(" ", "_")}" };
+        chest.Position = pos;
+        chest.DisplayName = name;
+        chest.ContentsType = "key";
+        chest.ContentsId = keyId;
+        chest.ContentsName = keyDisplayName;
+        chest.CollisionLayer = 1 << 5;
+        chest.CollisionMask = 1 << 1;
+
+        var shape = new CollisionShape2D();
+        shape.Shape = new RectangleShape2D { Size = new Vector2(16, 16) };
+        chest.AddChild(shape);
+
+        parent.AddChild(chest);
+        return chest;
+    }
+
+    /// <summary>Place a chest containing items or ink.</summary>
+    protected static Chest AddItemChest(Node2D parent, string name, Vector2 pos,
+        string contentsType, string contentsId, string contentsName, int quantity = 1,
+        string requiredKeyId = "")
+    {
+        var chest = new Chest { Name = $"Chest_{name.Replace(" ", "_")}" };
+        chest.Position = pos;
+        chest.DisplayName = name;
+        chest.ContentsType = contentsType;
+        chest.ContentsId = contentsId;
+        chest.ContentsName = contentsName;
+        chest.ContentsQuantity = quantity;
+        chest.RequiredKeyId = requiredKeyId;
+        chest.CollisionLayer = 1 << 5;
+        chest.CollisionMask = 1 << 1;
+
+        var shape = new CollisionShape2D();
+        shape.Shape = new RectangleShape2D { Size = new Vector2(16, 16) };
+        chest.AddChild(shape);
+
+        parent.AddChild(chest);
+        return chest;
+    }
+
+    /// <summary>Place a floor switch / pressure plate.</summary>
+    protected static FloorSwitch AddFloorSwitch(Node2D parent, string name, Vector2 pos, bool stayPressed = false)
+    {
+        var sw = new FloorSwitch { Name = $"Switch_{name.Replace(" ", "_")}" };
+        sw.Position = pos;
+        sw.StayPressed = stayPressed;
+
+        parent.AddChild(sw);
+        return sw;
+    }
+
+    /// <summary>Place an interactable lever.</summary>
+    protected static Lever AddLever(Node2D parent, string name, Vector2 pos, bool oneWay = false)
+    {
+        var lever = new Lever { Name = $"Lever_{name.Replace(" ", "_")}" };
+        lever.Position = pos;
+        lever.OneWay = oneWay;
+        lever.CollisionLayer = 1 << 5;
+        lever.CollisionMask = 1 << 1;
+
+        var shape = new CollisionShape2D();
+        shape.Shape = new RectangleShape2D { Size = new Vector2(12, 12) };
+        lever.AddChild(shape);
+
+        parent.AddChild(lever);
+        return lever;
+    }
+
+    /// <summary>Place a puzzle gate that opens when conditions are met.</summary>
+    protected static PuzzleGate AddPuzzleGate(Node2D parent, string name, Vector2 pos,
+        int requiredConditions = 1, bool stayOpen = true, bool isVertical = false,
+        float width = 32f, float height = 16f)
+    {
+        var gate = new PuzzleGate { Name = $"Gate_{name.Replace(" ", "_")}" };
+        gate.Position = pos;
+        gate.RequiredConditions = requiredConditions;
+        gate.StayOpen = stayOpen;
+        gate.IsVertical = isVertical;
+        gate.GateWidth = width;
+        gate.GateHeight = height;
+
+        parent.AddChild(gate);
+        return gate;
+    }
+
+    /// <summary>Place a pushable block for puzzles.</summary>
+    protected static PushBlock AddPushBlock(Node2D parent, string name, Vector2 pos)
+    {
+        var block = new PushBlock { Name = $"PushBlock_{name.Replace(" ", "_")}" };
+        block.Position = pos;
+
+        parent.AddChild(block);
+        return block;
+    }
+
+    /// <summary>Place a breakable/cracked wall.</summary>
+    protected static BreakableWall AddBreakableWall(Node2D parent, string name, Vector2 pos,
+        int hitsRequired = 1, float width = 16f, float height = 16f)
+    {
+        var wall = new BreakableWall { Name = $"BreakableWall_{name.Replace(" ", "_")}" };
+        wall.Position = pos;
+        wall.HitsRequired = hitsRequired;
+        wall.WallWidth = width;
+        wall.WallHeight = height;
+
+        parent.AddChild(wall);
+        return wall;
+    }
+
     // ─── Mission Flow Helpers ─────────────────────────────────────
 
     /// <summary>
@@ -355,7 +559,9 @@ public abstract partial class MissionLevelBase : Node2D
         MissionComplete.WhisperText = whisperText;
         MissionComplete.RewardText = rewardText;
 
-        var timer = GetTree().CreateTimer(delaySeconds);
-        timer.Timeout += () => GetTree().ChangeSceneToFile("res://Scenes/UI/MissionComplete.tscn");
+        // Capture tree reference before timer to avoid ObjectDisposedException if node freed.
+        var tree = GetTree();
+        var timer = tree.CreateTimer(delaySeconds);
+        timer.Timeout += () => tree.ChangeSceneToFile("res://Scenes/UI/MissionComplete.tscn");
     }
 }

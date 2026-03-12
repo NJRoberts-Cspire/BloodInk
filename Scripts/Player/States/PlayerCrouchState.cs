@@ -31,6 +31,7 @@ public partial class PlayerCrouchState : State
         // Tick down ability cooldowns (must happen in every movement state).
         PlayerAttackState.CooldownRemaining = Mathf.Max(0, PlayerAttackState.CooldownRemaining - (float)delta);
         PlayerDodgeState.CooldownRemaining = Mathf.Max(0, PlayerDodgeState.CooldownRemaining - (float)delta);
+        _player.TickInputBuffer((float)delta);
 
         var input = _player.GetInputVector();
         float crouchSpeed = _player.MoveSpeed * (_stealth?.CrouchSpeedMultiplier ?? 0.45f);

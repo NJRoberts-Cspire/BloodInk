@@ -86,6 +86,10 @@ public partial class GuardEnemy : EnemyBase
     {
         Target = player;
 
+        // Report detection to mission alert system.
+        if ((AwarenessLevel)awarenessLevel >= AwarenessLevel.Alerted)
+            Stealth.MissionAlertManager.Instance?.ReportDetection();
+
         // Alert nearby guards when first engaged.
         if ((AwarenessLevel)awarenessLevel == AwarenessLevel.Engaged && !HasCalledBackup)
         {

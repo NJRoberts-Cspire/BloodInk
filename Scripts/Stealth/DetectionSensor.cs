@@ -82,6 +82,14 @@ public partial class DetectionSensor : Node2D
     {
         // Find player in the scene tree. Deferred to allow scene to finish loading.
         CallDeferred(MethodName.FindPlayer);
+
+        // Register with noise propagation so guards can hear sounds.
+        NoisePropagator.Instance?.RegisterSensor(this);
+    }
+
+    public override void _ExitTree()
+    {
+        NoisePropagator.Instance?.UnregisterSensor(this);
     }
 
     private void FindPlayer()

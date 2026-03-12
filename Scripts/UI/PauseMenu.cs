@@ -74,12 +74,15 @@ public partial class PauseMenu : Control
 
     private void OnLoad()
     {
-        Core.GameManager.Instance?.Load("slot1");
+        var scenePath = Core.GameManager.Instance?.Load("slot1");
         GD.Print("Game loaded.");
-        // Reload the current scene so the level state matches the loaded data.
         Core.GameManager.Instance?.SetPaused(false);
         GetTree().Paused = false;
-        GetTree().ReloadCurrentScene();
+        // Navigate to the scene that was active when the player saved.
+        if (!string.IsNullOrEmpty(scenePath))
+            GetTree().ChangeSceneToFile(scenePath);
+        else
+            GetTree().ReloadCurrentScene();
     }
 
     private void OnSettings()

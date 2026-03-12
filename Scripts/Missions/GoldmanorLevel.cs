@@ -194,6 +194,12 @@ public partial class GoldmanorLevel : MissionLevelBase
         SetCameraLimits(0, -1040, 2560, 2240);
 
         GD.Print("═══ GOLDMANOR LOADED ═══");
+        GD.Print("  PUZZLE GUIDE:");
+        GD.Print("  Gardens: Find the Garden Key in a chest behind breakable bushes.");
+        GD.Print("           Push blocks onto both floor switches to open the Hall gate.");
+        GD.Print("  Hall:    Pull both levers (East & West wings) to open the Quarters gate.");
+        GD.Print("           Find the Master Key in the locked chest (requires Servant Key).");
+        GD.Print("  Quarters: Use Master Key on Cowl's study door. Breakable wall = secret path.");
     }
 
     // ═════════════════════════════════════════════════════════════
@@ -237,6 +243,39 @@ public partial class GoldmanorLevel : MissionLevelBase
         AddHidingSpot(gardenRoot, "Gazebo", new Vector2(1000, 260));
         AddHidingSpot(gardenRoot, "Statuary Grove", new Vector2(1600, 260));
         AddHidingSpot(gardenRoot, "Garden Gate", new Vector2(1280, 120));
+
+        // ═══ PUZZLE 1: GARDEN GATE ═════════════════════════════════
+        // Two floor switches (one on each side of the garden) must both
+        // be held down to open the gate into the Main Hall.
+        // Player pushes blocks onto them — classic Zelda push-block puzzle.
+
+        var gardenGate = AddPuzzleGate(gardenRoot, "Hall Entrance Gate",
+            new Vector2(1280, 60), requiredConditions: 2, stayOpen: true, width: 48, height: 12);
+
+        var switchWest = AddFloorSwitch(gardenRoot, "West Garden Plate",
+            new Vector2(640, 480), stayPressed: true);
+        var switchEast = AddFloorSwitch(gardenRoot, "East Garden Plate",
+            new Vector2(1920, 480), stayPressed: true);
+
+        gardenGate.LinkSwitch(switchWest);
+        gardenGate.LinkSwitch(switchEast);
+
+        // Push blocks near the switches — player must push them onto the plates.
+        AddPushBlock(gardenRoot, "West Stone", new Vector2(640, 432));
+        AddPushBlock(gardenRoot, "East Stone", new Vector2(1920, 432));
+
+        // ═══ PUZZLE 2: HIDDEN KEY CHEST ════════════════════════════
+        // A breakable hedge wall hides a chest containing the Servant Key
+        // (used later in the Main Hall to access a locked passage).
+        AddBreakableWall(gardenRoot, "Cracked Hedge", new Vector2(400, 300),
+            hitsRequired: 2, width: 16, height: 16);
+        AddKeyChest(gardenRoot, "Hidden Garden Chest", new Vector2(400, 340),
+            "servant_key", "Servant Passage Key");
+
+        // ═══ BONUS: OPTIONAL INK CHEST ═════════════════════════════
+        // Reward for exploring — trace ink hidden in the far east corner.
+        AddItemChest(gardenRoot, "Gardener's Stash", new Vector2(2400, 680),
+            "ink", "trace_ink", "Trace Ink", quantity: 1);
 
         // 8 garden patrol guards — longer routes across the expanded grounds.
         AddGuard(gardenRoot, "GardenGuard1", new Vector2(500, 200), new Vector2[]
@@ -311,6 +350,46 @@ public partial class GoldmanorLevel : MissionLevelBase
         AddHidingSpot(hallRoot, "Coat Room", new Vector2(800, 100));
         AddHidingSpot(hallRoot, "Linen Closet", new Vector2(1760, 100));
         AddHidingSpot(hallRoot, "Scullery", new Vector2(2200, 560));
+
+        // ═══ PUZZLE 3: LOCKED SERVANT PASSAGE ═════════════════════
+        // The servant passage shortcut through the Hall is locked.
+        // Requires the Servant Key found in the Garden's hidden chest.
+        AddLockedDoor(hallRoot, "Servant Door", new Vector2(120, 352),
+            "servant_key", isVertical: true);
+
+        // ═══ PUZZLE 4: DUAL-LEVER GATE ════════════════════════════
+        // Two levers — one in the west wing, one in the east wing —
+        // must both be pulled to open the reinforced gate to the Quarters.
+        // Guards patrol near each lever, forcing the player to plan timing.
+
+        var quartersGate = AddPuzzleGate(hallRoot, "Quarters Gate",
+            new Vector2(1280, 40), requiredConditions: 2, stayOpen: true, width: 48, height: 12);
+
+        var leverWest = AddLever(hallRoot, "West Wing Lever",
+            new Vector2(300, 500), oneWay: true);
+        var leverEast = AddLever(hallRoot, "East Wing Lever",
+            new Vector2(2260, 500), oneWay: true);
+
+        quartersGate.LinkLever(leverWest);
+        quartersGate.LinkLever(leverEast);
+
+        // ═══ PUZZLE 5: BREAKABLE WALL SHORTCUT ════════════════════
+        // A cracked section in the east wall reveals a shortcut
+        // past the guarded central corridor — risky but fast.
+        AddBreakableWall(hallRoot, "Cracked Hall Wall", new Vector2(2000, 352),
+            hitsRequired: 2, width: 16, height: 32);
+
+        // ═══ PUZZLE 6: MASTER KEY IN LOCKED CHEST ═════════════════
+        // The Master Key (needed for Cowl's study) is in a locked chest
+        // hidden in the wine cellar area. The chest requires the Servant Key.
+        AddItemChest(hallRoot, "Wine Cellar Strongbox", new Vector2(2400, 140),
+            "key", "master_key", "Master Key", requiredKeyId: "servant_key");
+
+        // ═══ BONUS: INK CHEST BEHIND PUSH BLOCK ══════════════════
+        // A push block in the dining area hides a lesser ink chest.
+        AddPushBlock(hallRoot, "Dining Stone Block", new Vector2(800, 352));
+        AddItemChest(hallRoot, "Hidden Dining Cache", new Vector2(800, 400),
+            "ink", "lesser_ink", "Lesser Ink", quantity: 1);
 
         // 10 hall guards — patrols leave gaps for sneaking through corridors.
         AddGuard(hallRoot, "HallGuard1", new Vector2(500, 120), new Vector2[]
@@ -390,6 +469,41 @@ public partial class GoldmanorLevel : MissionLevelBase
         AddHidingSpot(quartersRoot, "Servant Stairwell", new Vector2(1600, 120));
         AddHidingSpot(quartersRoot, "Private Chapel Pew", new Vector2(800, 480));
         AddHidingSpot(quartersRoot, "Balcony Overhang", new Vector2(1760, 480));
+
+        // ═══ PUZZLE 7: MASTER-LOCKED STUDY DOOR ═══════════════════
+        // The direct path to Cowl's study requires the Master Key
+        // found in the Main Hall's locked chest.
+        AddLockedDoor(quartersRoot, "Cowl's Study Door", new Vector2(1280, 192),
+            "master_key");
+
+        // ═══ PUZZLE 8: SECRET PASSAGE (BREAKABLE WALL) ════════════
+        // An alternate approach — a cracked wall on the west side
+        // reveals a hidden passage directly into Cowl's study.
+        // Hitting the wall makes noise (alerting nearby guards),
+        // creating a risk/reward tradeoff.
+        AddBreakableWall(quartersRoot, "Cracked Study Wall", new Vector2(960, 200),
+            hitsRequired: 3, width: 16, height: 16);
+
+        // ═══ PUZZLE 9: FLOOR SWITCH TRAP ROOM ═════════════════════
+        // Before the study, a room with a floor switch puzzle.
+        // Step on the switch to temporarily open a barred passage.
+        // The switch releases when you step off — you must be quick.
+        var trapGate = AddPuzzleGate(quartersRoot, "Barred Passage",
+            new Vector2(1100, 300), requiredConditions: 1, stayOpen: false,
+            isVertical: true, width: 16, height: 32);
+
+        var trapSwitch = AddFloorSwitch(quartersRoot, "Floor Trigger",
+            new Vector2(1100, 400), stayPressed: false);
+
+        trapGate.LinkSwitch(trapSwitch);
+
+        // A push block nearby — push it onto the switch to hold it down permanently.
+        AddPushBlock(quartersRoot, "Chapel Stone", new Vector2(1100, 448));
+
+        // ═══ BONUS: TREASURE ROOM ═════════════════════════════════
+        // A locked chest in the trophy gallery with major ink — big reward.
+        AddItemChest(quartersRoot, "Cowl's Private Collection", new Vector2(2360, 120),
+            "ink", "lesser_ink", "Lesser Ink", quantity: 2);
 
         // 6 elite guards — tougher, patrolling the private quarters.
         AddGuard(quartersRoot, "EliteGuard1", new Vector2(500, 160), new Vector2[]

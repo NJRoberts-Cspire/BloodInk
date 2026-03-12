@@ -47,10 +47,10 @@ public partial class MainMenu : Control
 
     private void OnContinue()
     {
-        Core.GameManager.Instance?.Load("slot1");
-        // After loading, transition to the appropriate scene.
-        // For now, go to camp.
-        GetTree().ChangeSceneToFile("res://Scenes/World/Camp.tscn");
+        var scenePath = Core.GameManager.Instance?.Load("slot1");
+        // Navigate to the scene stored in the save file; fall back to camp.
+        GetTree().ChangeSceneToFile(
+            !string.IsNullOrEmpty(scenePath) ? scenePath : "res://Scenes/World/Camp.tscn");
     }
 
     private void OnSettings()

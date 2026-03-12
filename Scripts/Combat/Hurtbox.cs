@@ -36,50 +36,59 @@ public partial class Hurtbox : Area2D
             EmitSignal(SignalName.Hurt, hitbox.Damage, knockback);
 
             // ─── VFX Juice ────────────────────────────────────────
-            if (Owner is Node2D target)
+            // Guard against owner being freed (e.g. death on same frame).
+            if (Owner is not Node2D target || !IsInstanceValid(target))
+                return;
+
+            // Stealth kills are lethal but quiet — minimal VFX.
+            bool isStealthKill = hitbox.IsStealthKill;
+            bool isCrit = !isStealthKill && hitbox.Damage >= 3;
+
+            // Hit flash (white blink on the damaged sprite).
+            HitFlash.FlashNode(
+                target.GetNodeOrNull<CanvasItem>("AnimatedSprite2D") ?? target,
+                Colors.White, isStealthKill ? 0.06f : 0.12f);
+
+            // Damage number (suppress for stealth kills — they're silent).
+            if (!isStealthKill)
             {
-                // Stealth kills are lethal but quiet — minimal VFX.
-                bool isStealthKill = hitbox.IsStealthKill;
-                bool isCrit = !isStealthKill && hitbox.Damage >= 3;
-
-                // Hit flash (white blink on the damaged sprite).
-                HitFlash.FlashNode(
-                    target.GetNodeOrNull<CanvasItem>("AnimatedSprite2D") ?? target,
-                    Colors.White, isStealthKill ? 0.06f : 0.12f);
-
-                // Damage number (suppress for stealth kills — they're silent).
-                if (!isStealthKill)
-                {
-                    DamageNumber.Spawn(
-                        target.GetTree().CurrentScene,
-                        target.GlobalPosition + new Vector2(0, -12),
-                        hitbox.Damage, isCrit);
-                }
-
-                // Blood splatter in knockback direction.
-                BloodSplatter.Spawn(
+                DamageNumber.Spawn(
                     target.GetTree().CurrentScene,
-                    target.GlobalPosition,
-                    knockbackDir,
-                    isStealthKill ? 3 : (isCrit ? 14 : 6));
+                    target.GlobalPosition + new Vector2(0, -12),
+                    hitbox.Damage, isCrit);
+            }
 
-                // Screen shake scaled to damage (none for stealth).
-                if (!isStealthKill)
-                {
-                    if (isCrit)
-                        CameraShake.Instance?.ShakeHeavy();
-                    else
-                        CameraShake.Instance?.ShakeLight();
-                }
+            // Blood splatter in knockback direction.
+            BloodSplatter.Spawn(
+                target.GetTree().CurrentScene,
+                target.GlobalPosition,
+                knockbackDir,
+                isStealthKill ? 3 : (isCrit ? 14 : 6));
 
-                // Hit-stop on heavy hits (none for stealth).
-                if (!isStealthKill)
-                {
-                    if (isCrit)
-                        HitStop.Instance?.FreezeHeavy();
-                    else if (hitbox.Damage >= 2)
-                        HitStop.Instance?.FreezeLight();
-                }
+            // ─── Audio Feedback ───────────────────────────────────
+            if (!isStealthKill)
+            {
+                Audio.AudioManager.Instance?.PlaySFX(
+                    isCrit ? "res://Assets/Audio/SFX/hit_crit.wav"
+                           : "res://Assets/Audio/SFX/hit_normal.wav");
+            }
+
+            // Screen shake scaled to damage (none for stealth).
+            if (!isStealthKill)
+            {
+                if (isCrit)
+                    CameraShake.Instance?.ShakeHeavy();
+                else
+                    CameraShake.Instance?.ShakeLight();
+            }
+
+            // Hit-stop on heavy hits (none for stealth).
+            if (!isStealthKill)
+            {
+                if (isCrit)
+                    HitStop.Instance?.FreezeHeavy();
+                else if (hitbox.Damage >= 2)
+                    HitStop.Instance?.FreezeLight();
             }
         }
     }

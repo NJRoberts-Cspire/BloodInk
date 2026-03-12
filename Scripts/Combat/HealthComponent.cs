@@ -33,6 +33,7 @@ public partial class HealthComponent : Node
     public void TakeDamage(int amount)
     {
         if (IsDead) return;
+        if (amount < 0) amount = 0;
         CurrentHealth -= amount;
         if (IsDead)
         {
@@ -43,11 +44,13 @@ public partial class HealthComponent : Node
     public void Heal(int amount)
     {
         if (IsDead) return;
+        if (amount < 0) amount = 0;
         CurrentHealth += amount;
     }
 
     public void FullHeal()
     {
+        if (IsDead) return;
         CurrentHealth = MaxHealth;
     }
 }

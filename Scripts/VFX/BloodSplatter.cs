@@ -34,6 +34,7 @@ public partial class BloodSplatter : Node
     /// <summary>Spawn a directional blood splatter at worldPos.</summary>
     public static void Spawn(Node parent, Vector2 worldPos, Vector2 knockbackDir, int intensity = 6)
     {
+        if (parent == null) return;
         if (knockbackDir == Vector2.Zero)
             knockbackDir = Vector2.Up;
 

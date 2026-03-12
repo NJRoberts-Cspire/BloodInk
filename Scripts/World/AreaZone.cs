@@ -43,6 +43,16 @@ public partial class AreaZone : Area2D
         PlayerInside = true;
         EmitSignal(SignalName.PlayerEnteredArea, AreaName);
         GD.Print($"Entered area: {AreaName}{(IsRestricted ? " [RESTRICTED]" : "")}");
+
+        // Restricted zones increase player visibility — guards will react.
+        if (IsRestricted)
+        {
+            var stealth = body is CharacterBody2D cb
+                ? cb.GetNodeOrNull<Stealth.StealthProfile>("StealthProfile")
+                : null;
+            if (stealth != null)
+                stealth.IsInRestrictedZone = true;
+        }
     }
 
     private void OnBodyExited(Node2D body)
@@ -51,5 +61,14 @@ public partial class AreaZone : Area2D
 
         PlayerInside = false;
         EmitSignal(SignalName.PlayerExitedArea, AreaName);
+
+        if (IsRestricted)
+        {
+            var stealth = body is CharacterBody2D cb
+                ? cb.GetNodeOrNull<Stealth.StealthProfile>("StealthProfile")
+                : null;
+            if (stealth != null)
+                stealth.IsInRestrictedZone = false;
+        }
     }
 }

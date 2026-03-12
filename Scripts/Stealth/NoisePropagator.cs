@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BloodInk.Stealth;
 
@@ -20,6 +21,11 @@ public partial class NoisePropagator : Node
         Instance = this;
     }
 
+    public override void _ExitTree()
+    {
+        if (Instance == this) Instance = null;
+    }
+
     /// <summary>Register a sensor (called by DetectionSensor._Ready).</summary>
     public void RegisterSensor(DetectionSensor sensor)
     {
@@ -35,6 +41,7 @@ public partial class NoisePropagator : Node
 
     /// <summary>
     /// Propagate a noise event to all sensors. Each sensor decides if it can hear it.
+    /// Raycasts to check for wall occlusion — noise is blocked by solid geometry.
     /// </summary>
     public void PropagateNoise(Vector2 position, float radius)
     {
@@ -43,11 +50,49 @@ public partial class NoisePropagator : Node
         // Clean up any freed sensors.
         _sensors.RemoveAll(s => s == null || !IsInstanceValid(s));
 
-        foreach (var sensor in _sensors)
+        // Iterate a snapshot to avoid modification during iteration.
+        var snapshot = _sensors.ToArray();
+        foreach (var sensor in snapshot)
         {
-            sensor.OnNoiseAtPosition(position, radius);
+            if (!IsInstanceValid(sensor)) continue;
+
+            // Wall occlusion: raycast from noise source to sensor.
+            // If a wall blocks the path, attenuate the effective radius.
+            float effectiveRadius = GetOccludedRadius(position, sensor.GlobalPosition, radius);
+            if (effectiveRadius > 0f)
+                sensor.OnNoiseAtPosition(position, effectiveRadius);
         }
     }
+
+    /// <summary>
+    /// Check how much a wall occludes noise between two points.
+    /// Returns the effective radius after wall attenuation, or 0 if fully blocked.
+    /// Each wall the ray passes through reduces effective radius by WallAttenuation.
+    /// </summary>
+    private float GetOccludedRadius(Vector2 from, Vector2 to, float baseRadius)
+    {
+        var spaceState = GetTree()?.Root?.GetWorld2D()?.DirectSpaceState;
+        if (spaceState == null) return baseRadius;
+
+        float distance = from.DistanceTo(to);
+        if (distance > baseRadius) return 0f;
+
+        // Cast a ray on the world collision layer (bit 0).
+        var query = PhysicsRayQueryParameters2D.Create(from, to, 1); // Layer 1 = world.
+        var result = spaceState.IntersectRay(query);
+
+        if (result == null || result.Count == 0)
+            return baseRadius; // No wall obstruction.
+
+        // Wall hit — attenuate. Each wall reduces effective radius by 60%.
+        return baseRadius * WallAttenuation;
+    }
+
+    /// <summary>
+    /// Multiplier applied to noise radius when a wall blocks line-of-sight.
+    /// 0.4 means walls block 60% of noise.
+    /// </summary>
+    public static float WallAttenuation { get; set; } = 0.4f;
 
     /// <summary>
     /// Raise an alarm — all sensors in the specified radius are force-engaged.
@@ -56,9 +101,11 @@ public partial class NoisePropagator : Node
     {
         _sensors.RemoveAll(s => s == null || !IsInstanceValid(s));
 
-        foreach (var sensor in _sensors)
+        // Iterate a snapshot to avoid modification during iteration.
+        var snapshot = _sensors.ToArray();
+        foreach (var sensor in snapshot)
         {
-            if (sensor.GlobalPosition.DistanceTo(position) <= alarmRadius)
+            if (IsInstanceValid(sensor) && sensor.GlobalPosition.DistanceTo(position) <= alarmRadius)
             {
                 sensor.ForceEngage();
             }

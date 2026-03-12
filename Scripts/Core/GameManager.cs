@@ -43,6 +43,11 @@ public partial class GameManager : Node
         InitializeSystems();
     }
 
+    public override void _ExitTree()
+    {
+        if (Instance == this) Instance = null;
+    }
+
     /// <summary>
     /// Create and wire all persistent gameplay systems as child nodes.
     /// </summary>
@@ -84,9 +89,7 @@ public partial class GameManager : Node
         AddChild(Crafting);
         AddChild(Camp);
 
-        // Noise propagation for stealth hearing.
-        var noiseProp = new Stealth.NoisePropagator();
-        AddChild(noiseProp);
+        // NoisePropagator is an autoload — no need to create a duplicate.
 
         // Kingdom states.
         string[] kingdomNames = { "The Greenhold", "The Drench", "The Fane of Flensing", "The Verdancy", "The Crucible of the Named", "The Accord Spire" };
@@ -202,11 +205,12 @@ public partial class GameManager : Node
 
     /// <summary>
     /// Load all system state from a named slot.
+    /// Returns the saved scene path (if any) so callers can change scene.
     /// </summary>
-    public void Load(string slotName = "slot1")
+    public string? Load(string slotName = "slot1")
     {
         var data = SaveSystem?.LoadGame(slotName);
-        if (data == null) return;
+        if (data == null) return null;
 
         if (data.TryGetValue("ink", out var inkData))
         {
@@ -235,6 +239,11 @@ public partial class GameManager : Node
             var stringFlags = dfData.ToDictionary(kv => kv.Key, kv => kv.Value?.ToString() ?? "");
             Dialogue.DialogueManager.Instance?.ImportFlags(stringFlags);
         }
+
+        // Return saved scene path for caller to navigate to.
+        if (data.TryGetValue("meta", out var metaData) && metaData.TryGetValue("scene", out var sceneVal))
+            return sceneVal?.ToString();
+        return null;
     }
 
     // ─── NG+ Transition ───────────────────────────────────────────

@@ -23,6 +23,9 @@ public partial class EnemyBase : CharacterBody2D
 
     public Vector2 KnockbackVelocity { get; set; }
 
+    /// <summary>Hitstun invincibility duration — prevents stunlock.</summary>
+    [Export] public float HitstunDuration { get; set; } = 0.25f;
+
     /// <summary>Reference to the player — set by the world or via detection.</summary>
     public Node2D? Target { get; set; }
 
@@ -107,13 +110,22 @@ public partial class EnemyBase : CharacterBody2D
     {
         Health.TakeDamage(damage);
         KnockbackVelocity = knockback;
+
+        // Hitstun invincibility — prevents infinite stunlock from attack spam.
+        Hurtbox.IsInvincible = true;
+        var tree = GetTree();
+        var timer = tree.CreateTimer(HitstunDuration, false);
+        timer.Timeout += () => { if (IsInstanceValid(this) && IsInsideTree()) Hurtbox.IsInvincible = false; };
     }
 
     protected virtual void OnDied()
     {
         // Disable combat and processing before deferred removal.
         Hitbox.Monitoring = false;
+        Hurtbox.IsInvincible = true;
         Hurtbox.Monitorable = false;
+        Hurtbox.SetDeferred("monitoring", false);
+        Hurtbox.Hurt -= OnHurt;
         SetPhysicsProcess(false);
         SetProcess(false);
 
@@ -128,6 +140,9 @@ public partial class EnemyBase : CharacterBody2D
         VFX.BloodSplatter.SpawnHeavy(
             GetTree().CurrentScene,
             GlobalPosition, Vector2.Up);
+
+        // Leave a corpse marker that guards can discover.
+        Stealth.CorpseMarker.SpawnAt(GetTree().CurrentScene, GlobalPosition);
 
         QueueFree();
     }

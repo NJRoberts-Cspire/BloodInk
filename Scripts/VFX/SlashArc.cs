@@ -16,6 +16,7 @@ public partial class SlashArc : Node2D
     /// </summary>
     public static void SpawnAt(Node parent, Vector2 worldPos, Vector2 direction, bool isHeavy = false)
     {
+        if (parent == null) return;
         var arc = new Node2D
         {
             GlobalPosition = worldPos,

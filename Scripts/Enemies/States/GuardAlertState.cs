@@ -70,6 +70,7 @@ public partial class GuardAlertState : State
             _guard.Velocity = _guard.Velocity.MoveToward(Vector2.Zero, _guard.Friction * (float)delta);
         }
 
+        _guard.ApplyKnockback(delta);
         _guard.MoveAndSlide();
 
         // Timeout — switch to investigate.

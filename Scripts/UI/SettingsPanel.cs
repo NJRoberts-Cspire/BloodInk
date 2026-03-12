@@ -30,15 +30,19 @@ public partial class SettingsPanel : Control
 
     // ─── Controls tab ────────────────────────────────────────────
     private KeybindSettings? _keybindSettings;
+    // ─── Gameplay tab ────────────────────────────────────────────
+    private HSlider? _screenShakeSlider;
     // ─── State ──────────────────────────────────────────────────
     private bool _loading;
     // ─── Tab buttons ─────────────────────────────────────────────
     private Button? _audioTabBtn;
     private Button? _displayTabBtn;
     private Button? _controlsTabBtn;
+    private Button? _gameplayTabBtn;
     private Control? _audioTab;
     private Control? _displayTab;
     private Control? _controlsTab;
+    private Control? _gameplayTab;
 
     private PackedScene? _keybindScene;
     private PackedScene KeybindScene =>
@@ -107,12 +111,15 @@ public partial class SettingsPanel : Control
 
         _audioTabBtn = new Button { Text = "Audio", SizeFlagsHorizontal = SizeFlags.ExpandFill, ToggleMode = true };
         _displayTabBtn = new Button { Text = "Display", SizeFlagsHorizontal = SizeFlags.ExpandFill, ToggleMode = true };
+        _gameplayTabBtn = new Button { Text = "Gameplay", SizeFlagsHorizontal = SizeFlags.ExpandFill, ToggleMode = true };
         _controlsTabBtn = new Button { Text = "Controls", SizeFlagsHorizontal = SizeFlags.ExpandFill, ToggleMode = true };
         _audioTabBtn.Pressed += () => ShowTab("audio");
         _displayTabBtn.Pressed += () => ShowTab("display");
+        _gameplayTabBtn.Pressed += () => ShowTab("gameplay");
         _controlsTabBtn.Pressed += () => ShowTab("controls");
         tabBar.AddChild(_audioTabBtn);
         tabBar.AddChild(_displayTabBtn);
+        tabBar.AddChild(_gameplayTabBtn);
         tabBar.AddChild(_controlsTabBtn);
 
         // ─── Content area ───────────────────────────────────────
@@ -129,9 +136,11 @@ public partial class SettingsPanel : Control
 
         _audioTab = BuildAudioTab();
         _displayTab = BuildDisplayTab();
+        _gameplayTab = BuildGameplayTab();
         _controlsTab = BuildControlsTab();
         contentArea.AddChild(_audioTab);
         contentArea.AddChild(_displayTab);
+        contentArea.AddChild(_gameplayTab);
         contentArea.AddChild(_controlsTab);
 
         // ─── Bottom bar (Back) ──────────────────────────────────
@@ -326,7 +335,30 @@ public partial class SettingsPanel : Control
 
         return scroll;
     }
+    // ─── Gameplay tab ───────────────────────────────────────
 
+    private Control BuildGameplayTab()
+    {
+        var scroll = new ScrollContainer
+        {
+            LayoutMode = 1,
+            AnchorsPreset = (int)LayoutPreset.FullRect,
+        };
+
+        var vbox = new VBoxContainer();
+        vbox.AddThemeConstantOverride("separation", 10);
+        scroll.AddChild(vbox);
+
+        // Screen Shake Intensity
+        _screenShakeSlider = AddVolumeRow(vbox, "Screen Shake", VFX.CameraShake.IntensityMultiplier);
+        _screenShakeSlider.ValueChanged += v =>
+        {
+            VFX.CameraShake.IntensityMultiplier = (float)v;
+            SaveSettings();
+        };
+
+        return scroll;
+    }
     // ─── Controls tab ───────────────────────────────────────────
 
     private Control BuildControlsTab()
@@ -351,10 +383,12 @@ public partial class SettingsPanel : Control
     {
         if (_audioTab != null) _audioTab.Visible = tab == "audio";
         if (_displayTab != null) _displayTab.Visible = tab == "display";
+        if (_gameplayTab != null) _gameplayTab.Visible = tab == "gameplay";
         if (_controlsTab != null) _controlsTab.Visible = tab == "controls";
 
         if (_audioTabBtn != null) _audioTabBtn.ButtonPressed = tab == "audio";
         if (_displayTabBtn != null) _displayTabBtn.ButtonPressed = tab == "display";
+        if (_gameplayTabBtn != null) _gameplayTabBtn.ButtonPressed = tab == "gameplay";
         if (_controlsTabBtn != null) _controlsTabBtn.ButtonPressed = tab == "controls";
     }
 
@@ -430,6 +464,9 @@ public partial class SettingsPanel : Control
         cfg.SetValue("display", "resolution", _resolutionOption?.Selected ?? 2);
         cfg.SetValue("display", "vsync", _vsyncToggle?.ButtonPressed ?? true);
 
+        // Gameplay
+        cfg.SetValue("gameplay", "screen_shake", _screenShakeSlider?.Value ?? 1.0);
+
         cfg.Save(ConfigPath);
     }
 
@@ -490,6 +527,14 @@ public partial class SettingsPanel : Control
             bool on = System.Convert.ToBoolean(cfg.GetValue("display", "vsync"));
             if (_vsyncToggle != null) _vsyncToggle.ButtonPressed = on;
             OnVSyncToggled(on);
+        }
+
+        // Gameplay
+        if (cfg.HasSectionKey("gameplay", "screen_shake"))
+        {
+            float v = System.Convert.ToSingle(cfg.GetValue("gameplay", "screen_shake"));
+            if (_screenShakeSlider != null) _screenShakeSlider.Value = v;
+            VFX.CameraShake.IntensityMultiplier = v;
         }
 
         _loading = false;

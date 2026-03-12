@@ -71,6 +71,11 @@ public partial class AudioManager : Node
         ApplyVolumes();
     }
 
+    public override void _ExitTree()
+    {
+        if (Instance == this) Instance = null;
+    }
+
     // ─── Music ────────────────────────────────────────────────────
 
     /// <summary>Play a music track with optional crossfade.</summary>

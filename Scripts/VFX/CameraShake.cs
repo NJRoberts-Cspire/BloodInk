@@ -31,6 +31,12 @@ public partial class CameraShake : Camera2D
 
     public static CameraShake? Instance { get; private set; }
 
+    /// <summary>
+    /// User-configurable intensity multiplier (0 = none, 1 = full).
+    /// Set from SettingsPanel. Multiplied into shake offset and rotation.
+    /// </summary>
+    public static float IntensityMultiplier { get; set; } = 1f;
+
     private float _trauma;
     private float _noiseY;
     private Vector2 _lookAheadTarget;
@@ -86,10 +92,10 @@ public partial class CameraShake : Camera2D
             float shake = _trauma * _trauma;
 
             shakeOffset = new Vector2(
-                MaxOffset * shake * Mathf.Sin(_noiseY * 1.3f + 0.7f),
-                MaxOffset * shake * Mathf.Cos(_noiseY * 1.7f + 1.1f)
+                MaxOffset * shake * IntensityMultiplier * Mathf.Sin(_noiseY * 1.3f + 0.7f),
+                MaxOffset * shake * IntensityMultiplier * Mathf.Cos(_noiseY * 1.7f + 1.1f)
             );
-            shakeRot = Mathf.DegToRad(MaxRoll * shake * Mathf.Sin(_noiseY * 2.3f));
+            shakeRot = Mathf.DegToRad(MaxRoll * shake * IntensityMultiplier * Mathf.Sin(_noiseY * 2.3f));
         }
 
         Offset = _lookAheadCurrent + shakeOffset;

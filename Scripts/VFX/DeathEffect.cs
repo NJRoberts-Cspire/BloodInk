@@ -14,6 +14,7 @@ public partial class DeathEffect : Node2D
     /// <summary>Spawn a death effect at an enemy's position, replacing its visual.</summary>
     public static void SpawnAt(Node parent, Vector2 worldPos, AnimatedSprite2D? sourceSprite = null)
     {
+        if (parent == null) return;
         var effect = new DeathEffect { GlobalPosition = worldPos, ZIndex = 5 };
         parent.AddChild(effect);
 

@@ -29,6 +29,66 @@ public partial class PlayerController : CharacterBody2D
     /// <summary>Knockback velocity applied externally (e.g. on hurt).</summary>
     public Vector2 KnockbackVelocity { get; set; }
 
+    // ─── Input Buffering ─────────────────────────────────────────
+    // Stores the last action pressed during a state that doesn't handle input
+    // (Attack, Dodge, StealthKill). The action is consumed on the next Idle/Move Enter.
+    /// <summary>How long a buffered input stays valid (seconds).</summary>
+    public const float InputBufferWindow = 0.15f;
+
+    /// <summary>The action name buffered ("attack", "dodge", "crouch"), or null.</summary>
+    public string? BufferedAction { get; set; }
+
+    /// <summary>Time remaining before the buffered action expires.</summary>
+    public float BufferedActionTimer { get; set; }
+
+    /// <summary>Buffer an input action. It will be consumed within InputBufferWindow.</summary>
+    public void BufferInput(string action)
+    {
+        BufferedAction = action;
+        BufferedActionTimer = InputBufferWindow;
+    }
+
+    /// <summary>
+    /// Try to consume the buffered action and transition. Returns true if consumed.
+    /// Call this from Idle/Move Enter() to auto-execute buffered inputs.
+    /// </summary>
+    public bool TryConsumeBuffer(Core.StateMachine machine)
+    {
+        if (BufferedAction == null || BufferedActionTimer <= 0) return false;
+
+        string action = BufferedAction;
+        BufferedAction = null;
+        BufferedActionTimer = 0;
+
+        switch (action)
+        {
+            case "attack" when States.PlayerAttackState.CooldownRemaining <= 0:
+                machine.TransitionTo("Attack");
+                return true;
+            case "dodge" when States.PlayerDodgeState.CooldownRemaining <= 0:
+                machine.TransitionTo("Dodge");
+                return true;
+            case "crouch":
+                machine.TransitionTo("Crouch");
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>Tick the buffer timer. Call from PhysicsUpdate in any state.</summary>
+    public void TickInputBuffer(float delta)
+    {
+        if (BufferedActionTimer > 0)
+        {
+            BufferedActionTimer -= delta;
+            if (BufferedActionTimer <= 0)
+            {
+                BufferedAction = null;
+                BufferedActionTimer = 0;
+            }
+        }
+    }
+
     public override void _Ready()
     {
         AnimPlayer = GetNodeOrNull<AnimatedSprite2D>("AnimatedSprite2D")!;
@@ -131,15 +191,19 @@ public partial class PlayerController : CharacterBody2D
         VFX.ScreenTransition.Instance?.FadeToBlack(1.5f);
 
         // Ensure game is unpaused (e.g. if player dies during dialogue).
+        // End any active dialogue first so the panel clears and pause state is restored.
+        Dialogue.DialogueManager.Instance?.EndConversation();
         Core.GameManager.Instance?.SetPaused(false);
 
         // Store the current scene for retry, then transition to Game Over.
         UI.GameOver.LastMissionScene = GetTree().CurrentScene?.SceneFilePath ?? "";
+        // Capture tree reference before timer to avoid ObjectDisposedException.
         // processAlways: true ensures the timer ticks even if something re-pauses.
-        var timer = GetTree().CreateTimer(2.0f, true, false, true);
+        var tree = GetTree();
+        var timer = tree.CreateTimer(2.0f, true, false, true);
         timer.Timeout += () =>
         {
-            GetTree().ChangeSceneToFile("res://Scenes/UI/GameOver.tscn");
+            tree.ChangeSceneToFile("res://Scenes/UI/GameOver.tscn");
         };
     }
 }

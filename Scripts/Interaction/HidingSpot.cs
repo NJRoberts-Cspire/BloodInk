@@ -41,6 +41,7 @@ public partial class HidingSpot : Interactable
         {
             UnhidePlayer();
         }
+        base.OnInteract(interactor);
     }
 
     private void HidePlayer(Node2D player)

@@ -57,6 +57,16 @@ public partial class GameHUD : CanvasLayer
         ConnectSignals();
     }
 
+    public override void _ExitTree()
+    {
+        var im = InteractionManager.Instance;
+        if (im != null)
+        {
+            im.InteractPromptChanged -= OnInteractPromptChanged;
+            im.InteractPromptHidden -= OnInteractPromptHidden;
+        }
+    }
+
     public override void _Process(double delta)
     {
         UpdateStealthIndicator();

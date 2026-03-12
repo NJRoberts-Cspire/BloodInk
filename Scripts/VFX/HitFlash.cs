@@ -61,7 +61,7 @@ public partial class HitFlash : Node
     /// <summary>Flash any CanvasItem without needing a HitFlash component.</summary>
     public static void FlashNode(CanvasItem node, Color color, float duration = 0.12f)
     {
-        if (node == null) return;
+        if (node == null || !IsInstanceValid(node)) return;
         var original = node.Modulate;
 
         var tween = node.CreateTween();

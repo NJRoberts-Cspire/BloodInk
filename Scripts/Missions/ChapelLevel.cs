@@ -153,6 +153,13 @@ public partial class ChapelLevel : MissionLevelBase
         SetCameraLimits(0, -640, 2560, 1840);
 
         GD.Print("═══ CHAPEL LOADED ═══");
+        GD.Print("  PUZZLE GUIDE:");
+        GD.Print("  Grounds: Break the cracked tomb wall to find the Crypt Key chest.");
+        GD.Print("           Push block onto floor switch near bell tower to open grounds gate.");
+        GD.Print("  Nave:    Use Crypt Key on the vestry door. Pull both choir-loft levers");
+        GD.Print("           to open the relic-chamber stairway gate.");
+        GD.Print("  Relic:   Break the crumbling catacomb wall for a shortcut/escape route.");
+        GD.Print("           Push block onto the floor switch to open Sister Blessing's sanctum.");
     }
 
     // ═════════════════════════════════════════════════════════════
@@ -214,6 +221,19 @@ public partial class ChapelLevel : MissionLevelBase
         {
             new(-300, 0), new(300, 0)
         });
+
+        // ── Puzzle 1: Breakable tomb wall hides the Crypt Key ───
+        AddBreakableWall(root, "CrackedTomb", new Vector2(400, 460), hitsRequired: 2, width: 20f, height: 16f);
+        AddKeyChest(root, "CryptKeyChest", new Vector2(400, 500), "crypt_key", "Crypt Key");
+
+        // ── Puzzle 2: Push block onto switch to open shortcut gate ──
+        var groundsSwitch = AddFloorSwitch(root, "BellTowerSwitch", new Vector2(1280, 160), stayPressed: true);
+        var groundsGate = AddPuzzleGate(root, "BellTowerGate", new Vector2(1280, 200), requiredConditions: 1, stayOpen: true, isVertical: false, width: 32f, height: 16f);
+        groundsGate.LinkSwitch(groundsSwitch);
+        AddPushBlock(root, "GraveyardBlock", new Vector2(1180, 160));
+
+        // ── Bonus: Trace Ink hidden among the flowers ──
+        AddItemChest(root, "FlowerInkChest", new Vector2(2160, 340), "ink", "trace_ink", "Trace Ink");
     }
 
     // ═════════════════════════════════════════════════════════════
@@ -283,6 +303,19 @@ public partial class ChapelLevel : MissionLevelBase
         {
             new(0, -120), new(0, 120)
         });
+
+        // ── Puzzle 3: Locked vestry door requires the Crypt Key ──
+        AddLockedDoor(root, "VestryDoor", new Vector2(1280, 480), "crypt_key");
+
+        // ── Puzzle 4: Two-lever gate to relic chamber stairway ──
+        var choirLever1 = AddLever(root, "ChoirLeverWest", new Vector2(400, 440), oneWay: false);
+        var choirLever2 = AddLever(root, "ChoirLeverEast", new Vector2(2160, 440), oneWay: false);
+        var relicGate = AddPuzzleGate(root, "RelicStairGate", new Vector2(1280, 40), requiredConditions: 2, stayOpen: true, isVertical: false, width: 48f, height: 16f);
+        relicGate.LinkLever(choirLever1);
+        relicGate.LinkLever(choirLever2);
+
+        // ── Bonus: Vestry Key chest behind the altar ──
+        AddKeyChest(root, "VestryKeyChest", new Vector2(800, 40), "vestry_key", "Vestry Key");
     }
 
     // ═════════════════════════════════════════════════════════════
@@ -343,6 +376,18 @@ public partial class ChapelLevel : MissionLevelBase
         {
             new(-100, -60), new(100, 60)
         }, elite: true);
+
+        // ── Puzzle 5: Breakable catacomb wall (secret passage / escape route) ──
+        AddBreakableWall(root, "CrumblingCatacomb", new Vector2(2440, 200), hitsRequired: 3, width: 16f, height: 24f);
+
+        // ── Puzzle 6: Push block onto switch to open Sister Blessing's sanctum ──
+        var relicSwitch = AddFloorSwitch(root, "SanctumSwitch", new Vector2(1280, 260), stayPressed: true);
+        var sanctumGate = AddPuzzleGate(root, "SanctumGate", new Vector2(1280, 180), requiredConditions: 1, stayOpen: true, isVertical: false, width: 40f, height: 16f);
+        sanctumGate.LinkSwitch(relicSwitch);
+        AddPushBlock(root, "CatacombBlock", new Vector2(1180, 260));
+
+        // ── Bonus: Rare ink in a locked sarcophagus ──
+        AddItemChest(root, "SarcophagusInkChest", new Vector2(160, 180), "ink", "blood_ink", "Blood Ink", requiredKeyId: "vestry_key");
 
         // Sister Blessing — praying near the relic in the center.
         SpawnSisterBlessing(root);

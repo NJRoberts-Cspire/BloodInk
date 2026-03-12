@@ -35,6 +35,9 @@ public partial class StealthProfile : Node
     /// <summary>Number of cover zones overlapping the player.</summary>
     public int CoverZoneCount { get; set; } = 0;
 
+    /// <summary>Whether the player is in a restricted zone (trespassing).</summary>
+    public bool IsInRestrictedZone { get; set; } = false;
+
     // ─── Visibility Modifiers (from tattoos, items, etc.) ─────────
     /// <summary>Flat modifier subtracted from visibility detection. From tattoo stealth bonus etc.</summary>
     public float StealthModifier { get; set; } = 0f;
@@ -91,7 +94,7 @@ public partial class StealthProfile : Node
         {
             Visibility = VisibilityLevel.Low;
         }
-        else if (speed > RunSpeedThreshold)
+        else if (speed > RunSpeedThreshold || IsInRestrictedZone)
         {
             Visibility = VisibilityLevel.Exposed;
         }

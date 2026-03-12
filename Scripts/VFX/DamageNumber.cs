@@ -49,6 +49,7 @@ public partial class DamageNumber : Label
     /// <summary>Spawn a floating damage number at a world position.</summary>
     public static void Spawn(Node parent, Vector2 worldPos, int amount, bool isCritical = false)
     {
+        if (parent == null) return;
         var label = new DamageNumber
         {
             Text = amount.ToString(),

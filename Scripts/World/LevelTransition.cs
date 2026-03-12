@@ -86,9 +86,17 @@ public partial class LevelTransition : Area2D
             var rect = fade?.GetNodeOrNull<ColorRect>("ColorRect");
             if (rect != null)
             {
-                var tween = CreateTween();
-                tween.TweenProperty(rect, "color:a", 1.0f, FadeDuration);
-                await ToSignal(tween, Tween.SignalName.Finished);
+                try
+                {
+                    var tween = CreateTween();
+                    tween.TweenProperty(rect, "color:a", 1.0f, FadeDuration);
+                    await ToSignal(tween, Tween.SignalName.Finished);
+                }
+                catch (System.Exception)
+                {
+                    // Node freed during fade — abort gracefully.
+                    return;
+                }
             }
         }
 

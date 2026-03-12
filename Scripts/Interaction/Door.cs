@@ -32,9 +32,18 @@ public partial class Door : Interactable
     {
         if (IsLocked)
         {
-            // TODO: check interactor's inventory for key.
-            GD.Print($"Door is locked. Requires key: {RequiredKeyId}");
-            return;
+            // Check player inventory for the required key.
+            var inventory = PlayerInventory.Instance;
+            if (inventory != null && !string.IsNullOrEmpty(RequiredKeyId) && inventory.HasKey(RequiredKeyId))
+            {
+                Unlock();
+                GD.Print($"Door unlocked with key: {RequiredKeyId}");
+            }
+            else
+            {
+                GD.Print($"Door is locked. Requires key: {RequiredKeyId}");
+                return;
+            }
         }
 
         IsOpen = !IsOpen;
@@ -71,7 +80,12 @@ public partial class Door : Interactable
 
     public override string GetPromptText()
     {
-        if (IsLocked) return "[E] Locked";
+        if (IsLocked && !string.IsNullOrEmpty(RequiredKeyId))
+        {
+            var inv = PlayerInventory.Instance;
+            if (inv == null || !inv.HasKey(RequiredKeyId))
+                return $"[E] Locked (need {PuzzleUtils.HumanizeId(RequiredKeyId)})";
+        }
         return base.GetPromptText();
     }
 }

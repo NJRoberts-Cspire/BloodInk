@@ -70,6 +70,7 @@ public partial class GuardSearchState : State
         {
             // Arrived — look around briefly then pick a new point.
             _guard.Velocity = _guard.Velocity.MoveToward(Vector2.Zero, _guard.Friction * (float)delta);
+            _guard.ApplyKnockback(delta);
             _guard.MoveAndSlide();
 
             _searchPointTimer -= (float)delta;
@@ -88,6 +89,7 @@ public partial class GuardSearchState : State
             );
             _guard.GuardFacingDirection = dir;
             _guard.AnimPlayer.FlipH = dir.X < 0;
+            _guard.ApplyKnockback(delta);
             _guard.MoveAndSlide();
             _guard.UpdateFacingFromVelocity();
         }

@@ -42,6 +42,12 @@ public partial class DialogueManager : Node
     public override void _Ready()
     {
         Instance = this;
+        ProcessMode = ProcessModeEnum.Always;
+    }
+
+    public override void _ExitTree()
+    {
+        if (Instance == this) Instance = null;
     }
 
     // ─── Start / End ──────────────────────────────────────────────

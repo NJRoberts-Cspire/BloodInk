@@ -285,10 +285,19 @@ public partial class CampScene : Node2D
 
     // ─── Dialogue Event Handling ────────────────────────────────
 
+    public override void _ExitTree()
+    {
+        var dm = Dialogue.DialogueManager.Instance;
+        if (dm != null)
+            dm.DialogueEventFired -= OnDialogueEvent;
+    }
+
     private void WireDialogueEvents()
     {
         var dm = Dialogue.DialogueManager.Instance;
         if (dm == null) return;
+        // Prevent stacking handlers on repeated camp loads — disconnect first.
+        dm.DialogueEventFired -= OnDialogueEvent;
         dm.DialogueEventFired += OnDialogueEvent;
     }
 

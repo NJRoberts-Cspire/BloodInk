@@ -18,6 +18,10 @@ public partial class PlayerIdleState : State
     public override void Enter()
     {
         _player.UpdateAnimation("idle");
+
+        // Consume any buffered input from the previous state (e.g. attack pressed during dodge).
+        if (Machine != null && _player.TryConsumeBuffer(Machine))
+            return;
     }
 
     public override void PhysicsUpdate(double delta)
@@ -25,6 +29,7 @@ public partial class PlayerIdleState : State
         // Tick down ability cooldowns.
         PlayerAttackState.CooldownRemaining = Mathf.Max(0, PlayerAttackState.CooldownRemaining - (float)delta);
         PlayerDodgeState.CooldownRemaining = Mathf.Max(0, PlayerDodgeState.CooldownRemaining - (float)delta);
+        _player.TickInputBuffer((float)delta);
 
         _player.ApplyKnockback(delta);
         _player.ApplyMovement(Vector2.Zero, 0, delta);

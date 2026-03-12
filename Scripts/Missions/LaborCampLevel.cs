@@ -136,6 +136,13 @@ public partial class LaborCampLevel : MissionLevelBase
         SetCameraLimits(0, -544, 2560, 1600);
 
         GD.Print("═══ LABOR CAMP LOADED ═══");
+        GD.Print("  PUZZLE GUIDE:");
+        GD.Print("  Yard:    Break the wooden fence to find the Tunnel Key chest.");
+        GD.Print("           Push the ore block onto the floor switch to open the tunnel gate.");
+        GD.Print("  Tunnels: Use Tunnel Key on the locked shaft door.");
+        GD.Print("           Pull lever + push block onto switch to open the Foreman's gate.");
+        GD.Print("           Break collapsed wall for shortcut. Find Foreman Key in chest.");
+        GD.Print("  Office:  Use Foreman Key on Maren's door. Push block puzzle for bonus ink.");
     }
 
     // ═════════════════════════════════════════════════════════════
@@ -205,6 +212,19 @@ public partial class LaborCampLevel : MissionLevelBase
         {
             new(-100, 0), new(100, 0)
         });
+
+        // ── Puzzle 1: Breakable wooden fence hides Tunnel Key ──
+        AddBreakableWall(root, "WoodenFence", new Vector2(240, 300), hitsRequired: 1, width: 20f, height: 16f);
+        AddKeyChest(root, "TunnelKeyChest", new Vector2(240, 340), "tunnel_key", "Tunnel Key");
+
+        // ── Puzzle 2: Push ore block onto switch to open tunnel entrance gate ──
+        var yardSwitch = AddFloorSwitch(root, "OreSwitch", new Vector2(1280, 300), stayPressed: true);
+        var tunnelGate = AddPuzzleGate(root, "TunnelEntranceGate", new Vector2(1280, 200), requiredConditions: 1, stayOpen: true, isVertical: false, width: 40f, height: 16f);
+        tunnelGate.LinkSwitch(yardSwitch);
+        AddPushBlock(root, "OreBlock", new Vector2(1380, 300));
+
+        // ── Bonus: Hidden supplies ──
+        AddItemChest(root, "ToolShackChest", new Vector2(2320, 300), "ink", "trace_ink", "Trace Ink");
     }
 
     // ═════════════════════════════════════════════════════════════
@@ -277,6 +297,23 @@ public partial class LaborCampLevel : MissionLevelBase
         {
             new(-200, 0), new(200, 0)
         });
+
+        // ── Puzzle 3: Locked shaft door requires Tunnel Key ──
+        AddLockedDoor(root, "ShaftDoor", new Vector2(400, 208), "tunnel_key", isVertical: true);
+
+        // ── Puzzle 4: Lever + push block switch to open Foreman's passage ──
+        var tunnelLever = AddLever(root, "TunnelLever", new Vector2(900, 60), oneWay: false);
+        var tunnelSwitch = AddFloorSwitch(root, "TunnelSwitch", new Vector2(1600, 300), stayPressed: true);
+        var foremanGate = AddPuzzleGate(root, "ForemanGate", new Vector2(2000, 208), requiredConditions: 2, stayOpen: true, isVertical: true, width: 16f, height: 40f);
+        foremanGate.LinkLever(tunnelLever);
+        foremanGate.LinkSwitch(tunnelSwitch);
+        AddPushBlock(root, "MinecartBlock", new Vector2(1500, 300));
+
+        // ── Puzzle 5: Breakable collapsed wall (shortcut) ──
+        AddBreakableWall(root, "CollapsedTunnel", new Vector2(1600, 208), hitsRequired: 2, width: 16f, height: 20f);
+
+        // ── Puzzle 6: Foreman Key chest deeper in tunnel ──
+        AddKeyChest(root, "ForemanKeyChest", new Vector2(2400, 340), "foreman_key", "Foreman Key");
     }
 
     // ═════════════════════════════════════════════════════════════
@@ -330,6 +367,19 @@ public partial class LaborCampLevel : MissionLevelBase
         {
             new(-120, 0), new(120, 0)
         }, elite: true);
+
+        // ── Puzzle 7: Locked office door requires Foreman Key ──
+        AddLockedDoor(root, "MarenDoor", new Vector2(1280, 320), "foreman_key");
+
+        // ── Puzzle 8: Push block onto switch for records room ──
+        var officeSwitch = AddFloorSwitch(root, "RecordsSwitch", new Vector2(600, 240), stayPressed: true);
+        var recordsGate = AddPuzzleGate(root, "RecordsGate", new Vector2(600, 300), requiredConditions: 1, stayOpen: true, isVertical: false, width: 32f, height: 16f);
+        recordsGate.LinkSwitch(officeSwitch);
+        AddPushBlock(root, "FilingBlock", new Vector2(700, 240));
+
+        // ── Puzzle 9: Breakable wall revealing secret intel cache ──
+        AddBreakableWall(root, "OfficeWall", new Vector2(2400, 140), hitsRequired: 2, width: 16f, height: 20f);
+        AddItemChest(root, "IntelInkChest", new Vector2(2440, 140), "ink", "blood_ink", "Blood Ink");
 
         // Reeve Maren — seated in the central carpeted study.
         SpawnReeveMaren(root);

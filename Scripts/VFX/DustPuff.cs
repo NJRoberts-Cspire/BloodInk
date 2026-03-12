@@ -14,6 +14,7 @@ public partial class DustPuff : Node2D
     /// <summary>Spawn a small dust puff at worldPos.</summary>
     public static void SpawnAt(Node parent, Vector2 worldPos, float intensity = 1f)
     {
+        if (parent == null) return;
         int count = Mathf.RoundToInt(ParticleCount * intensity);
 
         for (int i = 0; i < count; i++)

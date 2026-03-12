@@ -36,8 +36,22 @@ public partial class DialoguePanel : Control
 
         Visible = false;
 
+        // Must process during pause so typewriter + input work while dialogue pauses the game.
+        ProcessMode = ProcessModeEnum.Always;
+
         // Connect to DialogueManager signals (deferred — manager may load after us).
         CallDeferred(MethodName.ConnectToManager);
+    }
+
+    public override void _ExitTree()
+    {
+        // Disconnect from the singleton manager to prevent stale delegate crashes.
+        var mgr = DialogueManager.Instance;
+        if (mgr == null) return;
+        mgr.LineDisplayed -= OnLineDisplayed;
+        mgr.ChoicesPresented -= OnChoicesPresented;
+        mgr.ConversationStarted -= OnConversationStarted;
+        mgr.ConversationEnded -= OnConversationEnded;
     }
 
     private void ConnectToManager()

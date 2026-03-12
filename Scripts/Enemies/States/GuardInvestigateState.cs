@@ -99,6 +99,7 @@ public partial class GuardInvestigateState : State
                 );
                 _guard.GuardFacingDirection = dir;
                 _guard.AnimPlayer.FlipH = dir.X < 0;
+                _guard.ApplyKnockback(delta);
                 _guard.MoveAndSlide();
             }
         }
@@ -106,6 +107,7 @@ public partial class GuardInvestigateState : State
         {
             // Look around at the investigation point.
             _guard.Velocity = _guard.Velocity.MoveToward(Vector2.Zero, _guard.Friction * (float)delta);
+            _guard.ApplyKnockback(delta);
             _guard.MoveAndSlide();
 
             _lookTimer -= (float)delta;

@@ -67,6 +67,17 @@ public static class MapBuilder
                     body.AddChild(shape);
                     parent.AddChild(body);
                 }
+
+                // Shadow zone — create functional ShadowZone Area2D.
+                if (c == '~')
+                {
+                    var shadow = new Stealth.ShadowZone();
+                    shadow.Position = sprite.Position;
+                    var shadowShape = new CollisionShape2D();
+                    shadowShape.Shape = new RectangleShape2D { Size = new Vector2(TILE_SIZE, TILE_SIZE) };
+                    shadow.AddChild(shadowShape);
+                    parent.AddChild(shadow);
+                }
             }
         }
     }

@@ -92,6 +92,11 @@ public partial class PlayerStealthKillState : State
         _timer -= (float)delta;
         _player.MoveAndSlide();
 
+        // Tick cooldowns and input buffer during the kill animation.
+        PlayerAttackState.CooldownRemaining = Mathf.Max(0, PlayerAttackState.CooldownRemaining - (float)delta);
+        PlayerDodgeState.CooldownRemaining = Mathf.Max(0, PlayerDodgeState.CooldownRemaining - (float)delta);
+        _player.TickInputBuffer((float)delta);
+
         // Disable hitbox after the brief active window to prevent multi-kills.
         if (_timer <= KillDuration - HitboxActiveWindow && _player.SwordHitbox.Monitoring)
         {
@@ -103,6 +108,17 @@ public partial class PlayerStealthKillState : State
             // Return to Crouch state (still sneaking after the kill).
             Machine?.TransitionTo("Crouch");
         }
+    }
+
+    /// <summary>Buffer inputs pressed during the stealth kill so they execute on exit.</summary>
+    public override void HandleInput(InputEvent @event)
+    {
+        if (@event.IsActionPressed("attack"))
+            _player.BufferInput("attack");
+        else if (@event.IsActionPressed("dodge"))
+            _player.BufferInput("dodge");
+        else if (@event.IsActionPressed("crouch"))
+            _player.BufferInput("crouch");
     }
 
     public override void Exit()
@@ -155,7 +171,7 @@ public partial class PlayerStealthKillState : State
         if (result.Count == 0) return false; // No enemy in range — can't backstab nothing.
 
         var enemy = result["collider"].As<Node2D>();
-        if (enemy == null) return true;
+        if (enemy == null) return false; // Can't identify enemy — no backstab.
 
         // Check if we're behind the enemy.
         // Get the enemy's facing direction — default to their velocity or looking direction.

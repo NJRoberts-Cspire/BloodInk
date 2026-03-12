@@ -11,6 +11,7 @@ public partial class ScreenTransition : Node
     public static ScreenTransition? Instance { get; private set; }
 
     private ColorRect? _fadeRect;
+    private Tween? _activeTween;
 
     public override void _Ready()
     {
@@ -50,9 +51,10 @@ public partial class ScreenTransition : Node
     {
         if (_fadeRect == null) return;
 
+        _activeTween?.Kill();
         _fadeRect.Color = new Color(1, 1, 1, 0.6f);
-        var tween = _fadeRect.CreateTween();
-        tween.TweenProperty(_fadeRect, "color:a", 0.0f, duration);
+        _activeTween = _fadeRect.CreateTween();
+        _activeTween.TweenProperty(_fadeRect, "color:a", 0.0f, duration);
     }
 
     /// <summary>Red pulse (player takes damage).</summary>
@@ -60,9 +62,10 @@ public partial class ScreenTransition : Node
     {
         if (_fadeRect == null) return;
 
+        _activeTween?.Kill();
         _fadeRect.Color = new Color(0.7f, 0.05f, 0.05f, 0.3f);
-        var tween = _fadeRect.CreateTween();
-        tween.TweenProperty(_fadeRect, "color:a", 0.0f, duration);
+        _activeTween = _fadeRect.CreateTween();
+        _activeTween.TweenProperty(_fadeRect, "color:a", 0.0f, duration);
     }
 
     // ─── Internal ─────────────────────────────────────────────────
@@ -71,17 +74,19 @@ public partial class ScreenTransition : Node
     {
         if (_fadeRect == null) return;
 
+        _activeTween?.Kill();
         _fadeRect.Color = new Color(color.R, color.G, color.B, 0);
-        var tween = _fadeRect.CreateTween();
-        tween.TweenProperty(_fadeRect, "color:a", 1.0f, duration);
+        _activeTween = _fadeRect.CreateTween();
+        _activeTween.TweenProperty(_fadeRect, "color:a", 1.0f, duration);
     }
 
     private void FadeFrom(Color color, float duration)
     {
         if (_fadeRect == null) return;
 
+        _activeTween?.Kill();
         _fadeRect.Color = new Color(color.R, color.G, color.B, 1);
-        var tween = _fadeRect.CreateTween();
-        tween.TweenProperty(_fadeRect, "color:a", 0.0f, duration);
+        _activeTween = _fadeRect.CreateTween();
+        _activeTween.TweenProperty(_fadeRect, "color:a", 0.0f, duration);
     }
 }

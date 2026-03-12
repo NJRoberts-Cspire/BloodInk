@@ -49,6 +49,9 @@ public partial class PlayerAttackState : State
 
         // Camera nudge.
         CameraShake.Instance?.ShakeLight();
+
+        // Attack swing sound.
+        Audio.AudioManager.Instance?.PlaySFX("res://Assets/Audio/SFX/sword_swing.wav");
     }
 
     public override void PhysicsUpdate(double delta)
@@ -57,10 +60,25 @@ public partial class PlayerAttackState : State
         _player.ApplyKnockback(delta);
         _player.MoveAndSlide();
 
+        // Tick the other ability's cooldown so it's ready when this attack ends.
+        PlayerDodgeState.CooldownRemaining = Mathf.Max(0, PlayerDodgeState.CooldownRemaining - (float)delta);
+        _player.TickInputBuffer((float)delta);
+
         if (_timer <= 0)
         {
             Machine?.TransitionTo("Idle");
         }
+    }
+
+    /// <summary>Buffer inputs pressed during the attack so they execute on exit.</summary>
+    public override void HandleInput(InputEvent @event)
+    {
+        if (@event.IsActionPressed("attack"))
+            _player.BufferInput("attack");
+        else if (@event.IsActionPressed("dodge"))
+            _player.BufferInput("dodge");
+        else if (@event.IsActionPressed("crouch"))
+            _player.BufferInput("crouch");
     }
 
     public override void Exit()

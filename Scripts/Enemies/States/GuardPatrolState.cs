@@ -49,6 +49,7 @@ public partial class GuardPatrolState : State
         {
             _waitTimer -= (float)delta;
             _guard.Velocity = _guard.Velocity.MoveToward(Vector2.Zero, _guard.Friction * (float)delta);
+            _guard.ApplyKnockback(delta);
             _guard.MoveAndSlide();
 
             if (_waitTimer <= 0f)
@@ -82,6 +83,7 @@ public partial class GuardPatrolState : State
         );
         _guard.GuardFacingDirection = dir;
         _guard.AnimPlayer.FlipH = dir.X < 0;
+        _guard.ApplyKnockback(delta);
         _guard.MoveAndSlide();
     }
 
@@ -93,6 +95,7 @@ public partial class GuardPatrolState : State
         {
             AwarenessLevel.Engaged => TransitionTo("Chase"),
             AwarenessLevel.Alerted => TransitionTo("Alert"),
+            AwarenessLevel.Searching => TransitionTo("Search"),
             AwarenessLevel.Suspicious => TransitionTo("Investigate"),
             _ => false
         };

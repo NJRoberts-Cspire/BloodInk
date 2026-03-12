@@ -140,6 +140,13 @@ public partial class BarracksLevel : MissionLevelBase
         SetCameraLimits(0, -640, 2560, 1520);
 
         GD.Print("═══ BARRACKS LOADED ═══");
+        GD.Print("  PUZZLE GUIDE:");
+        GD.Print("  Yard:     Break weapon crates near stables to find Barracks Key.");
+        GD.Print("            Push two blocks onto floor switches to open drill-yard gate.");
+        GD.Print("  Interior: Use Barracks Key on bunk-room door. Pull armory lever + push");
+        GD.Print("            block onto switch to open corridor gate. Find Officer Key.");
+        GD.Print("  Trophy:   Use Officer Key on trophy room door. Break display case for ink.");
+        GD.Print("            Push block onto switch to reach Captain Thorne's sanctum.");
     }
 
     // ═════════════════════════════════════════════════════════════
@@ -210,6 +217,22 @@ public partial class BarracksLevel : MissionLevelBase
         {
             new(-120, 0), new(120, 0)
         });
+
+        // ── Puzzle 1: Breakable weapon crates hide Barracks Key ──
+        AddBreakableWall(root, "WeaponCrates", new Vector2(1800, 340), hitsRequired: 2, width: 20f, height: 16f);
+        AddKeyChest(root, "BarracksKeyChest", new Vector2(1800, 380), "barracks_key", "Barracks Key");
+
+        // ── Puzzle 2: Dual push blocks onto floor switches open drill-yard gate ──
+        var drillSwitch1 = AddFloorSwitch(root, "DrillSwitch1", new Vector2(1080, 350), stayPressed: true);
+        var drillSwitch2 = AddFloorSwitch(root, "DrillSwitch2", new Vector2(1480, 350), stayPressed: true);
+        var drillGate = AddPuzzleGate(root, "DrillYardGate", new Vector2(1280, 440), requiredConditions: 2, stayOpen: true, isVertical: false, width: 48f, height: 16f);
+        drillGate.LinkSwitch(drillSwitch1);
+        drillGate.LinkSwitch(drillSwitch2);
+        AddPushBlock(root, "DrillBlock1", new Vector2(980, 350));
+        AddPushBlock(root, "DrillBlock2", new Vector2(1580, 350));
+
+        // ── Bonus: Trace Ink under the siege engine ──
+        AddItemChest(root, "SiegeInkChest", new Vector2(1280, 400), "ink", "trace_ink", "Trace Ink");
     }
 
     // ═════════════════════════════════════════════════════════════
@@ -281,6 +304,23 @@ public partial class BarracksLevel : MissionLevelBase
         {
             new(-100, 0), new(100, 0)
         }, elite: true);
+
+        // ── Puzzle 3: Locked bunk-room door requires Barracks Key ──
+        AddLockedDoor(root, "BunkDoor", new Vector2(160, 240), "barracks_key", isVertical: true);
+
+        // ── Puzzle 4: Armory lever + push block switch opens corridor gate ──
+        var armoryLever = AddLever(root, "ArmoryLever", new Vector2(2100, 160), oneWay: false);
+        var corridorSwitch = AddFloorSwitch(root, "CorridorSwitch", new Vector2(1600, 380), stayPressed: true);
+        var corridorGate = AddPuzzleGate(root, "CorridorGate", new Vector2(1280, 420), requiredConditions: 2, stayOpen: true, isVertical: false, width: 48f, height: 16f);
+        corridorGate.LinkLever(armoryLever);
+        corridorGate.LinkSwitch(corridorSwitch);
+        AddPushBlock(root, "CorridorBlock", new Vector2(1500, 380));
+
+        // ── Puzzle 5: Breakable armory wall shortcut ──
+        AddBreakableWall(root, "ArmoryWall", new Vector2(2400, 200), hitsRequired: 2, width: 16f, height: 20f);
+
+        // ── Puzzle 6: Officer Key in locked armory chest ──
+        AddKeyChest(root, "OfficerKeyChest", new Vector2(2440, 200), "officer_key", "Officer Key");
     }
 
     // ═════════════════════════════════════════════════════════════
@@ -338,6 +378,19 @@ public partial class BarracksLevel : MissionLevelBase
         {
             new(0, -60), new(0, 60)
         }, elite: true);
+
+        // ── Puzzle 7: Locked trophy room door requires Officer Key ──
+        AddLockedDoor(root, "TrophyDoor", new Vector2(1280, 320), "officer_key");
+
+        // ── Puzzle 8: Breakable display case reveals rare ink ──
+        AddBreakableWall(root, "DisplayCase", new Vector2(600, 40), hitsRequired: 3, width: 20f, height: 16f);
+        AddItemChest(root, "TrophyInkChest", new Vector2(600, 80), "ink", "blood_ink", "Blood Ink");
+
+        // ── Puzzle 9: Push block onto switch to open Thorne's sanctum ──
+        var sanctumSwitch = AddFloorSwitch(root, "ThorneSanctumSwitch", new Vector2(1280, 240), stayPressed: true);
+        var thorneGate = AddPuzzleGate(root, "ThorneSanctumGate", new Vector2(1280, 160), requiredConditions: 1, stayOpen: true, isVertical: false, width: 40f, height: 16f);
+        thorneGate.LinkSwitch(sanctumSwitch);
+        AddPushBlock(root, "TrophyBlock", new Vector2(1180, 240));
 
         // Captain Thorne is the big-bad of the Barracks.
         SpawnCaptainThorne(root);
