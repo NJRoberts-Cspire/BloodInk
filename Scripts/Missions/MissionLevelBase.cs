@@ -138,6 +138,30 @@ public abstract partial class MissionLevelBase : Node2D
                 gameHud.OnHealthChanged(health.CurrentHealth, health.MaxHealth);
             }
         }
+
+        // Fade the level in smoothly on entry.
+        CallDeferred(MethodName.DoFadeIn);
+    }
+
+    // ─── Fade-In ──────────────────────────────────────────────────
+
+    /// <summary>
+    /// Overlay the screen with black and tween it to transparent — call from SetupHUD()
+    /// or any concrete level's _Ready() for a smooth scene entry fade.
+    /// </summary>
+    protected void DoFadeIn(float duration = 0.4f)
+    {
+        // CanvasLayer so the fade sits above all 2D content.
+        var layer = new CanvasLayer { Layer = 10 };
+        var rect  = new ColorRect { Color = new Color(0f, 0f, 0f, 1f) };
+        rect.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+        rect.LayoutMode = 1;
+        layer.AddChild(rect);
+        AddChild(layer);
+
+        var tween = CreateTween();
+        tween.TweenProperty(rect, "color:a", 0f, duration);
+        tween.TweenCallback(Callable.From(() => layer.QueueFree()));
     }
 
     // ─── Guard Factory ────────────────────────────────────────────
@@ -224,6 +248,65 @@ public abstract partial class MissionLevelBase : Node2D
         stateMachine.AddChild(new GuardChaseState { Name = "Chase" });
         stateMachine.AddChild(new GuardSearchState { Name = "Search" });
         stateMachine.AddChild(new GuardAttackState { Name = "Attack" });
+    }
+
+    // ─── Crossbow Enemy Factory ───────────────────────────────────
+
+    /// <summary>
+    /// Spawn a crossbow enemy at <paramref name="pos"/>. The enemy keeps its distance
+    /// and fires bolts at the player — it has no stealth awareness.
+    /// </summary>
+    protected virtual void AddCrossbowman(Node2D parent, string name, Vector2 pos,
+        float aggroRange = 180f, float preferredRange = 110f, int boltDamage = 1)
+    {
+        var enemy = new CrossbowEnemy
+        {
+            Name = name,
+            Position = pos,
+            AggroRange = aggroRange,
+            PreferredRange = preferredRange,
+            BoltDamage = boltDamage,
+        };
+        enemy.CollisionLayer = 1 << 2;
+        enemy.CollisionMask  = 1;
+
+        // Animated sprite.
+        var sprite = new AnimatedSprite2D { Name = "AnimatedSprite2D" };
+        var frames = PlaceholderSprites.GetFrames("crossbowman_frames")
+                  ?? PlaceholderSprites.GetFrames("guard_frames");
+        if (frames != null) sprite.SpriteFrames = frames;
+        enemy.AddChild(sprite);
+
+        // Health (2 hits — squishier than a melee guard).
+        var health = new HealthComponent { Name = "HealthComponent", MaxHealth = 2 };
+        enemy.AddChild(health);
+
+        // Hurtbox.
+        var hurtbox = new Hurtbox { Name = "Hurtbox" };
+        var hurtShape = new CollisionShape2D
+        {
+            Shape = new RectangleShape2D { Size = new Vector2(10, 14) }
+        };
+        hurtbox.AddChild(hurtShape);
+        enemy.AddChild(hurtbox);
+
+        // Hitbox (melee fallback — short range, rarely used).
+        var hitbox = new Hitbox { Name = "Hitbox", Monitoring = false };
+        var hitShape = new CollisionShape2D
+        {
+            Shape = new RectangleShape2D { Size = new Vector2(10, 10) }
+        };
+        hitbox.AddChild(hitShape);
+        enemy.AddChild(hitbox);
+
+        SetOwnerRecursive(enemy, enemy);
+
+        // Wire the player as the target after the enemy enters the tree.
+        parent.AddChild(enemy);
+        var player = parent.GetTree().GetFirstNodeInGroup("Player") as Node2D
+                  ?? parent.FindChild("Player", true, false) as Node2D;
+        if (player != null)
+            enemy.Target = player;
     }
 
     /// <summary>Recursively set Owner on all descendants so GetOwner works.</summary>
@@ -513,6 +596,40 @@ public abstract partial class MissionLevelBase : Node2D
         return wall;
     }
 
+    // ─── NG+ Ghost Encounters ─────────────────────────────────────
+
+    /// <summary>
+    /// Spawn a ghost echo of a previously killed Edictbearer if this is a NG+ run
+    /// and <paramref name="ghostTargetId"/> was killed in the previous cycle.
+    /// The ghost is a translucent elite guard that always pursues the player.
+    /// Does nothing on a first run or if the target was never killed before.
+    /// </summary>
+    protected void AddGhostIfNG(Node2D parent, string ghostTargetId, Vector2 pos)
+    {
+        var ngp = GameManager.Instance?.NewGamePlus;
+        if (ngp == null || !ngp.IsEdictbearerGhost(ghostTargetId)) return;
+
+        string ghostName = $"Ghost_{ghostTargetId}";
+        AddGuard(parent, ghostName, pos,
+            waypoints: System.Array.Empty<Vector2>(), elite: true);
+
+        var ghost = parent.GetNodeOrNull<GuardEnemy>(ghostName);
+        if (ghost == null) return;
+
+        // Visual: pale blue translucency.
+        ghost.Modulate = new Color(0.75f, 0.88f, 1f, 0.55f);
+
+        // Stat overrides — ghosts are relentless.
+        ghost.ChaseSpeed  = ghost.ChaseSpeed * 1.3f;
+        ghost.AlertedSpeed = ghost.AlertedSpeed * 1.2f;
+
+        // Sensor override: infinite view distance so it always closes in.
+        if (ghost.Sensor != null)
+            ghost.Sensor.ViewDistance = 9999f;
+
+        GD.Print($"[NG+] Ghost of '{ghostTargetId}' spawned at {pos}.");
+    }
+
     // ─── Mission Flow Helpers ─────────────────────────────────────
 
     /// <summary>
@@ -555,9 +672,20 @@ public abstract partial class MissionLevelBase : Node2D
             }
         }
 
-        MissionComplete.TargetText = targetDisplayName;
+        // Compute stealth grade from the peak alert level reached during the mission.
+        int peakAlert = Stealth.MissionAlertManager.Instance?.AlertLevel ?? 0;
+        MissionComplete.StealthGrade = peakAlert switch
+        {
+            0 => "S",
+            1 => "A",
+            2 => "B",
+            3 => "C",
+            _ => "D",
+        };
+
+        MissionComplete.TargetText  = targetDisplayName;
         MissionComplete.WhisperText = whisperText;
-        MissionComplete.RewardText = rewardText;
+        MissionComplete.RewardText  = rewardText;
 
         // Capture tree reference before timer to avoid ObjectDisposedException if node freed.
         var tree = GetTree();

@@ -119,18 +119,19 @@ public partial class GuardEnemy : EnemyBase
         // Use noise propagator to alert nearby guards.
         NoisePropagator.Instance?.PropagateNoise(GlobalPosition, AlertCallRadius);
 
-        // Also directly alert guards in the group within radius.
-        foreach (var node in GetTree().GetNodesInGroup("Guards"))
+        // Directly alert guards whose sensors are within radius — spatial query
+        // via NoisePropagator avoids scanning every node in the "Guards" group.
+        var propagator = NoisePropagator.Instance;
+        if (propagator != null)
         {
-            if (node is GuardEnemy guard && guard != this)
+            foreach (var sensor in propagator.GetSensorsInRadius(GlobalPosition, AlertCallRadius))
             {
-                float dist = GlobalPosition.DistanceTo(guard.GlobalPosition);
-                if (dist <= AlertCallRadius && guard.Sensor != null)
-                {
-                    guard.Sensor.ForceEngage();
-                    guard.Target = Target;
-                    GD.Print($"Guard {Name} called backup to {guard.Name}");
-                }
+                var guard = sensor.GetParent<GuardEnemy>();
+                if (guard == null || guard == this) continue;
+
+                sensor.ForceEngage();
+                guard.Target = Target;
+                GD.Print($"Guard {Name} called backup to {guard.Name}");
             }
         }
     }

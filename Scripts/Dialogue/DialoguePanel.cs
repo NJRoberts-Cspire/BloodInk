@@ -26,6 +26,15 @@ public partial class DialoguePanel : Control
     private bool _isTyping = false;
     private bool _waitingForChoice = false;
 
+    // ─── Continue indicator ───────────────────────────────────────
+    private Label? _continueHint; // "▼" blink shown when text is done
+    private float _blinkTimer;
+
+    // ─── Hold-to-skip ─────────────────────────────────────────────
+    private float _holdTimer;
+    private const float HoldSkipDuration = 1.0f; // seconds to hold before skipping
+    private bool _holdingAdvance;
+
     public override void _Ready()
     {
         _panelBg = GetNodeOrNull<Panel>("PanelBg");
@@ -38,6 +47,27 @@ public partial class DialoguePanel : Control
 
         // Must process during pause so typewriter + input work while dialogue pauses the game.
         ProcessMode = ProcessModeEnum.Always;
+
+        // Continue hint — try to get it from the scene, otherwise build it.
+        _continueHint = GetNodeOrNull<Label>("PanelBg/ContinueHint");
+        if (_continueHint == null && _panelBg != null)
+        {
+            _continueHint = new Label
+            {
+                Name = "ContinueHint",
+                Text = "▼",
+                HorizontalAlignment = HorizontalAlignment.Right,
+                LayoutMode = 1,
+                AnchorsPreset = (int)LayoutPreset.BottomRight,
+                OffsetBottom = -6,
+                OffsetRight  = -10,
+                OffsetTop    = -28,
+                OffsetLeft   = -40,
+            };
+            _continueHint.AddThemeColorOverride("font_color", new Color(0.7f, 0.5f, 0.3f));
+            _continueHint.Visible = false;
+            _panelBg.AddChild(_continueHint);
+        }
 
         // Connect to DialogueManager signals (deferred — manager may load after us).
         CallDeferred(MethodName.ConnectToManager);
@@ -71,34 +101,69 @@ public partial class DialoguePanel : Control
 
     public override void _Process(double delta)
     {
-        if (!_isTyping) return;
+        if (!Visible) return;
 
-        _charTimer += (float)delta;
-        float interval = 1f / TypewriterSpeed;
-        while (_charTimer >= interval && _visibleChars < _fullText.Length)
+        // ── Typewriter ──────────────────────────────────────────────
+        if (_isTyping)
         {
-            _visibleChars++;
-            _charTimer -= interval;
+            _charTimer += (float)delta;
+            float interval = 1f / TypewriterSpeed;
+            while (_charTimer >= interval && _visibleChars < _fullText.Length)
+            {
+                _visibleChars++;
+                _charTimer -= interval;
+            }
+
+            if (_textLabel != null)
+                _textLabel.VisibleCharacters = _visibleChars;
+
+            if (_visibleChars >= _fullText.Length)
+                _isTyping = false;
         }
 
-        if (_textLabel != null)
-            _textLabel.VisibleCharacters = _visibleChars;
+        // ── Continue-hint blink (shown when idle, no choices) ────────
+        if (_continueHint != null)
+        {
+            bool showHint = !_isTyping && !_waitingForChoice;
+            if (showHint)
+            {
+                _blinkTimer += (float)delta;
+                _continueHint.Visible = (int)(_blinkTimer * 2f) % 2 == 0;
+            }
+            else
+            {
+                _continueHint.Visible = false;
+                _blinkTimer = 0f;
+            }
+        }
 
-        if (_visibleChars >= _fullText.Length)
-            _isTyping = false;
+        // ── Hold-to-skip ────────────────────────────────────────────
+        if (_holdingAdvance)
+        {
+            _holdTimer += (float)delta;
+            if (_holdTimer >= HoldSkipDuration)
+            {
+                _holdingAdvance = false;
+                _holdTimer = 0f;
+                DialogueManager.Instance?.EndConversation();
+            }
+        }
     }
 
     public override void _UnhandledInput(InputEvent @event)
     {
         if (!Visible) return;
 
-        if (@event.IsActionPressed("interact") || @event.IsActionPressed("attack"))
+        bool isAdvanceAction = @event.IsAction("interact") || @event.IsAction("attack");
+        if (!isAdvanceAction) return;
+
+        if (@event.IsPressed() && !@event.IsEcho())
         {
             if (_waitingForChoice) return; // choices need button press
 
             if (_isTyping)
             {
-                // Skip typewriter — show full text instantly.
+                // First press: complete the line instantly.
                 _visibleChars = _fullText.Length;
                 if (_textLabel != null)
                     _textLabel.VisibleCharacters = _visibleChars;
@@ -106,10 +171,19 @@ public partial class DialoguePanel : Control
             }
             else
             {
+                // Begin tracking hold for skip.
+                _holdingAdvance = true;
+                _holdTimer = 0f;
                 DialogueManager.Instance?.Advance();
             }
 
             GetViewport().SetInputAsHandled();
+        }
+        else if (!@event.IsPressed())
+        {
+            // Button released before hold threshold — just a normal tap (already advanced above).
+            _holdingAdvance = false;
+            _holdTimer = 0f;
         }
     }
 
@@ -126,6 +200,9 @@ public partial class DialoguePanel : Control
         Visible = false;
         _isTyping = false;
         _waitingForChoice = false;
+        _holdingAdvance = false;
+        _holdTimer = 0f;
+        if (_continueHint != null) _continueHint.Visible = false;
     }
 
     private void OnLineDisplayed(string speaker, string portrait, string text)

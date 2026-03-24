@@ -27,13 +27,23 @@ public partial class GuardSearchState : State
     public override void Enter()
     {
         _guard.AnimPlayer.Play("run");
-        _searchTimer = _guard.SearchTime;
+
+        // At higher alert levels guards search longer before giving up.
+        int alertLevel = MissionAlertManager.Instance?.AlertLevel ?? 0;
+        float alertBonus = alertLevel switch
+        {
+            >= 3 => _guard.SearchTime * 2f,    // Hunted / Siege — search indefinitely.
+            2    => _guard.SearchTime * 1f,    // Alerted — 2× base.
+            _    => 0f
+        };
+        _searchTimer = _guard.SearchTime + alertBonus;
+
         _searchCenter = _guard.Sensor?.LastKnownPlayerPosition ?? _guard.GlobalPosition;
         _currentSearchPoint = _searchCenter;
         _searchPointTimer = 0f;
         _searchPointsVisited = 0;
 
-        GD.Print($"Guard {_guard.Name} is SEARCHING near {_searchCenter}");
+        GD.Print($"Guard {_guard.Name} is SEARCHING near {_searchCenter} (timer {_searchTimer:F0}s, alert {alertLevel})");
         PickNewSearchPoint();
     }
 
@@ -82,9 +92,10 @@ public partial class GuardSearchState : State
         }
         else
         {
+            float alertMul = MissionAlertManager.Instance?.GetSpeedMultiplier() ?? 1f;
             var dir = toPoint.Normalized();
             _guard.Velocity = _guard.Velocity.MoveToward(
-                dir * _guard.AlertedSpeed,
+                dir * _guard.AlertedSpeed * alertMul,
                 _guard.Acceleration * (float)delta
             );
             _guard.GuardFacingDirection = dir;
@@ -95,11 +106,21 @@ public partial class GuardSearchState : State
         }
 
         // Search timeout.
-        if (_searchTimer <= 0f || _searchPointsVisited >= 5)
+        // At Hunted/Siege alert level (>= 3), guards never stand down on their own.
+        int currentAlert = MissionAlertManager.Instance?.AlertLevel ?? 0;
+        bool lockedDown  = currentAlert >= 3;
+
+        if (!lockedDown && (_searchTimer <= 0f || _searchPointsVisited >= 5))
         {
             GD.Print($"Guard {_guard.Name} gave up searching.");
             _guard.Sensor?.ResetAwareness();
             Machine?.TransitionTo("Patrol");
+        }
+        else if (lockedDown && _searchPointsVisited >= 5)
+        {
+            // Keep cycling search points indefinitely during lockdown.
+            _searchPointsVisited = 0;
+            PickNewSearchPoint();
         }
     }
 

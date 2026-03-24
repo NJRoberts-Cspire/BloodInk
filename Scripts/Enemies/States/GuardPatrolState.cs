@@ -76,9 +76,11 @@ public partial class GuardPatrolState : State
             return;
         }
 
+        // Scale patrol speed by global alert level so guards hurry during a lockdown.
+        float alertMul = MissionAlertManager.Instance?.GetSpeedMultiplier() ?? 1f;
         var dir = toWaypoint.Normalized();
         _guard.Velocity = _guard.Velocity.MoveToward(
-            dir * _guard.PatrolSpeed,
+            dir * _guard.PatrolSpeed * alertMul,
             _guard.Acceleration * (float)delta
         );
         _guard.GuardFacingDirection = dir;

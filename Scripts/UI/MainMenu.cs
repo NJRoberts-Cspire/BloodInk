@@ -30,9 +30,15 @@ public partial class MainMenu : Control
         _settingsBtn?.Connect("pressed", Callable.From(OnSettings));
         _quitBtn?.Connect("pressed", Callable.From(OnQuit));
 
-        // Disable continue if no save exists.
+        // Disable continue if no save exists; show save info on the button.
+        var saveInfo = Core.SaveSystem.ReadSlotInfo("slot1");
         if (_continueBtn != null)
-            _continueBtn.Disabled = !Core.SaveSystem.SaveExists("slot1");
+        {
+            _continueBtn.Disabled = saveInfo == null;
+            _continueBtn.Text = saveInfo != null
+                ? $"Continue  ({saveInfo.DisplayLabel()})"
+                : "Continue";
+        }
 
         // Pre-instantiate the settings panel (hidden by default).
         _settingsPanel = SettingsScene.Instantiate<SettingsPanel>();

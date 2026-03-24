@@ -53,9 +53,13 @@ public partial class NoisePropagator : Node
 
         // Iterate a snapshot to avoid modification during iteration.
         var snapshot = _sensors.ToArray();
+        float radiusSq = radius * radius;
         foreach (var sensor in snapshot)
         {
             if (!IsInstanceValid(sensor)) continue;
+
+            // Fast reject: skip sensors that can't possibly hear this noise.
+            if (sensor.GlobalPosition.DistanceSquaredTo(position) > radiusSq) continue;
 
             // Wall occlusion: raycast from noise source to sensor.
             // If a wall blocks the path, attenuate the effective radius.
@@ -63,6 +67,18 @@ public partial class NoisePropagator : Node
             if (effectiveRadius > 0f)
                 sensor.OnNoiseAtPosition(position, effectiveRadius);
         }
+    }
+
+    /// <summary>
+    /// Return all valid registered sensors within <paramref name="radius"/> of <paramref name="center"/>.
+    /// Uses a squared-distance check — no raycasts involved.
+    /// </summary>
+    public IEnumerable<DetectionSensor> GetSensorsInRadius(Vector2 center, float radius)
+    {
+        float radiusSq = radius * radius;
+        foreach (var sensor in _sensors)
+            if (IsInstanceValid(sensor) && sensor.GlobalPosition.DistanceSquaredTo(center) <= radiusSq)
+                yield return sensor;
     }
 
     /// <summary>

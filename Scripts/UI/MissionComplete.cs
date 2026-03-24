@@ -19,10 +19,18 @@ public partial class MissionComplete : Control
     /// <summary>Reward summary text (e.g. "Blood-Ink Acquired: 1× Major Grade").</summary>
     public static string RewardText { get; set; } = "";
 
+    /// <summary>
+    /// Stealth grade letter set by the mission level based on alert history.
+    ///   S = never detected  A = suspicious only  B = alerted
+    ///   C = hunted          D = siege
+    /// </summary>
+    public static string StealthGrade { get; set; } = "S";
+
     private Label? _titleLabel;
     private Label? _targetLabel;
     private Label? _whisperLabel;
     private Label? _rewardLabel;
+    private Label? _gradeLabel;
     private Button? _continueBtn;
 
     public override void _Ready()
@@ -91,7 +99,41 @@ public partial class MissionComplete : Control
         _rewardLabel.AddThemeFontSizeOverride("font_size", 12);
         vbox.AddChild(_rewardLabel);
 
-        vbox.AddChild(new Control { CustomMinimumSize = new Vector2(0, 40) });
+        vbox.AddChild(new Control { CustomMinimumSize = new Vector2(0, 24) });
+
+        // ─── Stealth grade ────────────────────────────────────────────────
+        var gradeRow = new HBoxContainer { SizeFlagsHorizontal = SizeFlags.ShrinkCenter };
+        gradeRow.AddThemeConstantOverride("separation", 12);
+
+        var gradeCaption = new Label
+        {
+            Text = "Stealth:",
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        gradeCaption.AddThemeColorOverride("font_color", new Color(0.65f, 0.65f, 0.65f));
+        gradeRow.AddChild(gradeCaption);
+
+        _gradeLabel = new Label
+        {
+            Text = StealthGrade,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        // Colour the letter by grade.
+        Color gradeColor = StealthGrade switch
+        {
+            "S" => new Color(0.9f, 0.85f, 0.3f),   // gold
+            "A" => new Color(0.3f, 0.85f, 0.5f),   // green
+            "B" => new Color(0.4f, 0.65f, 0.9f),   // blue
+            "C" => new Color(0.9f, 0.55f, 0.2f),   // orange
+            _   => new Color(0.85f, 0.2f, 0.15f),  // red
+        };
+        _gradeLabel.AddThemeColorOverride("font_color", gradeColor);
+        _gradeLabel.AddThemeFontSizeOverride("font_size", 22);
+        gradeRow.AddChild(_gradeLabel);
+
+        vbox.AddChild(gradeRow);
+
+        vbox.AddChild(new Control { CustomMinimumSize = new Vector2(0, 20) });
 
         _continueBtn = new Button
         {
@@ -108,9 +150,10 @@ public partial class MissionComplete : Control
         tween.TweenProperty(this, "modulate:a", 1.0f, 2.0f);
 
         // Reset static data after reading — prevents stale text on replay.
-        TargetText = "Target Eliminated";
-        WhisperText = "";
-        RewardText = "";
+        TargetText   = "Target Eliminated";
+        WhisperText  = "";
+        RewardText   = "";
+        StealthGrade = "S";
     }
 
     private void OnContinue()

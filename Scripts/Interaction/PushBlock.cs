@@ -22,6 +22,7 @@ public partial class PushBlock : CharacterBody2D
     [Export] public Color BlockColor { get; set; } = new(0.4f, 0.35f, 0.3f, 1.0f);
 
     private Vector2 _targetPosition;
+    private Vector2 _initialPosition;
     private bool _isMoving = false;
     private float _pushTimer = 0f;
     private Vector2 _pushDirection = Vector2.Zero;
@@ -33,11 +34,14 @@ public partial class PushBlock : CharacterBody2D
         CollisionLayer = (1 << 6) | 1; // PushBlock layer + World layer.
         CollisionMask = 1;              // Collide with world.
 
+        AddToGroup("PushBlocks"); // Enables PauseMenu → Reset Puzzle to find all blocks.
+
         _targetPosition = Position;
 
         // Snap to grid on spawn.
         Position = SnapToGrid(Position);
-        _targetPosition = Position;
+        _targetPosition  = Position;
+        _initialPosition = Position; // Remember spawn position so puzzles can be reset.
 
         // Visual.
         var visual = new ColorRect
@@ -150,6 +154,19 @@ public partial class PushBlock : CharacterBody2D
         _pushTimer = 0f;
         _pushDirection = Vector2.Zero;
         _pusher = null;
+    }
+
+    /// <summary>
+    /// Return the block to its original spawn position, cancelling any active push.
+    /// Call this when the player resets the puzzle from the pause menu.
+    /// </summary>
+    public void Reset()
+    {
+        StopPushing();
+        _isMoving       = false;
+        Velocity        = Vector2.Zero;
+        Position        = _initialPosition;
+        _targetPosition = _initialPosition;
     }
 
     private Vector2 SnapToGrid(Vector2 pos)

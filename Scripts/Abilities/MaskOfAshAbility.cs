@@ -14,6 +14,9 @@ public partial class MaskOfAshAbility : AbilityBase
     private bool _isMasked;
     private float _maskTimer;
 
+    /// <summary>Seconds remaining on the active disguise (0 when inactive).</summary>
+    public float MaskTimeRemaining => _isMasked ? _maskTimer : 0f;
+
     public override void _Ready()
     {
         AbilityId = "mask_of_ash";

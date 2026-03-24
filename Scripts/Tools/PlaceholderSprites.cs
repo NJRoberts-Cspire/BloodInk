@@ -127,6 +127,15 @@ public static class PlaceholderSprites
 
         BuildTilesetSpriteFrames(ts, "slime_frames", 128, 432, 16, 16,
             new[] { "idle", "run", "attack" });
+
+        // Crossbow enemy — reuse a tileset character tile with a teal tint to distinguish it.
+        if (charSheet != null)
+            BuildCharacterWalkFrames(charSheet, "crossbowman_frames",
+                colStart: 6, rowStart: 0,
+                new[] { "idle", "run", "attack", "hurt", "death" });
+        else
+            BuildTilesetSpriteFrames(ts, "crossbowman_frames", 48, 416, 16, 16,
+                new[] { "idle", "run", "attack", "hurt", "death" });
     }
 
     // ─── Tileset helpers ──────────────────────────────────────────
@@ -389,6 +398,10 @@ public static class PlaceholderSprites
         BuildFallbackSpriteFrames("guard_frames",
             new Color(0.7f, 0.15f, 0.1f), 12, 16,
             new[] { "idle", "run", "attack", "patrol" });
+
+        BuildFallbackSpriteFrames("crossbowman_frames",
+            new Color(0.15f, 0.5f, 0.6f), 12, 16,
+            new[] { "idle", "run", "attack", "hurt", "death" });
     }
 
     // ═══════════════════════════════════════════════════════════════

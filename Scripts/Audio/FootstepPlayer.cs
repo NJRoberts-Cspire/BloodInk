@@ -33,10 +33,61 @@ public partial class FootstepPlayer : Node
     private float _stepTimer;
     private string _currentSurface = "default";
 
+    // Procedurally generated fallback streams, created once and reused.
+    private static AudioStreamWav? _proceduralDefault;
+    private static AudioStreamWav? _proceduralGrass;
+    private static AudioStreamWav? _proceduralStone;
+    private static AudioStreamWav? _proceduralWood;
+
     public override void _Ready()
     {
         _player = new AudioStreamPlayer2D { Bus = "SFX" };
         AddChild(_player);
+
+        // Pre-generate fallback sounds if exports are not set.
+        if (DefaultStep == null)
+        {
+            _proceduralDefault ??= GenerateThud(0.06f, 180f, 0.7f);
+            _proceduralGrass    ??= GenerateThud(0.07f, 120f, 0.5f);  // Softer, lower
+            _proceduralStone    ??= GenerateThud(0.04f, 260f, 0.9f);  // Sharper, higher
+            _proceduralWood     ??= GenerateThud(0.05f, 200f, 0.8f);  // Mid-resonance
+        }
+    }
+
+    /// <summary>
+    /// Generates a short percussive thud as an AudioStreamWav.
+    /// Produces a decaying burst of noise shaped by a simple exponential envelope,
+    /// so footsteps are audible even when no audio assets are present.
+    /// </summary>
+    private static AudioStreamWav GenerateThud(float durationSeconds, float centerFreq, float amplitude)
+    {
+        const int sampleRate = 22050;
+        int sampleCount = (int)(sampleRate * durationSeconds);
+        var data = new byte[sampleCount * 2]; // 16-bit mono
+
+        var rng = new System.Random();
+        for (int i = 0; i < sampleCount; i++)
+        {
+            float t = (float)i / sampleRate;
+            float envelope = Mathf.Exp(-t * 40f);           // Fast decay
+            float tone     = Mathf.Sin(2f * Mathf.Pi * centerFreq * t);
+            float noise    = (float)(rng.NextDouble() * 2.0 - 1.0);
+            float sample   = (tone * 0.4f + noise * 0.6f) * envelope * amplitude;
+
+            short s = (short)Mathf.Clamp(sample * 32767f, -32768f, 32767f);
+            data[i * 2]     = (byte)(s & 0xFF);
+            data[i * 2 + 1] = (byte)((s >> 8) & 0xFF);
+        }
+
+        var wav = new AudioStreamWav
+        {
+            Data = data,
+            Format = AudioStreamWav.FormatEnum.Format16Bits,
+            MixRate = sampleRate,
+            Stereo = false,
+            LoopMode = AudioStreamWav.LoopModeEnum.Disabled,
+        };
+        return wav;
     }
 
     public override void _PhysicsProcess(double delta)
@@ -66,13 +117,13 @@ public partial class FootstepPlayer : Node
     {
         if (_player == null) return;
 
-        // Select sound by surface.
+        // Select sound by surface — fall back to procedural thud when no assets are loaded.
         _player.Stream = _currentSurface switch
         {
-            "grass" => GrassStep ?? DefaultStep,
-            "stone" => StoneStep ?? DefaultStep,
-            "wood"  => WoodStep ?? DefaultStep,
-            _       => DefaultStep
+            "grass" => (AudioStream?)(GrassStep ?? DefaultStep ?? _proceduralGrass ?? _proceduralDefault),
+            "stone" => StoneStep ?? DefaultStep ?? _proceduralStone ?? _proceduralDefault,
+            "wood"  => WoodStep  ?? DefaultStep ?? _proceduralWood  ?? _proceduralDefault,
+            _       => DefaultStep ?? _proceduralDefault,
         };
 
         if (_player.Stream == null) return;

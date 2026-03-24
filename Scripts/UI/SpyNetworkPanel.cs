@@ -20,7 +20,8 @@ public partial class SpyNetworkPanel : Control
     private RichTextLabel? _detailInfo;
     private VBoxContainer? _missionButtons;
     private RichTextLabel? _statusLabel;
-    private Label? _heatLabel;
+    private RichTextLabel? _heatLabel;
+    private RichTextLabel? _intelLabel;
 
     private AgentData? _selectedAgent;
 
@@ -61,7 +62,48 @@ public partial class SpyNetworkPanel : Control
         var network = gm?.SpyNetwork;
 
         if (_heatLabel != null)
-            _heatLabel.Text = network == null ? "Heat: —" : "Network Active";
+        {
+            if (network == null)
+            {
+                _heatLabel.Text = "[color=gray]Heat: —[/color]";
+            }
+            else
+            {
+                var heatParts = new System.Text.StringBuilder();
+                heatParts.Append("[b]Kingdom Heat:[/b]  ");
+                for (int k = 0; k < 6; k++)
+                {
+                    float h = network.GetKingdomHeat(k);
+                    string col = h >= 70 ? "red" : h >= 40 ? "yellow" : "green";
+                    heatParts.Append($"[color={col}]K{k}:{h:F0}[/color]  ");
+                }
+                _heatLabel.Text = heatParts.ToString();
+            }
+        }
+
+        // ── Gathered Intel summary ────────────────────────────────────────
+        if (_intelLabel != null)
+        {
+            if (network == null)
+            {
+                _intelLabel.Text = "";
+            }
+            else
+            {
+                var verified = new System.Collections.Generic.List<Campaigns.Rukh.IntelData>(network.GetVerifiedIntel());
+                if (verified.Count == 0)
+                {
+                    _intelLabel.Text = "[color=gray](No verified intel yet)[/color]";
+                }
+                else
+                {
+                    var sb = new System.Text.StringBuilder();
+                    foreach (var intel in verified)
+                        sb.AppendLine($"[color=cyan]★[/color] {intel.Summary}");
+                    _intelLabel.Text = sb.ToString();
+                }
+            }
+        }
 
         if (_agentList == null) return;
         foreach (var child in _agentList.GetChildren()) child.QueueFree();
@@ -172,7 +214,14 @@ public partial class SpyNetworkPanel : Control
         var title = new Label { Text = "Rukh's Spy Network", Position = new Vector2(10, 6), Size = new Vector2(500, 24) };
         AddChild(title);
 
-        _heatLabel = new Label { Position = new Vector2(600, 6), Size = new Vector2(400, 24) };
+        _heatLabel = new RichTextLabel
+        {
+            BbcodeEnabled = true,
+            Position = new Vector2(500, 4),
+            Size = new Vector2(640, 28),
+            ScrollActive = false,
+            FitContent = true,
+        };
         AddChild(_heatLabel);
 
         var closeBtn = new Button { Text = "Close [E]", Position = new Vector2(1160, 4), Size = new Vector2(108, 28) };
@@ -185,11 +234,25 @@ public partial class SpyNetworkPanel : Control
         var agentTitle = new Label { Text = "Agents:", Position = new Vector2(10, 44), Size = new Vector2(380, 24) };
         AddChild(agentTitle);
 
-        var scroll = new ScrollContainer { Position = new Vector2(10, 72), Size = new Vector2(380, 608) };
+        var scroll = new ScrollContainer { Position = new Vector2(10, 72), Size = new Vector2(380, 420) };
         _agentList = new VBoxContainer();
         _agentList.SizeFlagsHorizontal = SizeFlags.ExpandFill;
         scroll.AddChild(_agentList);
         AddChild(scroll);
+
+        var intelTitle = new Label { Text = "Verified Intel:", Position = new Vector2(10, 500), Size = new Vector2(380, 24) };
+        AddChild(intelTitle);
+
+        var intelScroll = new ScrollContainer { Position = new Vector2(10, 524), Size = new Vector2(380, 156) };
+        _intelLabel = new RichTextLabel
+        {
+            BbcodeEnabled = true,
+            SizeFlagsHorizontal = SizeFlags.ExpandFill,
+            SizeFlagsVertical = SizeFlags.ExpandFill,
+            FitContent = false,
+        };
+        intelScroll.AddChild(_intelLabel);
+        AddChild(intelScroll);
 
         _detailPanel = new Panel { Position = new Vector2(410, 44), Size = new Vector2(858, 636), Visible = false };
         AddChild(_detailPanel);

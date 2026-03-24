@@ -22,6 +22,8 @@ public partial class WarbandPanel : Control
     private RichTextLabel? _statusLabel;
     private Label? _renownLabel;
 
+    private Button? _restBtn;
+
     private WarriorData? _selectedWarrior;
 
     public override void _Ready()
@@ -67,6 +69,9 @@ public partial class WarbandPanel : Control
             else
                 _renownLabel.Text = "Warband unavailable";
         }
+
+        if (_restBtn != null)
+            _restBtn.Disabled = warband == null;
 
         if (_warriorList == null) return;
         foreach (var child in _warriorList.GetChildren()) child.QueueFree();
@@ -143,6 +148,16 @@ public partial class WarbandPanel : Control
         }
     }
 
+    private void OnRestWarband()
+    {
+        GameManager.Instance?.Warband?.RestWarband();
+
+        if (_statusLabel != null)
+            _statusLabel.Text = "[color=cyan]Warband rested — morale restored.[/color]";
+
+        Refresh();
+    }
+
     private void TrainWarrior(WarriorData warrior, string stat)
     {
         var warband = GameManager.Instance?.Warband;
@@ -172,6 +187,10 @@ public partial class WarbandPanel : Control
 
         _renownLabel = new Label { Position = new Vector2(200, 6), Size = new Vector2(900, 24) };
         AddChild(_renownLabel);
+
+        _restBtn = new Button { Text = "Rest Warband", Position = new Vector2(1020, 4), Size = new Vector2(128, 28) };
+        _restBtn.Pressed += OnRestWarband;
+        AddChild(_restBtn);
 
         var closeBtn = new Button { Text = "Close [E]", Position = new Vector2(1160, 4), Size = new Vector2(108, 28) };
         closeBtn.Pressed += Close;

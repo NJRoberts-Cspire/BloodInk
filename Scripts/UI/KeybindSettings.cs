@@ -16,15 +16,16 @@ public partial class KeybindSettings : Control
     // Actions the player is allowed to rebind, mapped to friendly display names.
     private static readonly Dictionary<string, string> RebindableActions = new()
     {
-        { "move_up",   "Move Up" },
-        { "move_down", "Move Down" },
-        { "move_left", "Move Left" },
-        { "move_right","Move Right" },
-        { "attack",    "Attack" },
-        { "dodge",     "Dodge" },
-        { "interact",  "Interact" },
-        { "pause",     "Pause" },
-        { "crouch",    "Crouch" },
+        { "move_up",    "Move Up" },
+        { "move_down",  "Move Down" },
+        { "move_left",  "Move Left" },
+        { "move_right", "Move Right" },
+        { "attack",     "Attack" },
+        { "dodge",      "Dodge" },
+        { "interact",   "Interact" },
+        { "crouch",     "Crouch" },
+        { "ability",    "Use Ability" },
+        { "pause",      "Pause" },
     };
 
     private const string ConfigPath = "user://keybinds.cfg";

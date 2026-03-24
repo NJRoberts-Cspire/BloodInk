@@ -23,6 +23,9 @@ public partial class CraftingPanel : Control
     private Label? _tremorLabel;
     private Label? _materialsLabel;
 
+    private Label? _resultBanner;
+    private ColorRect? _resultFlash;
+
     private CraftingRecipe? _selectedRecipe;
 
     public override void _Ready()
@@ -158,18 +161,62 @@ public partial class CraftingPanel : Control
 
         var quality = gm.Crafting.Craft(_selectedRecipe.Id);
 
-        if (_statusLabel != null)
+        // ── Result banner (large quality name) ──────────────────────
+        string bannerText;
+        Color  bannerColor;
+        string statusText;
+
+        switch (quality)
         {
-            _statusLabel.Text = quality switch
-            {
-                CraftQuality.Masterwork => $"[color=gold]Masterwork {_selectedRecipe.ResultName}! Lorne's hands were steady today.[/color]",
-                CraftQuality.Standard   => $"[color=green]{_selectedRecipe.ResultName} crafted. Clean work.[/color]",
-                CraftQuality.Flawed     => $"[color=yellow]{_selectedRecipe.ResultName} crafted, but flawed. The tremor showed.[/color]",
-                CraftQuality.Ruined     => $"[color=red]Ruined. The tremor took it. Materials lost.[/color]",
-                null                    => "[color=red]Crafting failed — check materials and tremor level.[/color]",
-                _                       => "[color=white]Crafted.[/color]"
-            };
+            case CraftQuality.Masterwork:
+                bannerText  = "★ MASTERWORK";
+                bannerColor = new Color(1f, 0.85f, 0.15f);
+                statusText  = $"[color=#ffd924]Masterwork {_selectedRecipe.ResultName}! Lorne's hands were steady today.[/color]";
+                break;
+            case CraftQuality.Standard:
+                bannerText  = "CRAFTED";
+                bannerColor = new Color(0.35f, 0.85f, 0.45f);
+                statusText  = $"[color=#58d975]{_selectedRecipe.ResultName} crafted. Clean work.[/color]";
+                break;
+            case CraftQuality.Flawed:
+                bannerText  = "FLAWED";
+                bannerColor = new Color(0.9f, 0.75f, 0.2f);
+                statusText  = $"[color=#e6bf35]{_selectedRecipe.ResultName} crafted, but flawed. The tremor showed.[/color]";
+                break;
+            case CraftQuality.Ruined:
+                bannerText  = "RUINED";
+                bannerColor = new Color(0.85f, 0.2f, 0.15f);
+                statusText  = "[color=#d93525]Ruined. The tremor took it. Materials lost.[/color]";
+                break;
+            default:
+                bannerText  = "FAILED";
+                bannerColor = new Color(0.85f, 0.2f, 0.15f);
+                statusText  = "[color=#d93525]Crafting failed — check materials and tremor level.[/color]";
+                break;
         }
+
+        if (_resultBanner != null)
+        {
+            _resultBanner.Text    = bannerText;
+            _resultBanner.Modulate = new Color(bannerColor.R, bannerColor.G, bannerColor.B, 1f);
+            // Fade the banner out after 2 s.
+            var tween = _resultBanner.CreateTween();
+            tween.TweenProperty(_resultBanner, "modulate:a", 1f, 0.1f);
+            tween.TweenInterval(1.8f);
+            tween.TweenProperty(_resultBanner, "modulate:a", 0f, 0.6f);
+        }
+
+        if (_resultFlash != null)
+        {
+            _resultFlash.Color = new Color(bannerColor.R, bannerColor.G, bannerColor.B, 0.25f);
+            _resultFlash.Visible = true;
+            var tween = _resultFlash.CreateTween();
+            tween.TweenProperty(_resultFlash, "modulate:a", 0f, 0.5f);
+            tween.TweenCallback(Callable.From(() => _resultFlash.Visible = false));
+        }
+
+        if (_statusLabel != null)
+            _statusLabel.Text = statusText;
 
         Refresh();
     }
@@ -224,7 +271,31 @@ public partial class CraftingPanel : Control
         _craftButton.Pressed += OnCraftPressed;
         _detailPanel.AddChild(_craftButton);
 
-        _statusLabel = new RichTextLabel { Position = new Vector2(8, 368), Size = new Vector2(840, 100), BbcodeEnabled = true };
+        // Flash overlay — briefly colours the whole detail panel on craft result.
+        _resultFlash = new ColorRect
+        {
+            Position = Vector2.Zero,
+            Size     = new Vector2(858, 608),
+            Color    = new Color(0, 0, 0, 0),
+            Visible  = false,
+            ZIndex   = 5,
+        };
+        _detailPanel.AddChild(_resultFlash);
+
+        // Large quality-name banner, centred above the status label.
+        _resultBanner = new Label
+        {
+            Text                = "",
+            Position            = new Vector2(8, 360),
+            Size                = new Vector2(840, 36),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Modulate            = new Color(1, 1, 1, 0),
+            ZIndex              = 6,
+        };
+        _resultBanner.AddThemeFontSizeOverride("font_size", 22);
+        _detailPanel.AddChild(_resultBanner);
+
+        _statusLabel = new RichTextLabel { Position = new Vector2(8, 404), Size = new Vector2(840, 100), BbcodeEnabled = true };
         _detailPanel.AddChild(_statusLabel);
     }
 }

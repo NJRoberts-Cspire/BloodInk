@@ -157,6 +157,77 @@ public partial class SaveSystem : Node
         return FileAccess.FileExists($"{SaveDir}{slotName}.json");
     }
 
+    /// <summary>
+    /// Read the timestamp and scene path from a save slot without loading the full game state.
+    /// Returns null if the slot does not exist or the file cannot be parsed.
+    /// </summary>
+    public static SaveSlotInfo? ReadSlotInfo(string slotName)
+    {
+        string filePath = $"{SaveDir}{slotName}.json";
+        if (!FileAccess.FileExists(filePath)) return null;
+
+        using var file = FileAccess.Open(filePath, FileAccess.ModeFlags.Read);
+        if (file == null) return null;
+
+        try
+        {
+            var root = System.Text.Json.JsonSerializer
+                .Deserialize<Dictionary<string, System.Text.Json.JsonElement>>(file.GetAsText());
+            if (root == null) return null;
+
+            string timestamp = root.TryGetValue("timestamp", out var ts)
+                ? ts.GetString() ?? "" : "";
+
+            // Pull the current scene path out of meta.scene if present.
+            string scene = "";
+            if (root.TryGetValue("systems", out var sys))
+            {
+                var sysDict = System.Text.Json.JsonSerializer
+                    .Deserialize<Dictionary<string, System.Text.Json.JsonElement>>(sys.GetRawText());
+                if (sysDict != null &&
+                    sysDict.TryGetValue("meta", out var meta))
+                {
+                    var metaDict = System.Text.Json.JsonSerializer
+                        .Deserialize<Dictionary<string, System.Text.Json.JsonElement>>(meta.GetRawText());
+                    if (metaDict != null && metaDict.TryGetValue("scene", out var sc))
+                        scene = sc.GetString() ?? "";
+                }
+            }
+
+            return new SaveSlotInfo { Slot = slotName, Timestamp = timestamp, ScenePath = scene };
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>Lightweight save-slot metadata returned by <see cref="ReadSlotInfo"/>.</summary>
+    public sealed class SaveSlotInfo
+    {
+        public string Slot      { get; init; } = "";
+        public string Timestamp { get; init; } = "";
+        public string ScenePath { get; init; } = "";
+
+        /// <summary>A short human-readable label suitable for a button.</summary>
+        public string DisplayLabel()
+        {
+            // Timestamp is ISO 8601 "2025-03-24 14:22:00" — trim to "2025-03-24 14:22".
+            string time = Timestamp.Length >= 16 ? Timestamp[..16] : Timestamp;
+            // Show the leaf scene name (e.g. "Camp" from ".../Camp.tscn").
+            string sceneName = "";
+            if (!string.IsNullOrEmpty(ScenePath))
+            {
+                sceneName = ScenePath
+                    .GetFile()                      // Godot String extension
+                    .GetBaseName();
+            }
+            return string.IsNullOrEmpty(sceneName)
+                ? time
+                : $"{sceneName} — {time}";
+        }
+    }
+
     /// <summary>Delete a save slot.</summary>
     public void DeleteSave(string slotName)
     {
