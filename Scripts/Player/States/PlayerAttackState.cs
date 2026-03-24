@@ -31,10 +31,29 @@ public partial class PlayerAttackState : State
         _timer = AttackDuration;
         _player.Velocity = Vector2.Zero;
 
-        // Apply tattoo damage bonus.
+        // Attacking while masked breaks the disguise.
+        foreach (var child in _player.GetChildren())
+        {
+            if (child is Abilities.MaskOfAshAbility mask)
+            {
+                mask.BreakMask();
+                break;
+            }
+        }
+
+        // Apply tattoo damage bonus and Blood Rage multiplier.
         int baseDamage = 1;
         float dmgBonus = Core.GameManager.Instance?.TattooSystem?.DamageBonus ?? 0f;
-        _player.SwordHitbox.Damage = (int)Mathf.Max(1, baseDamage * (1f + dmgBonus));
+        float rageMult = 1f;
+        foreach (var child in _player.GetChildren())
+        {
+            if (child is Abilities.BloodRageAbility rage && rage.IsRaging)
+            {
+                rageMult = rage.DamageMult;
+                break;
+            }
+        }
+        _player.SwordHitbox.Damage = (int)Mathf.Max(1, baseDamage * (1f + dmgBonus) * rageMult);
 
         // Position hitbox in facing direction.
         _player.SwordHitbox.Position = _player.FacingDirection * 20f;

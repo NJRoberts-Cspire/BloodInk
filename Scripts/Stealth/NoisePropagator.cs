@@ -1,6 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 using System.Linq;
+using BloodInk.Abilities;
 
 namespace BloodInk.Stealth;
 
@@ -108,6 +109,20 @@ public partial class NoisePropagator : Node
             if (IsInstanceValid(sensor) && sensor.GlobalPosition.DistanceTo(position) <= alarmRadius)
             {
                 sensor.ForceEngage();
+            }
+        }
+
+        // An alarm blows any active disguise — guards recognize the threat.
+        var player = GetTree().GetFirstNodeInGroup("Player") as Node2D;
+        if (player != null && player.GlobalPosition.DistanceTo(position) <= alarmRadius)
+        {
+            foreach (var child in player.GetChildren())
+            {
+                if (child is Abilities.MaskOfAshAbility mask)
+                {
+                    mask.BreakMask();
+                    break;
+                }
             }
         }
 

@@ -1,5 +1,7 @@
 using Godot;
+using BloodInk.Abilities;
 using BloodInk.Combat;
+using BloodInk.Content;
 using BloodInk.VFX;
 
 namespace BloodInk.Player;
@@ -22,6 +24,9 @@ public partial class PlayerController : CharacterBody2D
     public Hitbox SwordHitbox { get; private set; } = null!;
     public HealthComponent Health { get; private set; } = null!;
     public VfxAnimationLibrary? VfxLibrary { get; private set; }
+
+    /// <summary>Cached WallCling ability — set when the tattoo is applied.</summary>
+    private Abilities.WallClingAbility? _wallCling;
 
     /// <summary>Last non-zero input direction, used for attack/dodge direction.</summary>
     public Vector2 FacingDirection { get; set; } = Vector2.Down;
@@ -109,6 +114,77 @@ public partial class PlayerController : CharacterBody2D
 
         Hurtbox.Hurt += OnHurt;
         Health.Died += OnDied;
+
+        // Wire tattoo ability spawning.
+        var tattooSystem = Core.GameManager.Instance?.TattooSystem;
+        if (tattooSystem != null)
+        {
+            tattooSystem.TattooApplied += OnTattooApplied;
+            tattooSystem.TattooEvolved += OnTattooEvolved;
+            // Spawn abilities for any tattoos already applied (e.g. from save load).
+            foreach (var tattoo in tattooSystem.GetAllTattoos())
+                SpawnAbilityIfNeeded(tattoo.Id, tattoo.AbilityScenePath);
+        }
+    }
+
+    public override void _ExitTree()
+    {
+        var tattooSystem = Core.GameManager.Instance?.TattooSystem;
+        if (tattooSystem != null)
+        {
+            tattooSystem.TattooApplied -= OnTattooApplied;
+            tattooSystem.TattooEvolved -= OnTattooEvolved;
+        }
+    }
+
+    private void OnTattooApplied(string tattooId, int slot)
+    {
+        var tattoo = TattooRegistry.FindById(tattooId);
+        if (tattoo != null)
+            SpawnAbilityIfNeeded(tattooId, tattoo.AbilityScenePath);
+    }
+
+    private void OnTattooEvolved(string oldId, string newId)
+    {
+        GetNodeOrNull(oldId)?.QueueFree();
+        var tattoo = TattooRegistry.FindById(newId);
+        if (tattoo != null)
+            SpawnAbilityIfNeeded(newId, tattoo.AbilityScenePath);
+    }
+
+    /// <summary>
+    /// Activates the first ready active ability on the player.
+    /// Called by player states when the "ability" input fires.
+    /// </summary>
+    public void TryActivateAbility()
+    {
+        foreach (var child in GetChildren())
+        {
+            if (child is Abilities.AbilityBase ability && !ability.IsOnCooldown)
+            {
+                ability.TryActivate();
+                return;
+            }
+        }
+    }
+
+    private void SpawnAbilityIfNeeded(string tattooId, string scenePath)
+    {
+        if (string.IsNullOrEmpty(scenePath)) return;
+        if (GetNodeOrNull(tattooId) != null) return; // Already present.
+
+        var scene = GD.Load<PackedScene>(scenePath);
+        if (scene == null)
+        {
+            GD.PrintErr($"[PlayerController] Ability scene not found: {scenePath}");
+            return;
+        }
+
+        var ability = scene.Instantiate<Node>();
+        ability.Name = tattooId;
+        AddChild(ability);
+        if (ability is Abilities.WallClingAbility wc) _wallCling = wc;
+        GD.Print($"[PlayerController] Spawned ability '{tattooId}'.");
     }
 
     /// <summary>Returns normalized WASD / arrow-key input vector.</summary>
@@ -124,6 +200,13 @@ public partial class PlayerController : CharacterBody2D
     /// <summary>Apply acceleration toward the target velocity.</summary>
     public void ApplyMovement(Vector2 direction, float speed, double delta)
     {
+        // WallCling: player is pinned — bleed off velocity, ignore input.
+        if (_wallCling?.IsClung == true)
+        {
+            Velocity = Velocity.MoveToward(Vector2.Zero, Friction * (float)delta);
+            return;
+        }
+
         if (direction != Vector2.Zero)
         {
             Velocity = Velocity.MoveToward(direction * speed, Acceleration * (float)delta);
@@ -157,6 +240,10 @@ public partial class PlayerController : CharacterBody2D
 
     private void OnHurt(int damage, Vector2 knockback)
     {
+        // StoneHeart ability: negate all damage while in stone form.
+        var stoneHeart = GetNodeOrNull<StoneHeartAbility>("stone_heart");
+        if (stoneHeart?.IsInStoneForm == true) return;
+
         Health.TakeDamage(damage);
         KnockbackVelocity = knockback;
 

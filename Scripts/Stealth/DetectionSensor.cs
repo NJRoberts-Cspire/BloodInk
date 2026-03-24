@@ -1,4 +1,5 @@
 using Godot;
+using BloodInk.Abilities;
 
 namespace BloodInk.Stealth;
 
@@ -116,6 +117,10 @@ public partial class DetectionSensor : Node2D
     private bool CheckVision()
     {
         if (_player == null) return false;
+
+        // MaskOfAsh ability: disguised player cannot be detected by vision.
+        var mask = _player.GetNodeOrNull<MaskOfAshAbility>("mask_of_ash");
+        if (mask?.IsMasked == true) return false;
 
         var toPlayer = _player.GlobalPosition - GlobalPosition;
         float distance = toPlayer.Length();

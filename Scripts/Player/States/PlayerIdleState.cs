@@ -51,5 +51,7 @@ public partial class PlayerIdleState : State
             Machine?.TransitionTo("Dodge");
         else if (@event.IsActionPressed("crouch"))
             Machine?.TransitionTo("Crouch");
+        else if (@event.IsActionPressed("ability"))
+            _player.TryActivateAbility();
     }
 }

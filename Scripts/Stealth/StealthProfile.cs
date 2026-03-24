@@ -55,14 +55,37 @@ public partial class StealthProfile : Node
     // ─── Owner reference ──────────────────────────────────────────
     private CharacterBody2D? _owner;
 
+    // How often to propagate continuous movement noise (seconds).
+    private const float NoiseTickInterval = 0.15f;
+    private float _noiseTickTimer;
+
     public override void _Ready()
     {
         _owner = GetParent<CharacterBody2D>();
+
+        // Wire one-shot noise events (combat, breaking objects, etc.) to NoisePropagator.
+        NoiseEmitted += OnNoiseEmitted;
+    }
+
+    private void OnNoiseEmitted(int noiseType, float radius)
+    {
+        if (_owner != null && radius > 0f)
+            NoisePropagator.Instance?.PropagateNoise(_owner.GlobalPosition, radius);
     }
 
     public override void _PhysicsProcess(double delta)
     {
         UpdateVisibility();
+
+        // Propagate continuous movement noise at a fixed interval.
+        _noiseTickTimer -= (float)delta;
+        if (_noiseTickTimer <= 0f)
+        {
+            _noiseTickTimer = NoiseTickInterval;
+            float radius = GetCurrentNoiseRadius();
+            if (radius > 0f && _owner != null)
+                NoisePropagator.Instance?.PropagateNoise(_owner.GlobalPosition, radius);
+        }
     }
 
     // ─── Crouch ───────────────────────────────────────────────────

@@ -35,7 +35,8 @@ public partial class PlayerDodgeState : State
         // Remember if player was already invincible (e.g. post-hit iframes).
         _wasInvincibleBeforeDodge = _player.Hurtbox.IsInvincible;
         _player.Hurtbox.IsInvincible = true;
-        _player.Velocity = _player.FacingDirection * _player.DodgeSpeed;
+        float speedBonus = Core.GameManager.Instance?.TattooSystem?.SpeedBonus ?? 0f;
+        _player.Velocity = _player.FacingDirection * (_player.DodgeSpeed * (1f + speedBonus));
         _player.UpdateAnimation("dodge");
 
         // Dodge VFX: ghost trail + dust puff at start.

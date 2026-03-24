@@ -66,6 +66,8 @@ public partial class SpyNetworkManager : Node
     public IEnumerable<AgentData> GetAvailableAgents() =>
         _agents.Values.Where(a => !a.IsCompromised && !a.IsOnMission);
 
+    public IEnumerable<AgentData> GetAllAgents() => _agents.Values;
+
     // ─── Mission Assignment ───────────────────────────────────────
 
     /// <summary>

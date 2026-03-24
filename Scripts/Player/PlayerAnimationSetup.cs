@@ -100,6 +100,9 @@ public partial class PlayerAnimationSetup : Node
     //  Row 8: Staff Attack    6 frames
     //  Row 9: Run             8 frames
     // Row 10: Death           6 frames
+    // Row 11: Crouch Idle     4 frames
+    // Row 12: Crouch Walk     6 frames
+    // Row 13: Stealth Kill    8 frames
     //
     // If your sheet differs, just edit the numbers below.
     // ────────────────────────────────────────────────────────────────
@@ -108,18 +111,21 @@ public partial class PlayerAnimationSetup : Node
         int w = FrameW, h = FrameH;
         return new List<AnimationDef>
         {
-            //                         Name           Row  Col  Cnt   Spd   Loop   W  H
-            new AnimationDef("idle",           0,   0,   6,   8f,  true,  w, h),
-            new AnimationDef("hurt",           1,   0,   4,  10f,  false, w, h),
-            new AnimationDef("attack",         2,   0,   6,  14f,  false, w, h),
-            new AnimationDef("attack_heavy",   3,   0,   6,  12f,  false, w, h),
-            new AnimationDef("thrust",         4,   0,   5,  14f,  false, w, h),
-            new AnimationDef("dodge",          5,   0,   4,  14f,  false, w, h),
-            new AnimationDef("air_attack",     6,   0,   6,  14f,  false, w, h),
-            new AnimationDef("cast",           7,   0,   6,  10f,  false, w, h),
-            new AnimationDef("staff_attack",   8,   0,   6,  14f,  false, w, h),
-            new AnimationDef("run",            9,   0,   8,  10f,  true,  w, h),
-            new AnimationDef("death",         10,   0,   6,   8f,  false, w, h),
+            //                         Name              Row  Col  Cnt   Spd   Loop   W  H
+            new AnimationDef("idle",            0,   0,   6,   8f,  true,  w, h),
+            new AnimationDef("hurt",            1,   0,   4,  10f,  false, w, h),
+            new AnimationDef("attack",          2,   0,   6,  14f,  false, w, h),
+            new AnimationDef("attack_heavy",    3,   0,   6,  12f,  false, w, h),
+            new AnimationDef("thrust",          4,   0,   5,  14f,  false, w, h),
+            new AnimationDef("dodge",           5,   0,   4,  14f,  false, w, h),
+            new AnimationDef("air_attack",      6,   0,   6,  14f,  false, w, h),
+            new AnimationDef("cast",            7,   0,   6,  10f,  false, w, h),
+            new AnimationDef("staff_attack",    8,   0,   6,  14f,  false, w, h),
+            new AnimationDef("run",             9,   0,   8,  10f,  true,  w, h),
+            new AnimationDef("death",          10,   0,   6,   8f,  false, w, h),
+            new AnimationDef("crouch_idle",    11,   0,   4,   8f,  true,  w, h),
+            new AnimationDef("crouch_walk",    12,   0,   6,  10f,  true,  w, h),
+            new AnimationDef("stealth_kill",   13,   0,   8,  12f,  false, w, h),
         };
     }
 }

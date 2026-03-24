@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://rootwardenfarm001"]
+
+[ext_resource type="Script" path="res://Scripts/Missions/RootwardenFarmLevel.cs" id="1"]
+
+[node name="RootwardenFarm" type="Node2D"]
+script = ExtResource("1")

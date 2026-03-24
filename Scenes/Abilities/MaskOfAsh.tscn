@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://ability_maskofash"]
+
+[ext_resource type="Script" path="res://Scripts/Abilities/MaskOfAshAbility.cs" id="1"]
+
+[node name="MaskOfAsh" type="Node2D"]
+script = ExtResource("1")

@@ -1,4 +1,5 @@
 using Godot;
+using BloodInk.Abilities;
 using BloodInk.Core;
 using BloodInk.Combat;
 using BloodInk.Stealth;
@@ -39,6 +40,16 @@ public partial class PlayerStealthKillState : State
     {
         _stealth = _player.GetNodeOrNull<StealthProfile>("StealthProfile");
         _timer = KillDuration;
+
+        // Any attack (even stealth) breaks a disguise.
+        foreach (var child in _player.GetChildren())
+        {
+            if (child is MaskOfAshAbility mask)
+            {
+                mask.BreakMask();
+                break;
+            }
+        }
 
         // Determine if this qualifies as a stealth kill.
         _isStealthKill = CheckStealthKillConditions();
@@ -174,9 +185,14 @@ public partial class PlayerStealthKillState : State
         if (enemy == null) return false; // Can't identify enemy — no backstab.
 
         // Check if we're behind the enemy.
-        // Get the enemy's facing direction — default to their velocity or looking direction.
+        // Prefer DetectionSensor.FacingDirection (set by AI); fall back to velocity.
         Vector2 enemyFacing = Vector2.Down;
-        if (enemy is CharacterBody2D body && body.Velocity.Length() > 5f)
+        var sensor = enemy.GetNodeOrNull<Stealth.DetectionSensor>("DetectionSensor");
+        if (sensor != null)
+        {
+            enemyFacing = sensor.FacingDirection;
+        }
+        else if (enemy is CharacterBody2D body && body.Velocity.Length() > 5f)
         {
             enemyFacing = body.Velocity.Normalized();
         }

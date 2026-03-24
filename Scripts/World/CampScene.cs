@@ -308,33 +308,69 @@ public partial class CampScene : Node2D
             case "open_crafting":
                 CallDeferred(nameof(OpenCraftingPanel));
                 break;
+            case "open_spy_network":
+                CallDeferred(nameof(OpenSpyNetworkPanel));
+                break;
+            case "open_warband":
+                CallDeferred(nameof(OpenWarbandPanel));
+                break;
         }
     }
 
     private void OpenCraftingPanel()
     {
-        var gm = GameManager.Instance;
-        if (gm?.Crafting == null)
-        {
-            GD.Print("CampScene: Crafting system not available.");
-            return;
-        }
-
-        // Check if Ink Tent panel scene exists.
-        // The InkTentPanel doubles as Lorne's crafting workspace.
-        var panelScene = GD.Load<PackedScene>("res://Scenes/UI/InkTentPanel.tscn");
-        if (panelScene == null)
-        {
-            GD.Print("CampScene: InkTentPanel.tscn not found — crafting UI not yet built.");
-            return;
-        }
-
-        // Prevent duplicates.
         if (GetNodeOrNull("CraftingPanel") != null) return;
 
-        var panel = panelScene.Instantiate<Control>();
+        var panelScene = GD.Load<PackedScene>("res://Scenes/UI/CraftingPanel.tscn");
+        if (panelScene == null)
+        {
+            GD.Print("CampScene: CraftingPanel.tscn not found.");
+            return;
+        }
+
+        var panel = panelScene.Instantiate<UI.CraftingPanel>();
         panel.Name = "CraftingPanel";
+        panel.PanelClosed += () => panel.QueueFree();
         AddChild(panel);
+        panel.Open();
         GD.Print("CampScene: Crafting panel opened.");
+    }
+
+    private void OpenSpyNetworkPanel()
+    {
+        if (GetNodeOrNull("SpyNetworkPanel") != null) return;
+
+        var panelScene = GD.Load<PackedScene>("res://Scenes/UI/SpyNetworkPanel.tscn");
+        if (panelScene == null)
+        {
+            GD.Print("CampScene: SpyNetworkPanel.tscn not found.");
+            return;
+        }
+
+        var panel = panelScene.Instantiate<UI.SpyNetworkPanel>();
+        panel.Name = "SpyNetworkPanel";
+        panel.PanelClosed += () => panel.QueueFree();
+        AddChild(panel);
+        panel.Open();
+        GD.Print("CampScene: Spy Network panel opened.");
+    }
+
+    private void OpenWarbandPanel()
+    {
+        if (GetNodeOrNull("WarbandPanel") != null) return;
+
+        var panelScene = GD.Load<PackedScene>("res://Scenes/UI/WarbandPanel.tscn");
+        if (panelScene == null)
+        {
+            GD.Print("CampScene: WarbandPanel.tscn not found.");
+            return;
+        }
+
+        var panel = panelScene.Instantiate<UI.WarbandPanel>();
+        panel.Name = "WarbandPanel";
+        panel.PanelClosed += () => panel.QueueFree();
+        AddChild(panel);
+        panel.Open();
+        GD.Print("CampScene: Warband panel opened.");
     }
 }

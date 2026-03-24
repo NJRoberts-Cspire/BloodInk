@@ -1,7 +1,8 @@
 using Godot;
 using BloodInk.Combat;
-using BloodInk.Stealth;
+using BloodInk.Ink;
 using BloodInk.Interaction;
+using BloodInk.Stealth;
 
 namespace BloodInk.UI;
 
@@ -65,6 +66,10 @@ public partial class GameHUD : CanvasLayer
             im.InteractPromptChanged -= OnInteractPromptChanged;
             im.InteractPromptHidden -= OnInteractPromptHidden;
         }
+
+        var ink = Core.GameManager.Instance?.InkInventory;
+        if (ink != null)
+            ink.InkChanged -= OnInkChanged;
     }
 
     public override void _Process(double delta)
@@ -89,6 +94,28 @@ public partial class GameHUD : CanvasLayer
             // Deferred connection — manager might init after us.
             CallDeferred(MethodName.ConnectInteractionManager);
         }
+
+        // Ink inventory display.
+        var ink = Core.GameManager.Instance?.InkInventory;
+        if (ink != null)
+        {
+            ink.InkChanged += OnInkChanged;
+            // Show current totals immediately.
+            UpdateInkDisplay(
+                ink.GetInk(InkGrade.Major),
+                ink.GetInk(InkGrade.Lesser),
+                ink.GetInk(InkGrade.Trace));
+        }
+    }
+
+    private void OnInkChanged(int grade, int amount)
+    {
+        var ink = Core.GameManager.Instance?.InkInventory;
+        if (ink == null) return;
+        UpdateInkDisplay(
+            ink.GetInk(InkGrade.Major),
+            ink.GetInk(InkGrade.Lesser),
+            ink.GetInk(InkGrade.Trace));
     }
 
     private void ConnectInteractionManager()

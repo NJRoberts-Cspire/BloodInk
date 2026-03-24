@@ -34,7 +34,8 @@ public partial class PlayerCrouchState : State
         _player.TickInputBuffer((float)delta);
 
         var input = _player.GetInputVector();
-        float crouchSpeed = _player.MoveSpeed * (_stealth?.CrouchSpeedMultiplier ?? 0.45f);
+        float speedBonus = Core.GameManager.Instance?.TattooSystem?.SpeedBonus ?? 0f;
+        float crouchSpeed = _player.MoveSpeed * (1f + speedBonus) * (_stealth?.CrouchSpeedMultiplier ?? 0.45f);
 
         _player.ApplyKnockback(delta);
         _player.ApplyMovement(input, crouchSpeed, delta);
@@ -66,7 +67,12 @@ public partial class PlayerCrouchState : State
         if (@event.IsActionPressed("dodge") && PlayerDodgeState.CooldownRemaining <= 0)
         {
             Machine?.TransitionTo("Dodge");
+            return;
         }
+
+        // Abilities usable while crouching.
+        if (@event.IsActionPressed("ability"))
+            _player.TryActivateAbility();
     }
 
     public override void Exit()

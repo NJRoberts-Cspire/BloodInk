@@ -160,7 +160,14 @@ public static class CampDialogues
                             : "Word is spreading. The Greenhold knows something is hunting."
             },
             new() { Id = "2", Speaker = "Rukh", Text = "The board has updated intel. More targets, more opportunities.", NextLineId = "3" },
-            new() { Id = "3", Speaker = "Rukh", Text = "But don't lose sight of the prize — Cowl is the Edictbearer. Everything else is preparation." },
+            new() { Id = "3", Speaker = "Rukh", Text = "But don't lose sight of the prize — Cowl is the Edictbearer. Everything else is preparation.", NextLineId = "4" },
+            new() { Id = "4", Speaker = "Vetch", Text = "...", Choices = new[]
+            {
+                "Show me the network.|spy_open",
+                "Understood.|end"
+            }},
+            new() { Id = "spy_open", Speaker = "Rukh", Text = "*unrolls a map* Here. My agents, their positions, their assignments.", Event = "open_spy_network" },
+            new() { Id = "end", Speaker = "Rukh", Text = "Good. We'll talk more after you've done your work." },
         }
     };
 
@@ -173,7 +180,14 @@ public static class CampDialogues
             new() { Id = "1", Speaker = "Rukh", Text = "*quiet satisfaction* The Greenhold has no governor.", IsEntry = true, NextLineId = "2" },
             new() { Id = "2", Speaker = "Rukh", Text = "My contacts say the human garrison is in disarray. They're fighting over who gives orders now.", NextLineId = "3" },
             new() { Id = "3", Speaker = "Rukh", Text = "There are still targets in the Greenhold if you want to press the advantage.", NextLineId = "4" },
-            new() { Id = "4", Speaker = "Rukh", Text = "Or... the Needlewise may have thoughts on our next kingdom. One anchor down. Five to go." },
+            new() { Id = "4", Speaker = "Rukh", Text = "Or... the Needlewise may have thoughts on our next kingdom. One anchor down. Five to go.", NextLineId = "5" },
+            new() { Id = "5", Speaker = "Vetch", Text = "...", Choices = new[]
+            {
+                "Show me the network.|spy_open",
+                "Later.|end"
+            }},
+            new() { Id = "spy_open", Speaker = "Rukh", Text = "*unfolds map* The network is yours to direct.", Event = "open_spy_network" },
+            new() { Id = "end", Speaker = "Rukh", Text = "When you're ready." },
         }
     };
 
@@ -216,7 +230,14 @@ public static class CampDialogues
                     ? "*grudging nod* You're racking up a count. Almost respectable."
                     : "*looks up from blade* You killed one. Congratulations. There are more."
             },
-            new() { Id = "2", Speaker = "Grael", Text = "Still think a proper war party would be faster. But... fine. Your way is working. For now." },
+            new() { Id = "2", Speaker = "Grael", Text = "Still think a proper war party would be faster. But... fine. Your way is working. For now.", NextLineId = "3" },
+            new() { Id = "3", Speaker = "Vetch", Text = "...", Choices = new[]
+            {
+                "Show me the warband.|warband_open",
+                "Keep training.|end"
+            }},
+            new() { Id = "warband_open", Speaker = "Grael", Text = "*sweeps arm toward the training area* Here. My warriors. Judge for yourself.", Event = "open_warband" },
+            new() { Id = "end", Speaker = "Grael", Text = "*turns back to his blade* Don't dawdle." },
         }
     };
 
@@ -228,7 +249,13 @@ public static class CampDialogues
         {
             new() { Id = "1", Speaker = "Grael", Text = "*standing* You killed the governor. Alone. In his own house.", IsEntry = true, NextLineId = "2" },
             new() { Id = "2", Speaker = "Grael", Text = "*long pause* ...That's an Irontusk thing to do.", NextLineId = "3" },
-            new() { Id = "3", Speaker = "Grael", Text = "Don't let it go to your head. There are five more kingdoms. And they'll be ready for you now." },
+            new() { Id = "3", Speaker = "Grael", Text = "Don't let it go to your head. There are five more kingdoms. And they'll be ready for you now.", Choices = new[]
+            {
+                "Show me the warband.|warband_open",
+                "Understood.|end"
+            }},
+            new() { Id = "warband_open", Speaker = "Grael", Text = "*nods once* Come." , Event = "open_warband" },
+            new() { Id = "end", Speaker = "Grael", Text = "Five more. Don't forget." },
         }
     };
 
