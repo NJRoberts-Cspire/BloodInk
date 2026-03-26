@@ -83,6 +83,8 @@ public partial class PlayerChoices : Node
 
     /// <summary>
     /// Determine ending alignment based on accumulated choices.
+    /// Priority: Liberation (Edict broken + mercy-dominant) > DarkEdictbearer (cruelty-dominant,
+    /// regardless of whether the Edict was broken) > BitterFreedom (all other outcomes).
     /// </summary>
     public EndingAlignment GetEndingAlignment()
     {
@@ -90,10 +92,13 @@ public partial class PlayerChoices : Node
 
         if (EdictBroken && balance > 10)
             return EndingAlignment.Liberation;
-        else if (!EdictBroken && Cruelty > Mercy)
+
+        // Cruelty-dominant run is "Dark Edictbearer" whether or not the Edict was broken —
+        // a player who shattered the Edict through blood and terror earned no liberation.
+        if (Cruelty > Mercy)
             return EndingAlignment.DarkEdictbearer;
-        else
-            return EndingAlignment.BitterFreedom;
+
+        return EndingAlignment.BitterFreedom;
     }
 
     // ─── Serialization ────────────────────────────────────────────

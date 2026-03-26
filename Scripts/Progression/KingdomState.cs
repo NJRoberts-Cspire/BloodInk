@@ -212,5 +212,13 @@ public partial class KingdomState : Node
             foreach (var id in aList) { if (id is string s) _discoveredAreas.Add(s); }
         if (data.TryGetValue("flags", out var flags) && flags is List<object> fList)
             foreach (var f in fList) { if (f is string s) _narrativeFlags.Add(s); }
+
+        // Re-evaluate completion in case saved data has kills but IsCompleted=false
+        // (e.g., save written before a target was registered, then targets were re-registered).
+        // Only emit the signal if the flag was NOT already true in the saved data —
+        // CheckCompletion guards internally with the IsCompleted flag, so re-running it
+        // will only emit if we just determined it should be true now.
+        if (!IsCompleted)
+            CheckCompletion();
     }
 }

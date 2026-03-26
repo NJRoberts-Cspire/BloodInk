@@ -73,6 +73,8 @@ public static class MapBuilder
                 {
                     var shadow = new Stealth.ShadowZone();
                     shadow.Position = sprite.Position;
+                    shadow.CollisionLayer = 0;
+                    shadow.CollisionMask  = 1 << 1; // Player layer.
                     var shadowShape = new CollisionShape2D();
                     shadowShape.Shape = new RectangleShape2D { Size = new Vector2(TILE_SIZE, TILE_SIZE) };
                     shadow.AddChild(shadowShape);

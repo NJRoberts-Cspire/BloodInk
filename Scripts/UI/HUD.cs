@@ -11,15 +11,15 @@ namespace BloodInk.UI;
 /// </summary>
 public partial class HUD : CanvasLayer
 {
-    private Label _healthLabel = null!;
-    private Label _stateLabel = null!;
+    private Label? _healthLabel;
+    private Label? _stateLabel;
     private TextureProgressBar? _healthBar;
     private StateMachine? _stateMachine;
     private StealthProfile? _stealthProfile;
 
     public override void _Ready()
     {
-        _healthLabel = GetNode<Label>("HealthLabel");
+        _healthLabel = GetNodeOrNull<Label>("HealthLabel") ?? CreateLabel("HealthLabel", 8);
         _stateLabel = GetNodeOrNull<Label>("StateLabel") ?? CreateLabel("StateLabel", 26);
         _healthBar = GetNodeOrNull<TextureProgressBar>("HealthBar");
     }
@@ -37,12 +37,14 @@ public partial class HUD : CanvasLayer
                 if (_stealthProfile.IsCrouching)
                     stealthText += " [Crouching]";
             }
-            _stateLabel.Text = $"State: {stateName}{stealthText}";
+            if (_stateLabel != null)
+                _stateLabel.Text = $"State: {stateName}{stealthText}";
         }
     }
 
     public void OnHealthChanged(int current, int max)
     {
+        if (_healthLabel == null) return;
         _healthLabel.Text = $"HP: {current}/{max}";
         // Color-code health.
         float ratio = max > 0 ? (float)current / max : 0;

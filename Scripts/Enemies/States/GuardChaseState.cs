@@ -23,9 +23,12 @@ public partial class GuardChaseState : State
         _guard.AnimPlayer.Play("run");
         GD.Print($"Guard {_guard.Name} is CHASING!");
 
-        // Call for backup on first engagement only.
+        // If backup hasn't been called yet, redirect through the Backup state
+        // so the guard pauses and alerts nearby guards before pursuing.
         if (!_guard.HasCalledBackup)
-            _guard.CallBackup();
+        {
+            Machine?.TransitionTo("Backup");
+        }
     }
 
     public override void PhysicsUpdate(double delta)

@@ -52,6 +52,16 @@ public abstract partial class AbilityBase : Node2D
         CooldownRemaining = Cooldown;
     }
 
+    /// <summary>
+    /// Cancel a cooldown that was started but whose effect did not actually land
+    /// (e.g. ShadowStep found no destination). Resets IsOnCooldown immediately.
+    /// </summary>
+    protected void CancelCooldown()
+    {
+        IsOnCooldown = false;
+        CooldownRemaining = 0f;
+    }
+
     protected void ExpireAbility()
     {
         EmitSignal(SignalName.AbilityExpired, AbilityId);

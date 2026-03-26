@@ -12,6 +12,23 @@ namespace BloodInk.Player;
 /// </summary>
 public partial class PlayerController : CharacterBody2D
 {
+    /// <summary>
+    /// Emitted when the player dies, before any scene transition.
+    /// Connect this signal to suppress the default Game Over transition
+    /// (e.g. MissionLevelBase connects it to perform a checkpoint respawn instead).
+    /// If no listener calls <see cref="SuppressDeathTransition"/> within the same frame,
+    /// the controller will navigate to the Game Over screen after a short delay.
+    /// </summary>
+    [Signal] public delegate void PlayerDiedEventHandler();
+
+    /// <summary>
+    /// Call from a PlayerDied signal listener to cancel the automatic Game Over transition.
+    /// Intended for use by MissionLevelBase when a checkpoint respawn handles the death.
+    /// </summary>
+    public void SuppressDeathTransition() => _deathTransitionSuppressed = true;
+
+    private bool _deathTransitionSuppressed;
+
     [ExportGroup("Movement")]
     [Export] public float MoveSpeed { get; set; } = 120f;
     [Export] public float DodgeSpeed { get; set; } = 250f;
@@ -221,6 +238,13 @@ public partial class PlayerController : CharacterBody2D
     /// <summary>Apply knockback then decay it.</summary>
     public void ApplyKnockback(double delta)
     {
+        // WallCling: player is pinned to the wall — do not accumulate or apply knockback.
+        if (_wallCling?.IsClung == true)
+        {
+            KnockbackVelocity = Vector2.Zero;
+            return;
+        }
+
         KnockbackVelocity = KnockbackVelocity.MoveToward(Vector2.Zero, Friction * (float)delta);
         Velocity += KnockbackVelocity;
     }
@@ -281,6 +305,18 @@ public partial class PlayerController : CharacterBody2D
         // End any active dialogue first so the panel clears and pause state is restored.
         Dialogue.DialogueManager.Instance?.EndConversation();
         Core.GameManager.Instance?.SetPaused(false);
+
+        // Notify listeners (e.g. MissionLevelBase) so they can perform checkpoint respawn.
+        // Listeners may call SuppressDeathTransition() to cancel the Game Over screen.
+        _deathTransitionSuppressed = false;
+        EmitSignal(SignalName.PlayerDied);
+
+        if (_deathTransitionSuppressed)
+        {
+            // A checkpoint respawn handler took over — do not navigate to Game Over.
+            GD.Print("[PlayerController] Death transition suppressed by external handler.");
+            return;
+        }
 
         // Store the current scene for retry, then transition to Game Over.
         UI.GameOver.LastMissionScene = GetTree().CurrentScene?.SceneFilePath ?? "";

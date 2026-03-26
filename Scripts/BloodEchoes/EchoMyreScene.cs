@@ -80,16 +80,22 @@ public partial class EchoMyreScene : BloodEchoScene
 
         SetNarration("Find the key. Open the door. She is not watching you.");
 
-        // Trigger — reaching the locked door area opens whisper
-        var trigger = new Area2D { Name = "DoorTrigger" };
-        trigger.Position = new Vector2(650, 360);
+        // Trigger — placed inside the locked room (x > 600), so it only fires after the
+        // player has actually unlocked the door and passed through. Proximity to the door
+        // from the starting side (x < 580) must not prematurely end the puzzle.
+        var trigger = new Area2D { Name = "PuzzleSolvedTrigger" };
+        trigger.Position = new Vector2(780, 360);
         var tShape = new CollisionShape2D();
-        tShape.Shape = new RectangleShape2D { Size = new Vector2(80, 80) };
+        tShape.Shape = new RectangleShape2D { Size = new Vector2(120, 200) };
         trigger.AddChild(tShape);
+        bool _whisperTriggered = false;
         trigger.BodyEntered += (body) =>
         {
-            if (body.IsInGroup("Player"))
+            if (body.IsInGroup("Player") && !_whisperTriggered)
+            {
+                _whisperTriggered = true;
                 TriggerWhisperReveal();
+            }
         };
         AddChild(trigger);
     }

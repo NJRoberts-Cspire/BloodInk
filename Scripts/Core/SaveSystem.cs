@@ -281,7 +281,7 @@ public partial class SaveSystem : Node
             string fileName = dir.GetNext();
             if (string.IsNullOrEmpty(fileName)) break;
             if (fileName.EndsWith(".json"))
-                slots.Add(fileName.Replace(".json", ""));
+                slots.Add(fileName[..^5]); // Strip exactly the last 5 chars (".json").
         }
         dir.ListDirEnd();
         return slots;

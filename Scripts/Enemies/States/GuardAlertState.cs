@@ -41,10 +41,17 @@ public partial class GuardAlertState : State
             return;
         }
 
-        // De-escalate if awareness drops.
-        if (_guard.Sensor.CurrentAwareness <= AwarenessLevel.Unaware)
+        // Player lost — transition to active search.
+        if (_guard.Sensor.CurrentAwareness == AwarenessLevel.Searching)
         {
-            Machine?.TransitionTo("Patrol");
+            Machine?.TransitionTo("Search");
+            return;
+        }
+
+        // Awareness dropped below Alerted — investigate last position.
+        if (_guard.Sensor.CurrentAwareness <= AwarenessLevel.Suspicious)
+        {
+            Machine?.TransitionTo("Investigate");
             return;
         }
 

@@ -8,6 +8,7 @@ namespace BloodInk.Combat;
 public partial class HealthComponent : Node
 {
     [Signal] public delegate void HealthChangedEventHandler(int currentHealth, int maxHealth);
+    [Signal] public delegate void DamageTakenEventHandler(int amount);
     [Signal] public delegate void DiedEventHandler();
 
     [Export] public int MaxHealth { get; set; } = 5;
@@ -35,6 +36,7 @@ public partial class HealthComponent : Node
         if (IsDead) return;
         if (amount < 0) amount = 0;
         CurrentHealth -= amount;
+        EmitSignal(SignalName.DamageTaken, amount);
         if (IsDead)
         {
             EmitSignal(SignalName.Died);
@@ -50,7 +52,7 @@ public partial class HealthComponent : Node
 
     public void FullHeal()
     {
-        if (IsDead) return;
+        // Intentionally no IsDead guard — FullHeal is used for revival/respawn.
         CurrentHealth = MaxHealth;
     }
 }

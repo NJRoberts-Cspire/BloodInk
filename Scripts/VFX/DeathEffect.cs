@@ -87,6 +87,8 @@ public partial class DeathEffect : Node2D
             tween.TweenProperty(particle, "modulate:a", 0.0f, lifetime);
             tween.TweenProperty(particle, "rotation",
                 (float)GD.RandRange(-Mathf.Pi, Mathf.Pi), lifetime);
+            tween.SetParallel(false);
+            tween.TweenCallback(Callable.From(() => particle.QueueFree()));
         }
     }
 }

@@ -135,11 +135,22 @@ public partial class BarracksLevel : MissionLevelBase
         BuildTrophyRoom();
         SpawnPlayer(YardOffset + new Vector2(1280, 420));
         SetupHUD();
+        SetupCheckpointRespawn();
+
+        // Checkpoint 1 — player enters Barracks Interior zone.
+        AddCheckpoint(this, 1, new Vector2(1280, 50), 2560f, new Vector2(1280, 200));
+
+        // Checkpoint 2 — player enters Captain Thorne's Trophy Room.
+        AddCheckpoint(this, 2, new Vector2(1280, -620), 2560f, new Vector2(1280, -500));
 
         // Camera bounds encompass all three zones (Trophy top → Yard bottom).
         SetCameraLimits(0, -640, 2560, 1520);
 
+        // Wire alert lockdown after nodes are in tree.
+        CallDeferred(MethodName.WireAlertLockdown);
+
         GD.Print("═══ BARRACKS LOADED ═══");
+        GD.Print("  MECHANIC: Full alarm (alert 3) triggers lockdown — doors slam, reinforcements spawn.");
         GD.Print("  PUZZLE GUIDE:");
         GD.Print("  Yard:     Break weapon crates near stables to find Barracks Key.");
         GD.Print("            Push two blocks onto floor switches to open drill-yard gate.");
@@ -308,6 +319,10 @@ public partial class BarracksLevel : MissionLevelBase
         // ── Puzzle 3: Locked bunk-room door requires Barracks Key ──
         AddLockedDoor(root, "BunkDoor", new Vector2(160, 240), "barracks_key", isVertical: true);
 
+        // ── Lockdown door — slams shut at alert level 3 ──
+        // Normally open (not locked). During lockdown, WireAlertLockdown() calls Lock("lockdown") on it.
+        _armoryLockdownDoor = AddDoor(root, "Armory Lockdown Door", new Vector2(1280, 460), isVertical: false);
+
         // ── Puzzle 4: Armory lever + push block switch opens corridor gate ──
         var armoryLever = AddLever(root, "ArmoryLever", new Vector2(2100, 160), oneWay: false);
         var corridorSwitch = AddFloorSwitch(root, "CorridorSwitch", new Vector2(1600, 380), stayPressed: true);
@@ -466,6 +481,59 @@ public partial class BarracksLevel : MissionLevelBase
         health.Died += () => OnTargetKilled("thorne", 0,
             "Captain Thorne\nCommander of the Greenguard",
             "\"He went down swinging. They all do. …Why didn't I?\"");
+    }
+
+    // ═════════════════════════════════════════════════════════════
+    //  UNIQUE MECHANIC: ALERT LOCKDOWN
+    //  When the mission alert level reaches 3 (full alarm), the barracks
+    //  enters LOCKDOWN: two reinforcement guards spawn in the Interior
+    //  and the armory door slams shut — cutting off the player's retreat.
+    //  This fires once and only once per mission run.
+    // ═════════════════════════════════════════════════════════════
+
+    private bool _lockdownTriggered;
+    private Door? _armoryLockdownDoor;
+
+    private void WireAlertLockdown()
+    {
+        var alertMgr = Stealth.MissionAlertManager.Instance;
+        if (alertMgr == null) return;
+
+        alertMgr.AlertLevelChanged += OnAlertLevelChanged;
+    }
+
+    private void OnAlertLevelChanged(int newLevel)
+    {
+        if (_lockdownTriggered || newLevel < 3) return;
+
+        _lockdownTriggered = true;
+        GD.Print("[Barracks] LOCKDOWN TRIGGERED — reinforcements inbound!");
+
+        // Close the armory door to cut off retreat.
+        _armoryLockdownDoor?.Lock("lockdown");
+
+        // Spawn two reinforcement guards in the interior corridor.
+        var interior = GetNodeOrNull<Node2D>("BarracksInterior");
+        if (interior != null)
+        {
+            AddGuard(interior, "Reinforcement1", new Vector2(800, 320),
+                new[] { new Vector2(400, 320), new Vector2(1280, 320) }, elite: true);
+            AddGuard(interior, "Reinforcement2", new Vector2(1760, 320),
+                new[] { new Vector2(1280, 320), new Vector2(2160, 320) }, elite: true);
+        }
+
+        // Brief red flash to signal the lockdown visually.
+        var layer = new CanvasLayer { Layer = 9 };
+        var rect  = new ColorRect { Color = new Color(0.8f, 0.0f, 0.0f, 0.0f) };
+        rect.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+        rect.LayoutMode = 1;
+        layer.AddChild(rect);
+        AddChild(layer);
+
+        var tween = CreateTween();
+        tween.TweenProperty(rect, "color:a", 0.35f, 0.2f);
+        tween.TweenProperty(rect, "color:a", 0.0f,  0.6f);
+        tween.TweenCallback(Callable.From(() => layer.QueueFree()));
     }
 
     // ═════════════════════════════════════════════════════════════

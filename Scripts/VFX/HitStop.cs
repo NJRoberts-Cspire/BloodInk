@@ -52,11 +52,11 @@ public partial class HitStop : Node
     }
 
     /// <summary>Light hit-stop for normal attacks.</summary>
-    public void FreezeLight() => Freeze(0.04f);
+    public void FreezeLight() => Freeze(0.08f);
 
     /// <summary>Medium hit-stop for charged/heavy attacks.</summary>
     public void FreezeMedium() => Freeze(0.08f);
 
     /// <summary>Heavy hit-stop for stealth kills and critical moments.</summary>
-    public void FreezeHeavy() => Freeze(0.14f);
+    public void FreezeHeavy() => Freeze(0.15f);
 }

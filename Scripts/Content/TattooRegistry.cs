@@ -312,6 +312,12 @@ public static class TattooRegistry
 
     private static System.Collections.Generic.Dictionary<string, Ink.TattooData>? _byId;
 
+    /// <summary>
+    /// Invalidate the FindById cache. Call this if evolved tattoo IDs must be
+    /// resolvable by the new ID after an evolution event.
+    /// </summary>
+    public static void InvalidateCache() => _byId = null;
+
     /// <summary>Find a tattoo by its ID. Returns null if not found.</summary>
     public static Ink.TattooData? FindById(string id)
     {

@@ -1,5 +1,4 @@
 using Godot;
-using BloodInk.Stealth;
 
 namespace BloodInk.Abilities;
 
@@ -44,10 +43,14 @@ public partial class ShadowStepAbility : AbilityBase
         {
             player.GlobalPosition = nearest.GlobalPosition;
             GD.Print($"[ShadowStep] Teleported to {nearest.Name} at {nearest.GlobalPosition}");
+            // Instant ability — notify listeners the effect is complete.
+            ExpireAbility();
         }
         else
         {
-            GD.Print("[ShadowStep] No target shadow zone in range.");
+            // No valid destination — refund the cooldown so the player is not penalised.
+            CancelCooldown();
+            GD.Print("[ShadowStep] No target shadow zone in range — cooldown refunded.");
         }
     }
 }

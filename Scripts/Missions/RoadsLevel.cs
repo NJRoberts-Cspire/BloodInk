@@ -106,9 +106,58 @@ public partial class RoadsLevel : MissionLevelBase
         "#############################################################################################################################################################",
     };
 
-    private static readonly Vector2 RoadOffset = new(0, 1200);
+    // ─── Toll Bridge Guard Post — fourth zone added to extend level length ──
+    // A narrow fortified crossing with a gate mechanism. The Assessor's wagon
+    // must pass through here — it's the one fixed choke point on the entire road.
+    // Unique mechanic: guard patrol SCHEDULES. Guards shift routes every 30 seconds
+    // based on an alternating watch-pattern, forcing the player to observe timing.
+    private static readonly string[] TollBridgeMap = {
+        "#############################################################################################################################################################",
+        "#................#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#........#",
+        "#................#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#........#",
+        "#................#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#........#",
+        "#..~~............#........#..........#........#..........#........#..........#........#..........#........#..........#........#..........#........#..~~....#",
+        "#................................................................................................................................................................................................................#",
+        "#................................................................................................................................................................................................................#",
+        "#####.....#######################################################################################################################################.....#####",
+        "#####.....#######################################################################################################################################.....#####",
+        "#####.....##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##.....#####",
+        "#####.....##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##.....#####",
+        "#####.....##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##.....#####",
+        "#####.....#######################################################################################################################################.....#####",
+        "#####.....#######################################################################################################################################.....#####",
+        "#................................................................................................................................................................................................................#",
+        "#................................................................................................................................................................................................................#",
+        "#..~~............#........#..........#........#..........#........#..........#........#..........#........#..........#........#..........#........#..~~....#",
+        "#................#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#........#",
+        "#................#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#........#",
+        "#................#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#........#",
+        "#############################################################################################################################################################",
+    };
+
+    private static readonly Vector2 RoadOffset      = new(0, 1200);
     private static readonly Vector2 CrossroadsOffset = new(0, 0);
-    private static readonly Vector2 WagonOffset = new(0, -800);
+    private static readonly Vector2 WagonOffset      = new(0, -800);
+    private static readonly Vector2 TollBridgeOffset = new(0, -1280); // Below the wagon zone
+
+    // ─── Patrol Schedule State ────────────────────────────────────
+    // Guards alternate between Watch A and Watch B every 30 seconds.
+    // Watch A: spread patrol covering both flanks.
+    // Watch B: converged patrol guarding the gate directly.
+    private readonly Vector2[][] _watchA =
+    {
+        new[] { new Vector2(300,  200), new Vector2(800,  200) },   // Left flank sweep
+        new[] { new Vector2(2200, 200), new Vector2(1700, 200) },   // Right flank sweep
+        new[] { new Vector2(1280, 150), new Vector2(1280, 350) },   // Gate centre
+    };
+    private readonly Vector2[][] _watchB =
+    {
+        new[] { new Vector2(200, 300), new Vector2(600, 100) },     // Tight gate left
+        new[] { new Vector2(2360, 300), new Vector2(1960, 100) },   // Tight gate right
+        new[] { new Vector2(900, 250), new Vector2(1660, 250) },    // Wide crossing sweep
+    };
+    private Enemies.GuardEnemy[] _scheduleGuards = System.Array.Empty<Enemies.GuardEnemy>();
+    private int _watchPhase; // 0 = Watch A, 1 = Watch B
 
     public override void _Ready()
     {
@@ -117,14 +166,28 @@ public partial class RoadsLevel : MissionLevelBase
         BuildRoad();
         BuildCrossroads();
         BuildWagonCamp();
+        BuildTollBridge();
 
         SpawnPlayer(RoadOffset + new Vector2(800, 180));
         SetupHUD();
-        SetCameraLimits(0, -800, 2720, 1680);
+        SetupCheckpointRespawn();
+
+        // Checkpoint 1 — player enters Market Crossroads zone.
+        AddCheckpoint(this, 1, new Vector2(1280, 50), 2560f, new Vector2(800, 200));
+
+        // Checkpoint 2 — player enters the Assessor's Wagon zone.
+        AddCheckpoint(this, 2, new Vector2(1280, -780), 2560f, new Vector2(800, -680));
+
+        // Checkpoint 3 — player enters the Toll Bridge Guard Post.
+        AddCheckpoint(this, 3, new Vector2(1280, -1260), 2560f, new Vector2(1280, -1150));
+
+        // Expand camera to include toll bridge zone below the wagon.
+        SetCameraLimits(0, -1640, 2720, 1680);
 
         GD.Print("═══ THE ROADS LOADED ═══");
         GD.Print("  Target: The Assessor — traveling tax collector & slave appraiser.");
-        GD.Print("  Optional target. Difficulty 3. Light escort.");
+        GD.Print("  Optional target. Difficulty 3. Four zones including Toll Bridge.");
+        GD.Print("  MECHANIC: Guard patrol schedules rotate every 30 s — observe before moving.");
     }
 
     // ─── Zone Builders ────────────────────────────────────────────
@@ -135,7 +198,7 @@ public partial class RoadsLevel : MissionLevelBase
         zone.Position = RoadOffset;
         AddChild(zone);
 
-        BuildTileMap(zone, RoadMap, new Vector2(0, 0));
+        MapBuilder.Build(zone, RoadMap);
         AddAreaZone(zone, "Country Road", new Vector2(800, 300), new Vector2(1600, 400));
         AddAreaZone(zone, "Roadside Ditch", new Vector2(200, 200), new Vector2(200, 300), isRestricted: false);
 
@@ -161,7 +224,7 @@ public partial class RoadsLevel : MissionLevelBase
         zone.Position = CrossroadsOffset;
         AddChild(zone);
 
-        BuildTileMap(zone, CrossroadsMap, new Vector2(0, 0));
+        MapBuilder.Build(zone, CrossroadsMap);
         AddAreaZone(zone, "Market Crossroads", new Vector2(1360, 200), new Vector2(2720, 400));
         AddAreaZone(zone, "Inn Yard", new Vector2(400, 200), new Vector2(600, 300), isRestricted: true);
 
@@ -194,7 +257,7 @@ public partial class RoadsLevel : MissionLevelBase
         zone.Position = WagonOffset;
         AddChild(zone);
 
-        BuildTileMap(zone, WagonMap, new Vector2(0, 0));
+        MapBuilder.Build(zone, WagonMap);
         AddAreaZone(zone, "Wagon Camp", new Vector2(1360, 200), new Vector2(2720, 400));
         AddAreaZone(zone, "Assessor's Tent", new Vector2(1360, 120), new Vector2(400, 200), isRestricted: true);
 
@@ -257,49 +320,85 @@ public partial class RoadsLevel : MissionLevelBase
             whisperText: "\"I just wrote down what they told me to write.\"");
     }
 
-    // ─── Tile Map Builder ─────────────────────────────────────────
+    // ─── Toll Bridge Guard Post ───────────────────────────────────
 
-    private static void BuildTileMap(Node2D parent, string[] map, Vector2 origin)
+    private void BuildTollBridge()
     {
-        const float TileSize = 16f;
+        var zone = new Node2D { Name = "TollBridgeZone" };
+        zone.Position = TollBridgeOffset;
+        AddChild(zone);
 
-        for (int row = 0; row < map.Length; row++)
+        MapBuilder.Build(zone, TollBridgeMap);
+        AddAreaZone(zone, "Toll Bridge", new Vector2(1280, 200), new Vector2(2560, 400));
+        AddAreaZone(zone, "Gate House", new Vector2(1280, 280), new Vector2(500, 180), isRestricted: true);
+
+        // Shadow — guardhouse alcoves and bridge underside shadows
+        AddShadowZone(zone, new Vector2(80, 130), new Vector2(120, 120));
+        AddShadowZone(zone, new Vector2(2480, 130), new Vector2(120, 120));
+        AddShadowZone(zone, new Vector2(400, 300), new Vector2(200, 80));
+        AddShadowZone(zone, new Vector2(1900, 300), new Vector2(200, 80));
+        AddShadowZone(zone, new Vector2(1280, 310), new Vector2(600, 60)); // Bridge underdeck shadow
+
+        // Hiding spots — guard house alcoves, supply pile, ditch
+        AddHidingSpot(zone, "Guard House Alcove", new Vector2(120, 130));
+        AddHidingSpot(zone, "Far Alcove", new Vector2(2440, 130));
+        AddHidingSpot(zone, "Supply Pile", new Vector2(600, 250));
+        AddHidingSpot(zone, "Road Ditch", new Vector2(380, 310));
+
+        // Toll gate — locked; lever inside the guardhouse raises it
+        var gate = AddPuzzleGate(zone, "Toll Gate", new Vector2(1280, 330), requiredConditions: 1,
+            isVertical: false, width: 80f, height: 16f);
+        var gateLever = AddLever(zone, "Gate Lever", new Vector2(1280, 270), oneWay: true);
+        gateLever.Toggled += (on) => { if (on) gate.RegisterConditionMet(); };
+
+        // Breakable barrier — side path through collapsed stone abutment
+        AddBreakableWall(zone, "Collapsed Abutment", new Vector2(200, 330), hitsRequired: 2, width: 32f, height: 16f);
+
+        // Key chest — bridge toll records (contains intel about Assessor's route)
+        AddItemChest(zone, "Toll Ledger", new Vector2(1280, 140),
+            "consumable", "intel_scroll", "Bridge Toll Records", 1);
+
+        // Schedule-driven guards: stored so the timer can swap their waypoints
+        var guard0 = SpawnScheduleGuard(zone, "BridgeGuard1", new Vector2(500, 200));
+        var guard1 = SpawnScheduleGuard(zone, "BridgeGuard2", new Vector2(2060, 200));
+        var guard2 = SpawnScheduleGuard(zone, "BridgeGuard3", new Vector2(1280, 200), elite: true);
+        _scheduleGuards = new[] { guard0, guard1, guard2 };
+
+        // Apply initial Watch A routes immediately.
+        ApplyWatchRoutes(_watchA);
+
+        // Two crossbowmen on upper guardhouse ledges — cannot be bypassed from front.
+        AddCrossbowman(zone, "TollCrossbowman1", new Vector2(300, 80));
+        AddCrossbowman(zone, "TollCrossbowman2", new Vector2(2260, 80));
+
+        // Start the 30-second patrol rotation timer.
+        var timer = new Timer { WaitTime = 30.0, Autostart = true, OneShot = false };
+        timer.Timeout += OnPatrolScheduleRotate;
+        AddChild(timer);
+    }
+
+    private Enemies.GuardEnemy SpawnScheduleGuard(Node2D parent, string name, Vector2 pos, bool elite = false)
+    {
+        // Use AddGuard then retrieve the node so we can store a reference.
+        AddGuard(parent, name, pos, System.Array.Empty<Vector2>(), elite);
+        return parent.GetNode<Enemies.GuardEnemy>(name);
+    }
+
+    private void ApplyWatchRoutes(Vector2[][] routes)
+    {
+        for (int i = 0; i < _scheduleGuards.Length && i < routes.Length; i++)
         {
-            for (int col = 0; col < map[row].Length; col++)
-            {
-                char tile = map[row][col];
-                var pos = origin + new Vector2(col * TileSize, row * TileSize);
-
-                Color? color = tile switch
-                {
-                    '#' => new Color(0.28f, 0.24f, 0.18f, 1f),
-                    '.' => new Color(0.55f, 0.48f, 0.38f, 1f),
-                    'w' => new Color(0.48f, 0.36f, 0.22f, 1f),
-                    'p' => new Color(0.50f, 0.44f, 0.34f, 1f),
-                    '~' => null,
-                    ',' => null,
-                    _ => null
-                };
-
-                if (color == null) continue;
-
-                var rect = new ColorRect();
-                rect.Color = color.Value;
-                rect.Position = pos;
-                rect.Size = new Vector2(TileSize, TileSize);
-
-                if (tile == '#')
-                {
-                    var body = new StaticBody2D();
-                    body.Position = pos + new Vector2(TileSize / 2, TileSize / 2);
-                    var shape = new CollisionShape2D();
-                    shape.Shape = new RectangleShape2D { Size = new Vector2(TileSize, TileSize) };
-                    body.AddChild(shape);
-                    parent.AddChild(body);
-                }
-
-                parent.AddChild(rect);
-            }
+            var patrol = _scheduleGuards[i].GetNodeOrNull<Enemies.PatrolRoute>("PatrolRoute");
+            if (patrol != null)
+                patrol.Waypoints = routes[i];
         }
     }
+
+    private void OnPatrolScheduleRotate()
+    {
+        _watchPhase = 1 - _watchPhase; // Toggle 0 ↔ 1
+        ApplyWatchRoutes(_watchPhase == 0 ? _watchA : _watchB);
+        GD.Print($"[Toll Bridge] Patrol rotated to Watch {(_watchPhase == 0 ? 'A' : 'B')}.");
+    }
+
 }

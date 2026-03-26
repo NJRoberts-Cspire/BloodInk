@@ -86,8 +86,9 @@ public partial class MissionBoard : Interactable
             var choices = new List<string>();
             foreach (var target in living.OrderBy(t => t.Difficulty))
             {
-                // Only show targets whose mission scene exists.
+                // A target is unavailable if explicitly locked or its scene file is missing.
                 bool sceneExists = ResourceLoader.Exists(target.MissionScenePath);
+                bool unavailable = target.IsLocked || !sceneExists;
                 string stars = new string('★', target.Difficulty)
                              + new string('☆', 10 - target.Difficulty);
                 string label;
@@ -96,10 +97,15 @@ public partial class MissionBoard : Interactable
                 else
                     label = $"{target.Name} ({stars})";
 
-                if (sceneExists)
+                if (!unavailable)
                     choices.Add($"{label}|brief_{target.Id}");
                 else
-                    choices.Add($"{label} [INTEL NEEDED]|unavail_{target.Id}");
+                {
+                    string lockTag = !string.IsNullOrEmpty(target.LockReason)
+                        ? target.LockReason.ToUpper()
+                        : "INTEL NEEDED";
+                    choices.Add($"{label} [{lockTag}]|unavail_{target.Id}");
+                }
             }
             choices.Add("Not yet.|cancel");
 
@@ -115,15 +121,19 @@ public partial class MissionBoard : Interactable
             foreach (var target in living)
             {
                 bool sceneExists = ResourceLoader.Exists(target.MissionScenePath);
+                bool unavailable = target.IsLocked || !sceneExists;
 
-                if (!sceneExists)
+                if (unavailable)
                 {
-                    // Unavailable target — intel not yet gathered.
+                    // Unavailable target — locked or scene missing.
+                    string reason = !string.IsNullOrEmpty(target.LockReason)
+                        ? target.LockReason
+                        : "Rukh's spies haven't mapped this location yet.";
                     lines.Add(new DialogueLine
                     {
                         Id = $"unavail_{target.Id}",
                         Speaker = "",
-                        Text = $"TARGET: {target.Name}\n{target.Title}\n\nRukh's spies haven't mapped this location yet.\nComplete other missions to gather more intel.",
+                        Text = $"TARGET: {target.Name}\n{target.Title}\n\n{reason}\nComplete other missions to gather more intel.",
                         NextLineId = "choose"
                     });
                     continue;

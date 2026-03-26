@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Linq;
 using BloodInk.Combat;
 using BloodInk.Content;
 using BloodInk.Core;
@@ -187,19 +188,49 @@ public partial class GoldmanorLevel : MissionLevelBase
         BuildGardens();
         BuildMainHall();
         BuildQuarters();
+        CallDeferred(MethodName.PlaceServantDisguise); // After zones are in tree
         SpawnPlayer(GardenOffset + new Vector2(1280, 740));
         SetupHUD();
+        SetupCheckpointRespawn();
+        CallDeferred(MethodName.ShowGardenHintOnce);
+
+        // Checkpoint 1 — player enters the Main Hall zone.
+        AddCheckpoint(this, 1, new Vector2(1280, 50), 2560f, new Vector2(1280, 200));
+
+        // Checkpoint 2 — player enters Lord Cowl's Quarters.
+        AddCheckpoint(this, 2, new Vector2(1280, -1020), 2560f, new Vector2(1280, -900));
 
         // Camera bounds encompass all three zones (Quarters top → Garden bottom).
         SetCameraLimits(0, -1040, 2560, 2240);
 
         GD.Print("═══ GOLDMANOR LOADED ═══");
+        GD.Print("  MECHANIC: Find the Servant Livery — non-elite guards half-blind while worn.");
         GD.Print("  PUZZLE GUIDE:");
         GD.Print("  Gardens: Find the Garden Key in a chest behind breakable bushes.");
         GD.Print("           Push blocks onto both floor switches to open the Hall gate.");
         GD.Print("  Hall:    Pull both levers (East & West wings) to open the Quarters gate.");
         GD.Print("           Find the Master Key in the locked chest (requires Servant Key).");
         GD.Print("  Quarters: Use Master Key on Cowl's study door. Breakable wall = secret path.");
+    }
+
+    // ─── First-visit hint ─────────────────────────────────────────
+
+    private const string HintFlag = "goldmanor_garden_hint_shown";
+
+    /// <summary>
+    /// Shows a one-time entry hint via the HUD toast. The flag is stored in
+    /// DialogueManager so it survives retries within the same session and is
+    /// exported/imported with save data.
+    /// </summary>
+    private void ShowGardenHintOnce()
+    {
+        var dm = Dialogue.DialogueManager.Instance;
+        if (dm == null || dm.HasFlag(HintFlag)) return;
+
+        dm.SetFlag(HintFlag);
+
+        var hud = GetTree().GetFirstNodeInGroup("GameHUD") as UI.GameHUD;
+        hud?.ShowHint("The gardens are less guarded at the edges. Move slowly.", 4f);
     }
 
     // ═════════════════════════════════════════════════════════════
@@ -620,5 +651,84 @@ public partial class GoldmanorLevel : MissionLevelBase
         health.Died += () => OnTargetKilled("cowl", 0,
             "Lord Harlan Cowl\nGovernor of the Greenhold\nEdictbearer",
             "\"I never saw the dark as empty. I thought it was full of things that loved me.\"");
+    }
+
+    // ═════════════════════════════════════════════════════════════
+    //  UNIQUE MECHANIC: SERVANT DISGUISE
+    //  A chest in the groundskeeper shed contains a Servant Livery.
+    //  While the player holds it, non-elite guards in unrestricted areas
+    //  halve their detection awareness gain — they see a servant,
+    //  not an intruder. Elite guards and restricted zones ignore it.
+    //  The disguise is one-time; dropping into combat removes it.
+    // ═════════════════════════════════════════════════════════════
+
+    private bool _disguiseActive;
+
+    private void PlaceServantDisguise()
+    {
+        var gardens = GetNodeOrNull<Node2D>("Gardens");
+        if (gardens == null) return;
+
+        // Servant livery chest hidden in the groundskeeper shed.
+        var chest = AddItemChest(gardens, "Servant Livery Chest",
+            new Vector2(700, 720),
+            "consumable", "servant_livery", "Servant Livery", quantity: 1);
+
+        // When the player opens this chest, activate the disguise.
+        chest.Opened += OnServantLiveryPickedUp;
+    }
+
+    private void OnServantLiveryPickedUp()
+    {
+        if (_disguiseActive) return;
+        _disguiseActive = true;
+
+        // Reduce awareness gain on all non-elite guards currently in the scene.
+        ApplyDisguiseToGuards(active: true);
+
+        // Also subscribe to the alert manager — if a full alarm fires, the
+        // disguise is blown (guards recognise the ruse under full alarm).
+        var alertMgr = Stealth.MissionAlertManager.Instance;
+        if (alertMgr != null)
+            alertMgr.AlertLevelChanged += OnAlertWhileDisguised;
+
+        GD.Print("[Goldmanor] Servant Livery equipped — non-elite guards partially blind.");
+    }
+
+    private void OnAlertWhileDisguised(int level)
+    {
+        if (level >= 3 && _disguiseActive)
+            RemoveDisguise();
+    }
+
+    private void RemoveDisguise()
+    {
+        if (!_disguiseActive) return;
+        _disguiseActive = false;
+
+        ApplyDisguiseToGuards(active: false);
+
+        var alertMgr = Stealth.MissionAlertManager.Instance;
+        if (alertMgr != null)
+            alertMgr.AlertLevelChanged -= OnAlertWhileDisguised;
+
+        GD.Print("[Goldmanor] Disguise blown — guards are now fully alert.");
+    }
+
+    private void ApplyDisguiseToGuards(bool active)
+    {
+        // Walk every guard in the scene; halve (or restore) awareness gain
+        // only on non-elite guards that are NOT inside a restricted zone.
+        float multiplier = active ? 0.5f : 2.0f; // Apply/undo
+
+        foreach (var guard in GetTree().GetNodesInGroup("Enemy").OfType<GuardEnemy>())
+        {
+            // Skip elites — they see through any disguise.
+            if (guard.DetectRange >= 130f) continue;
+
+            var sensor = guard.GetNodeOrNull<DetectionSensor>("DetectionSensor");
+            if (sensor != null)
+                sensor.AwarenessGainRate *= multiplier;
+        }
     }
 }

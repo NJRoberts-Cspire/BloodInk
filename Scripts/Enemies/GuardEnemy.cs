@@ -12,7 +12,7 @@ namespace BloodInk.Enemies;
 public partial class GuardEnemy : EnemyBase
 {
     [ExportGroup("Guard")]
-    [Export] public float PatrolSpeed { get; set; } = 40f;
+    [Export] public float PatrolSpeed { get; set; } = 55f;
     [Export] public float AlertedSpeed { get; set; } = 70f;
     [Export] public float ChaseSpeed { get; set; } = 90f;
 
@@ -41,12 +41,10 @@ public partial class GuardEnemy : EnemyBase
         Sensor = GetNodeOrNull<DetectionSensor>("DetectionSensor");
         Patrol = GetNodeOrNull<PatrolRoute>("PatrolRoute");
 
-        // Register sensor with the noise propagator.
+        // Wire sensor signals.
+        // Note: DetectionSensor._Ready() already registers itself with NoisePropagator.
         if (Sensor != null)
         {
-            NoisePropagator.Instance?.RegisterSensor(Sensor);
-
-            // Wire sensor signals.
             Sensor.PlayerDetected += OnPlayerDetected;
             Sensor.PlayerLost += OnPlayerLost;
             Sensor.NoiseHeard += OnNoiseHeard;
@@ -58,8 +56,14 @@ public partial class GuardEnemy : EnemyBase
 
     public override void _ExitTree()
     {
+        // DetectionSensor._ExitTree() handles its own NoisePropagator unregistration.
+        // Disconnect signals to prevent stale callbacks after the guard is freed.
         if (Sensor != null)
-            NoisePropagator.Instance?.UnregisterSensor(Sensor);
+        {
+            Sensor.PlayerDetected -= OnPlayerDetected;
+            Sensor.PlayerLost -= OnPlayerLost;
+            Sensor.NoiseHeard -= OnNoiseHeard;
+        }
     }
 
     public override void _PhysicsProcess(double delta)
@@ -90,11 +94,12 @@ public partial class GuardEnemy : EnemyBase
         if ((AwarenessLevel)awarenessLevel >= AwarenessLevel.Alerted)
             Stealth.MissionAlertManager.Instance?.ReportDetection();
 
-        // Alert nearby guards when first engaged.
-        if ((AwarenessLevel)awarenessLevel == AwarenessLevel.Engaged && !HasCalledBackup)
-        {
-            CallBackup();
-        }
+        // Do NOT call CallBackup() here. When awareness reaches Engaged the state
+        // machine transitions to Chase, which redirects to the Backup state on first
+        // detection. GuardBackupState.Enter() calls CallBackup() at the right moment
+        // (after the guard stops and plays the callout animation). Calling it here
+        // would set HasCalledBackup = true before Chase checks it, permanently
+        // skipping the Backup state.
     }
 
     private void OnPlayerLost()
@@ -105,6 +110,28 @@ public partial class GuardEnemy : EnemyBase
     private void OnNoiseHeard(Vector2 noisePosition)
     {
         // Handled by the AI states checking Sensor.HasPendingNoise.
+    }
+
+    // ─── Corpse Discovery ─────────────────────────────────────────
+
+    /// <summary>
+    /// Called by <see cref="Stealth.CorpseMarker"/> via signal when this guard
+    /// discovers a body. Handles sensor alert boost and mission reporting.
+    /// </summary>
+    /// <param name="_discoverer">The guard that found the body (this guard).</param>
+    /// <param name="corpsePosition">World position of the discovered corpse.</param>
+    public void OnCorpseDiscovered(Node2D _discoverer, Vector2 corpsePosition)
+    {
+        // Boost sensor awareness so the guard immediately investigates the corpse location.
+        if (Sensor != null)
+        {
+            Sensor.LastHeardNoisePosition = corpsePosition;
+            Sensor.HasPendingNoise = true;
+            Sensor.OnNoiseAtPosition(corpsePosition, 60f);
+        }
+
+        // Report corpse to mission alert system.
+        Stealth.MissionAlertManager.Instance?.ReportCorpseFound();
     }
 
     // ─── Guard Communication ──────────────────────────────────────

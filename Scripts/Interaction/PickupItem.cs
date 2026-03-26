@@ -30,6 +30,10 @@ public partial class PickupItem : Interactable
         EmitSignal(SignalName.ItemPickedUp, ItemId, ItemType);
         GD.Print($"Picked up: {DisplayName} x{Quantity} ({ItemType})");
 
+        // Keys are registered directly into the player inventory so Door can check them.
+        if (ItemType == "key" && !string.IsNullOrEmpty(ItemId))
+            PlayerInventory.Instance?.AddKey(ItemId);
+
         base.OnInteract(interactor);
 
         // Despawn the item.

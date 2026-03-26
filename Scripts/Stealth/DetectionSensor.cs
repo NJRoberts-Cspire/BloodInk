@@ -18,7 +18,7 @@ public partial class DetectionSensor : Node2D
 
     [ExportGroup("Vision")]
     /// <summary>Max distance the enemy can see (in pixels).</summary>
-    [Export] public float ViewDistance { get; set; } = 120f;
+    [Export] public float ViewDistance { get; set; } = 110f;
 
     /// <summary>Vision cone half-angle in degrees.</summary>
     [Export] public float ViewAngle { get; set; } = 55f;
@@ -41,7 +41,7 @@ public partial class DetectionSensor : Node2D
     [Export] public float AwarenessGainRate { get; set; } = 22f;
 
     /// <summary>How fast awareness decays when player is NOT visible (per second).</summary>
-    [Export] public float AwarenessDecayRate { get; set; } = 15f;
+    [Export] public float AwarenessDecayRate { get; set; } = 23f;
 
     /// <summary>Awareness threshold to become Suspicious.</summary>
     [Export] public float SuspiciousThreshold { get; set; } = 25f;
@@ -50,7 +50,7 @@ public partial class DetectionSensor : Node2D
     [Export] public float AlertedThreshold { get; set; } = 60f;
 
     /// <summary>Awareness threshold to become Engaged (full detection).</summary>
-    [Export] public float EngagedThreshold { get; set; } = 90f;
+    [Export] public float EngagedThreshold { get; set; } = 85f;
 
     // ─── Runtime State ────────────────────────────────────────────
 
@@ -144,7 +144,7 @@ public partial class DetectionSensor : Node2D
 
         // Check angle.
         float angle = Mathf.RadToDeg(FacingDirection.AngleTo(toPlayer));
-        if (Math.Abs(angle) > ViewAngle) return false;
+        if (Mathf.Abs(angle) > ViewAngle) return false;
 
         // Raycast to check for walls.
         return HasLineOfSight(toPlayer, distance);
@@ -190,8 +190,8 @@ public partial class DetectionSensor : Node2D
         else
         {
             // Decay awareness when player isn't visible.
-            // Slower decay at higher awareness levels.
-            float decayMult = CurrentAwareness >= AwarenessLevel.Alerted ? 0.5f : 1f;
+            // Slower decay at higher awareness levels (Alerted, Searching, or Engaged).
+            float decayMult = CurrentAwareness >= AwarenessLevel.Searching ? 0.5f : 1f;
             Awareness = Mathf.Max(0f, Awareness - AwarenessDecayRate * decayMult * delta);
         }
 
@@ -205,13 +205,12 @@ public partial class DetectionSensor : Node2D
         else
             CurrentAwareness = AwarenessLevel.Unaware;
 
-        // If we've lost sight while engaged, switch to searching.
-        if (oldLevel == AwarenessLevel.Engaged && !CanSeePlayer && Awareness > SuspiciousThreshold)
-        {
-            CurrentAwareness = AwarenessLevel.Searching;
-        }
-        // Persist Searching state until awareness drops below suspicious threshold or player re-spotted.
-        else if (oldLevel == AwarenessLevel.Searching && !CanSeePlayer && Awareness > SuspiciousThreshold)
+        // If the player is not visible and was previously at Alerted or higher
+        // (including already Searching), preserve the Searching state until awareness
+        // fully decays below the suspicious threshold. This prevents a guard from
+        // silently dropping back to Suspicious/Alerted mid-search.
+        if (!CanSeePlayer && Awareness > SuspiciousThreshold
+            && oldLevel >= AwarenessLevel.Alerted)
         {
             CurrentAwareness = AwarenessLevel.Searching;
         }

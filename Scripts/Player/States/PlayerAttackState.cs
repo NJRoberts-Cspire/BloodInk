@@ -42,7 +42,7 @@ public partial class PlayerAttackState : State
         }
 
         // Apply tattoo damage bonus and Blood Rage multiplier.
-        int baseDamage = 1;
+        int baseDamage = 2;
         float dmgBonus = Core.GameManager.Instance?.TattooSystem?.DamageBonus ?? 0f;
         float rageMult = 1f;
         foreach (var child in _player.GetChildren())
@@ -60,11 +60,15 @@ public partial class PlayerAttackState : State
         _player.SwordHitbox.Monitoring = true;
         _player.UpdateAnimation("attack");
 
-        // Slash VFX.
-        SlashArc.SpawnAt(
-            _player.GetTree().CurrentScene,
-            _player.GlobalPosition + _player.FacingDirection * 16f,
-            _player.FacingDirection);
+        // Slash VFX — guard against CurrentScene being null during scene transitions.
+        var scene = _player.GetTree()?.CurrentScene;
+        if (scene != null)
+        {
+            SlashArc.SpawnAt(
+                scene,
+                _player.GlobalPosition + _player.FacingDirection * 16f,
+                _player.FacingDirection);
+        }
 
         // Camera nudge.
         CameraShake.Instance?.ShakeLight();

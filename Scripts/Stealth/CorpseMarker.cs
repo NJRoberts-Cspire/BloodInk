@@ -8,9 +8,20 @@ namespace BloodInk.Stealth;
 /// Visible as a blood pool sprite on the ground.
 ///
 /// Spawned by EnemyBase.OnDied() instead of (or after) QueueFree.
+///
+/// Architecture: CorpseMarker emits <see cref="BodyDiscovered"/> when a guard walks
+/// over it. Alert logic (sensor manipulation, MissionAlertManager calls) must be
+/// handled by the receiver — typically GuardEnemy — not here.
 /// </summary>
 public partial class CorpseMarker : Area2D
 {
+    /// <summary>
+    /// Emitted when a guard first discovers this corpse.
+    /// <param name="discoverer">The guard body node that walked over the corpse.</param>
+    /// <param name="corpsePosition">World position of this corpse.</param>
+    /// </summary>
+    [Signal] public delegate void BodyDiscoveredEventHandler(Node2D discoverer, Vector2 corpsePosition);
+
     /// <summary>Whether this corpse has already been discovered by a guard.</summary>
     public bool IsDiscovered { get; private set; }
 
@@ -66,26 +77,24 @@ public partial class CorpseMarker : Area2D
     private void OnBodyEntered(Node2D body)
     {
         if (IsDiscovered) return;
-        if (body is not Enemies.GuardEnemy guard) return;
+        // Only react to enemies in the "Guards" group — avoids direct type coupling.
+        if (!body.IsInGroup("Guards")) return;
 
         IsDiscovered = true;
 
-        // Guard reacts — investigate the corpse location.
-        if (guard.Sensor != null)
-        {
-            guard.Sensor.LastHeardNoisePosition = GlobalPosition;
-            guard.Sensor.HasPendingNoise = true;
-            // Boost awareness via noise to trigger investigation.
-            guard.Sensor.OnNoiseAtPosition(GlobalPosition, 60f);
-        }
+        // Connect the BodyDiscovered signal to the guard's handler (if it has one)
+        // before emitting, so the guard receives this specific discovery event.
+        if (body.HasMethod("OnCorpseDiscovered"))
+            Connect(SignalName.BodyDiscovered, new Callable(body, "OnCorpseDiscovered"),
+                (uint)ConnectFlags.OneShot);
 
-        // Raise mission alert.
-        MissionAlertManager.Instance?.ReportCorpseFound();
-
-        // Propagate noise so nearby guards also react.
+        // Propagate noise so nearby guards also react to the discovery location.
         NoisePropagator.Instance?.PropagateNoise(GlobalPosition, DiscoveryNoiseRadius);
 
-        GD.Print($"[Corpse] Body discovered at {GlobalPosition} by {guard.Name}");
+        // Emit the signal — receivers handle their own alert logic.
+        EmitSignal(SignalName.BodyDiscovered, body, GlobalPosition);
+
+        GD.Print($"[Corpse] Body discovered at {GlobalPosition} by {body.Name}");
     }
 
     /// <summary>

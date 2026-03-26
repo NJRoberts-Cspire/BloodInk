@@ -105,6 +105,8 @@ public static class GreenholdTargets
         InkAmount    = 1,
         Weaknesses   = new[] { "road_ambush", "market_day", "greedy" },
         MissionScenePath = "res://Scenes/Missions/Greenhold/Roads.tscn",
+        IsLocked     = true,
+        LockReason   = "Intel Required",
         IntelBrief   = "A sniveling bureaucrat who 'assesses' orc captives for sale on a sliding scale: "
                      + "healthy ones for labor, weak ones for disposal. Travels with minimal guard. "
                      + "Killing him disrupts the slave trade pipeline temporarily.",
@@ -124,6 +126,8 @@ public static class GreenholdTargets
         InkAmount    = 1,
         Weaknesses   = new[] { "barn_entrance", "fight_night", "drunk_after_events" },
         MissionScenePath = "res://Scenes/Missions/Greenhold/RootwardenFarm.tscn",
+        IsLocked     = true,
+        LockReason   = "Intel Required",
         IntelBrief   = "Runs an underground orc-fighting ring in his barn. Captures wild orcs, "
                      + "starves them, then charges nobles to watch them fight to the death. "
                      + "Popular with minor gentry. Killing him liberates captive orcs.",

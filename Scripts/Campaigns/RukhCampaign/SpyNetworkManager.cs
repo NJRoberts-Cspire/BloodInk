@@ -82,6 +82,20 @@ public partial class SpyNetworkManager : Node
         agent.IsOnMission = true;
         _activeMissions[agentId] = mission;
 
+        // Each mission assignment raises heat — agents operating in a kingdom attract
+        // scrutiny regardless of outcome. Riskier mission types raise heat more.
+        float assignHeat = mission switch
+        {
+            MissionType.GatherIntel       => 5f,
+            MissionType.MarkTarget        => 8f,
+            MissionType.CreateDiversion   => 10f,
+            MissionType.SabotageDefences  => 15f,
+            MissionType.EscortAsset       => 8f,
+            MissionType.Extraction        => 12f,
+            _                             => 5f
+        };
+        ModifyKingdomHeat(agent.KingdomIndex, assignHeat);
+
         // Higher skill = faster completion. Base 3 turns, -1 per 30 skill points.
         int baseTurns = mission switch
         {
@@ -171,7 +185,8 @@ public partial class SpyNetworkManager : Node
 
             case MissionType.CreateDiversion:
                 GD.Print($"  Diversion created — guard alert temporarily lowered");
-                ModifyKingdomHeat(agent.KingdomIndex, -15f);
+                // Diversion missions actively suppress heat (extra bonus on top of base reduction).
+                ModifyKingdomHeat(agent.KingdomIndex, -20f);
                 break;
 
             case MissionType.SabotageDefences:
@@ -182,6 +197,11 @@ public partial class SpyNetworkManager : Node
                 GD.Print($"  Asset extracted from kingdom {agent.KingdomIndex}");
                 break;
         }
+
+        // A clean extraction means the agent came home without a trail —
+        // reduce heat to reflect that scrutiny has eased.
+        ModifyKingdomHeat(agent.KingdomIndex, -10f);
+        GD.Print($"  Heat in kingdom {agent.KingdomIndex} reduced (clean op).");
 
         // Skill improves on success.
         agent.SkillLevel = Math.Min(100, agent.SkillLevel + 5);

@@ -47,14 +47,14 @@ public partial class EnemySenseAbility : AbilityBase
 
         foreach (var node in GetTree().GetNodesInGroup("Enemy"))
         {
-            if (node is Node2D enemy)
+            if (node is Node2D enemy && IsInstanceValid(enemy))
             {
                 float dist = origin.DistanceTo(enemy.GlobalPosition);
                 if (dist <= SenseRange)
                 {
                     // Modulate sprite red to indicate detected — visual only
                     var sprite = enemy.GetNodeOrNull<AnimatedSprite2D>("AnimatedSprite2D");
-                    if (sprite != null)
+                    if (sprite != null && IsInstanceValid(sprite))
                         sprite.Modulate = new Color(2f, 0.3f, 0.3f, 1f);
                 }
             }
@@ -65,13 +65,13 @@ public partial class EnemySenseAbility : AbilityBase
     {
         _isSensing = false;
 
-        // Restore normal modulation
+        // Restore normal modulation — guard against enemies freed during the sense window.
         foreach (var node in GetTree().GetNodesInGroup("Enemy"))
         {
-            if (node is Node2D enemy)
+            if (node is Node2D enemy && IsInstanceValid(enemy))
             {
                 var sprite = enemy.GetNodeOrNull<AnimatedSprite2D>("AnimatedSprite2D");
-                if (sprite != null)
+                if (sprite != null && IsInstanceValid(sprite))
                     sprite.Modulate = Colors.White;
             }
         }

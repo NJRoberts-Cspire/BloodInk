@@ -129,13 +129,22 @@ public partial class LaborCampLevel : MissionLevelBase
         BuildYard();
         BuildTunnels();
         BuildOffice();
+        CallDeferred(MethodName.SpawnPrisoners); // After zones are in tree
         SpawnPlayer(YardOffset + new Vector2(1280, 480));
         SetupHUD();
+        SetupCheckpointRespawn();
+
+        // Checkpoint 1 — player descends into the Tunnel Passage zone.
+        AddCheckpoint(this, 1, new Vector2(1280, 50), 2560f, new Vector2(1280, 200));
+
+        // Checkpoint 2 — player enters Reeve Maren's Office compound.
+        AddCheckpoint(this, 2, new Vector2(1280, -520), 2560f, new Vector2(1280, -400));
 
         // Camera bounds encompass all three zones (Office top → Yard bottom).
         SetCameraLimits(0, -544, 2560, 1600);
 
         GD.Print("═══ LABOR CAMP LOADED ═══");
+        GD.Print("  MECHANIC: Free orc prisoners from pens — they run, guards investigate.");
         GD.Print("  PUZZLE GUIDE:");
         GD.Print("  Yard:    Break the wooden fence to find the Tunnel Key chest.");
         GD.Print("           Push the ore block onto the floor switch to open the tunnel gate.");
@@ -463,6 +472,93 @@ public partial class LaborCampLevel : MissionLevelBase
         health.Died += () => OnTargetKilled("maren", 0,
             "Reeve Maren\nOverseer of the Labor Camps",
             "\"The dogs didn't bark. That's what I can't understand.\"");
+    }
+
+    // ═════════════════════════════════════════════════════════════
+    //  UNIQUE MECHANIC: FREEABLE PRISONERS
+    //  Orc captives are locked in the quarry pens. Interacting with a
+    //  pen gate (a one-shot lever) releases them. Released prisoners
+    //  run toward the nearest guard on a fixed path, drawing that guard
+    //  into a chase/investigate state and giving the player a window.
+    //  Each pen can only be opened once; prisoners never fight.
+    // ═════════════════════════════════════════════════════════════
+
+    private void SpawnPrisoners()
+    {
+        var yard = GetNodeOrNull<Node2D>("QuarryYard");
+        if (yard == null) return;
+
+        // Three prisoner pens — each releases a pair of captives on interact.
+        SpawnPrisonerPen(yard, "PenA", new Vector2(480, 380),
+            runTarget: new Vector2(600, 200), guardNodeName: "YardGuard4");
+        SpawnPrisonerPen(yard, "PenB", new Vector2(1280, 400),
+            runTarget: new Vector2(1280, 180), guardNodeName: "YardGuard3");
+        SpawnPrisonerPen(yard, "PenC", new Vector2(2080, 380),
+            runTarget: new Vector2(2160, 200), guardNodeName: "YardGuard5");
+    }
+
+    private void SpawnPrisonerPen(Node2D parent, string penId, Vector2 penPos,
+        Vector2 runTarget, string guardNodeName)
+    {
+        // Pen gate lever — opens the cage.
+        var gate = AddPuzzleGate(parent, $"PenGate_{penId}", penPos + new Vector2(0, -20),
+            requiredConditions: 1, stayOpen: true, isVertical: true, width: 8f, height: 24f);
+        var penLever = AddLever(parent, $"PenLever_{penId}", penPos + new Vector2(20, -10), oneWay: true);
+        gate.LinkLever(penLever);
+
+        // Spawn two orc prisoners huddled at the pen.
+        for (int i = 0; i < 2; i++)
+        {
+            var prisoner = new Enemies.EnemyBase { Name = $"Prisoner_{penId}_{i}" };
+            prisoner.Position = penPos + new Vector2(i * 12 - 6, 0);
+            prisoner.CollisionLayer = 1 << 2;
+            prisoner.CollisionMask = 1;
+
+            var sprite = new AnimatedSprite2D { Name = "AnimatedSprite2D" };
+            sprite.SpriteFrames = CreateGuardSpriteFrames("npc_civilian");
+            prisoner.AddChild(sprite);
+
+            var bodyShape = new CollisionShape2D();
+            bodyShape.Shape = new RectangleShape2D { Size = new Vector2(10, 14) };
+            prisoner.AddChild(bodyShape);
+
+            var health = new Combat.HealthComponent { Name = "HealthComponent", MaxHealth = 1 };
+            prisoner.AddChild(health);
+
+            SetOwnerRecursive(prisoner, prisoner);
+            parent.AddChild(prisoner);
+
+            // When gate opens, prisoners bolt toward the guard's last known area.
+            int capturedI = i;
+            penLever.Toggled += (on) =>
+            {
+                if (!on) return;
+                FleeTowardGuard(prisoner, runTarget, parent, guardNodeName);
+            };
+        }
+    }
+
+    private void FleeTowardGuard(Enemies.EnemyBase prisoner, Vector2 runTarget,
+        Node2D zone, string guardNodeName)
+    {
+        // Move prisoner toward runTarget using a simple tween (no nav mesh needed).
+        var tween = prisoner.CreateTween();
+        tween.TweenProperty(prisoner, "position", runTarget, 1.8f)
+             .SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
+
+        // Agitate the nearby guard — force it into Investigate state by destroying
+        // its peaceful patrol temporarily (set waypoints to the prisoner's target).
+        var guard = zone.GetNodeOrNull<Enemies.GuardEnemy>(guardNodeName);
+        if (guard != null)
+        {
+            var patrol = guard.GetNodeOrNull<Enemies.PatrolRoute>("PatrolRoute");
+            if (patrol != null)
+            {
+                // Interrupt patrol: send guard to the prisoner's run target.
+                patrol.Waypoints = new[] { runTarget, runTarget + new Vector2(80, 0) };
+                GD.Print($"[Labor Camp] Prisoner freed — guard '{guardNodeName}' distracted toward {runTarget}.");
+            }
+        }
     }
 
 }

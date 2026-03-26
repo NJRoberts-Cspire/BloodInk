@@ -84,6 +84,13 @@ public partial class InteractionManager : Node
         // Clean up freed interactables.
         _nearbyInteractables.RemoveAll(i => i == null || !IsInstanceValid(i));
 
+        // Also clear the focused reference if the focused interactable was freed.
+        if (FocusedInteractable != null && !IsInstanceValid(FocusedInteractable))
+        {
+            FocusedInteractable = null;
+            EmitSignal(SignalName.InteractPromptHidden);
+        }
+
         // Find the closest enabled interactable.
         Interactable? closest = null;
         float closestDist = float.MaxValue;

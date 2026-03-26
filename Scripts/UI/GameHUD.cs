@@ -54,6 +54,7 @@ public partial class GameHUD : CanvasLayer
 
     public override void _Ready()
     {
+        AddToGroup("GameHUD");
         _healthLabel = GetNodeOrNull<Label>("TopLeft/HealthLabel");
         _healthBar = GetNodeOrNull<TextureProgressBar>("TopLeft/HealthBar");
         _stealthLabel = GetNodeOrNull<Label>("TopLeft/StealthLabel");
@@ -124,6 +125,22 @@ public partial class GameHUD : CanvasLayer
         var ink = Core.GameManager.Instance?.InkInventory;
         if (ink != null)
             ink.InkChanged -= OnInkChanged;
+
+        if (_alertManagerConnected)
+        {
+            var am = Stealth.MissionAlertManager.Instance;
+            if (am != null)
+                am.AlertLevelChanged -= OnAlertLevelChanged;
+            _alertManagerConnected = false;
+        }
+
+        var tattoo = Core.GameManager.Instance?.TattooSystem;
+        if (tattoo != null)
+            tattoo.InkConflictTriggered -= OnInkConflictTriggered;
+
+        var echoMgr = Core.GameManager.Instance?.EchoManager;
+        if (echoMgr != null)
+            echoMgr.EchoUnlocked -= OnEchoUnlocked;
     }
 
     public override void _Process(double delta)
@@ -396,13 +413,19 @@ public partial class GameHUD : CanvasLayer
             _alertLabel.Text = level;
     }
 
+    private bool _alertManagerConnected = false;
+
     private void ConnectAlertManager()
     {
+        if (_alertManagerConnected) return;
         var am = Stealth.MissionAlertManager.Instance;
         if (am != null)
+        {
             am.AlertLevelChanged += OnAlertLevelChanged;
-        else
-            CallDeferred(MethodName.ConnectAlertManager); // Retry next frame if not ready.
+            _alertManagerConnected = true;
+        }
+        // If the manager isn't present yet, _Process will keep the alert label hidden via
+        // UpdateAlertGuardCount's early-out — no infinite retry needed.
     }
 
     /// <summary>
@@ -500,5 +523,33 @@ public partial class GameHUD : CanvasLayer
         _echoToastTween.TweenProperty(_echoToastLabel, "modulate:a", 1f,  0.3f);
         _echoToastTween.TweenInterval(3.5f);
         _echoToastTween.TweenProperty(_echoToastLabel, "modulate:a", 0f,  1.0f);
+    }
+
+    /// <summary>
+    /// Show a brief hint message (white, lower-center) that fades after
+    /// <paramref name="duration"/> seconds. Used for first-visit level hints.
+    /// </summary>
+    public void ShowHint(string message, float duration = 4f)
+    {
+        if (_echoToastLabel == null) return;
+
+        _echoToastLabel.Text    = message;
+        _echoToastLabel.Modulate = new Color(1f, 1f, 1f, 0f); // white, transparent
+
+        _echoToastTween?.Kill();
+        _echoToastTween = CreateTween();
+        _echoToastTween.TweenProperty(_echoToastLabel, "modulate:a", 1f,  0.3f);
+        _echoToastTween.TweenInterval(duration);
+        _echoToastTween.TweenProperty(_echoToastLabel, "modulate:a", 0f,  0.8f);
+    }
+
+    /// <summary>
+    /// "Locked — need &lt;key&gt;" feedback toast triggered by a door with no matching key.
+    /// Looks up the active GameHUD in the scene tree so Door.cs (non-UI code) can call it.
+    /// </summary>
+    public static void ShowLockedMessage(SceneTree tree, string keyName)
+    {
+        var hud = tree.GetFirstNodeInGroup("GameHUD") as GameHUD;
+        hud?.ShowHint($"Locked — need {keyName}.", 2.5f);
     }
 }

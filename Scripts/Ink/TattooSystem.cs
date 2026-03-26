@@ -86,13 +86,12 @@ public partial class TattooSystem : Node
     /// <summary>Apply a tattoo. Requires sufficient ink in the inventory.</summary>
     public bool ApplyTattoo(TattooData tattoo, InkInventory inventory)
     {
-        if (!inventory.CanAfford(tattoo.RequiredGrade, tattoo.InkCost))
+        if (!inventory.SpendInk(tattoo.RequiredGrade, tattoo.InkCost))
         {
             GD.Print($"Cannot afford tattoo '{tattoo.DisplayName}': need {tattoo.InkCost} {tattoo.RequiredGrade} ink.");
             return false;
         }
 
-        inventory.SpendInk(tattoo.RequiredGrade, tattoo.InkCost);
         _appliedTattoos[tattoo.Slot].Add(tattoo);
 
         // Push temperament from the tattoo itself.
@@ -101,6 +100,28 @@ public partial class TattooSystem : Node
         EmitSignal(SignalName.TattooApplied, tattoo.Id, (int)tattoo.Slot);
         GD.Print($"Tattoo applied: {tattoo.DisplayName} ({tattoo.Slot})");
         return true;
+    }
+
+    /// <summary>
+    /// Remove a tattoo by ID. Stats are recalculated immediately.
+    /// Returns false if the tattoo was not found.
+    /// </summary>
+    public bool RemoveTattoo(string tattooId)
+    {
+        foreach (var (slot, tattoos) in _appliedTattoos)
+        {
+            var index = tattoos.FindIndex(t => t.Id == tattooId);
+            if (index >= 0)
+            {
+                var removed = tattoos[index];
+                tattoos.RemoveAt(index);
+                RecalculateStats();
+                GD.Print($"Tattoo removed: {removed.DisplayName} ({slot})");
+                return true;
+            }
+        }
+        GD.PrintErr($"TattooSystem.RemoveTattoo: Tattoo '{tattooId}' not found.");
+        return false;
     }
 
     /// <summary>Get all tattoos in a specific slot.</summary>
@@ -117,6 +138,7 @@ public partial class TattooSystem : Node
 
     private void CheckForEvolutions()
     {
+        bool anyEvolved = false;
         foreach (var (slot, tattoos) in _appliedTattoos)
         {
             for (int i = 0; i < tattoos.Count; i++)
@@ -129,8 +151,14 @@ public partial class TattooSystem : Node
                     tattoos[i] = tattoo.EvolvedForm;
                     EmitSignal(SignalName.TattooEvolved, oldId, tattoo.EvolvedForm.Id);
                     GD.Print($"Tattoo evolved: {oldId} → {tattoo.EvolvedForm.Id}");
+                    anyEvolved = true;
                 }
             }
+        }
+        if (anyEvolved)
+        {
+            Content.TattooRegistry.InvalidateCache();
+            RecalculateStats();
         }
     }
 

@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using BloodInk.Dialogue;
 
 namespace BloodInk.Progression;
 
@@ -68,10 +69,10 @@ public partial class NewGamePlus : Node
 
         // Carry select narrative flags.
         _carryFlags.Clear();
-        if (choices.KnowsEdictTruth) _carryFlags.Add("knows_edict_truth");
-        if (choices.SidedWithThresh) _carryFlags.Add("sided_with_thresh");
-        if (!choices.SennaSurvived) _carryFlags.Add("senna_died");
-        if (choices.EdictBroken) _carryFlags.Add("edict_broken");
+        if (choices.KnowsEdictTruth) _carryFlags.Add(DialogueFlags.KnowsEdictTruth);
+        if (choices.SidedWithThresh) _carryFlags.Add(DialogueFlags.SidedWithThresh);
+        if (!choices.SennaSurvived)  _carryFlags.Add(DialogueFlags.SennaDied);
+        if (choices.EdictBroken)     _carryFlags.Add(DialogueFlags.EdictBroken);
 
         GD.Print($"NG+ Snapshot — Cycle {CycleCount}, Ending: {PreviousEnding}");
         GD.Print($"  Mercy: {PreviousMercy}, Cruelty: {PreviousCruelty}");
@@ -93,19 +94,16 @@ public partial class NewGamePlus : Node
         var intScores = new Dictionary<Ink.InkTemperament, int>();
         foreach (var (t, v) in _carryTemperament)
             intScores[t] = (int)v;
-        tattoos.ImportTemperamentsForNewGamePlus(intScores, 1.0f);
+        tattoos.ImportTemperamentsForNewGamePlus(intScores, 0.5f);
         GD.Print("NG+: Temperament imported at 50% carryover.");
 
         // Carry narrative flags.
         foreach (var flag in _carryFlags)
         {
-            switch (flag)
-            {
-                case "knows_edict_truth": choices.KnowsEdictTruth = true; break;
-                case "senna_died": choices.SennaSurvived = false; break;
-                case "sided_with_thresh": choices.SidedWithThresh = true; break;
-                case "edict_broken": choices.EdictBroken = true; break;
-            }
+            if      (flag == DialogueFlags.KnowsEdictTruth) choices.KnowsEdictTruth = true;
+            else if (flag == DialogueFlags.SennaDied)        choices.SennaSurvived   = false;
+            else if (flag == DialogueFlags.SidedWithThresh)  choices.SidedWithThresh = true;
+            else if (flag == DialogueFlags.EdictBroken)      choices.EdictBroken     = true;
         }
 
         // Lorne's tremor worsens each cycle.
@@ -152,14 +150,14 @@ public partial class NewGamePlus : Node
     /// </summary>
     public string GetDialogueModifier()
     {
-        if (!IsNewGamePlus) return "first_run";
+        if (!IsNewGamePlus) return DialogueFlags.DialogueFirstRun;
 
         return PreviousEnding switch
         {
-            EndingAlignment.Liberation => "prev_liberation",
-            EndingAlignment.DarkEdictbearer => "prev_dark",
-            EndingAlignment.BitterFreedom => "prev_bitter",
-            _ => "first_run"
+            EndingAlignment.Liberation      => DialogueFlags.DialoguePrevLiberation,
+            EndingAlignment.DarkEdictbearer => DialogueFlags.DialoguePrevDark,
+            EndingAlignment.BitterFreedom   => DialogueFlags.DialoguePrevBitter,
+            _                               => DialogueFlags.DialogueFirstRun
         };
     }
 

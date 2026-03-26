@@ -146,13 +146,22 @@ public partial class ChapelLevel : MissionLevelBase
         BuildGrounds();
         BuildNave();
         BuildRelicChamber();
+        CallDeferred(MethodName.PlaceCandles); // After zones are added to tree
         SpawnPlayer(GroundsOffset + new Vector2(1280, 540));
         SetupHUD();
+        SetupCheckpointRespawn();
+
+        // Checkpoint 1 — player enters the Nave & Vestry zone.
+        AddCheckpoint(this, 1, new Vector2(1280, 50), 2560f, new Vector2(1280, 200));
+
+        // Checkpoint 2 — player descends into the Relic Chamber.
+        AddCheckpoint(this, 2, new Vector2(1280, -620), 2560f, new Vector2(1280, -500));
 
         // Camera bounds encompass all three zones (Relic top → Grounds bottom).
         SetCameraLimits(0, -640, 2560, 1840);
 
         GD.Print("═══ CHAPEL LOADED ═══");
+        GD.Print("  MECHANIC: Extinguish candles to permanently create shadow zones.");
         GD.Print("  PUZZLE GUIDE:");
         GD.Print("  Grounds: Break the cracked tomb wall to find the Crypt Key chest.");
         GD.Print("           Push block onto floor switch near bell tower to open grounds gate.");
@@ -391,6 +400,83 @@ public partial class ChapelLevel : MissionLevelBase
 
         // Sister Blessing — praying near the relic in the center.
         SpawnSisterBlessing(root);
+    }
+
+    // ═════════════════════════════════════════════════════════════
+    //  UNIQUE MECHANIC: EXTINGUISHABLE CANDLES
+    //  Each candle is an invisible Area2D. When the player walks into
+    //  its radius, the flame dims and a new ShadowZone appears at that
+    //  spot — permanently expanding the stealth landscape of the level.
+    //  The chapel is lit by candles; extinguishing them re-shapes the
+    //  space in the player's favour.
+    // ═════════════════════════════════════════════════════════════
+
+    private void PlaceCandles()
+    {
+        // Grounds candles — torches along the cemetery wall and gate arch
+        var grounds = GetNodeOrNull<Node2D>("ChapelGrounds");
+        if (grounds != null)
+        {
+            AddCandle(grounds, "TorchGate1",     new Vector2(460,  200));
+            AddCandle(grounds, "TorchGate2",     new Vector2(2100, 200));
+            AddCandle(grounds, "TorchPath1",     new Vector2(880,  340));
+            AddCandle(grounds, "TorchPath2",     new Vector2(1680, 340));
+            AddCandle(grounds, "TorchBellTower", new Vector2(1280, 130));
+        }
+
+        // Nave candles — altar candelabra, side chapel sconces, choir loft lanterns
+        var nave = GetNodeOrNull<Node2D>("NaveVestry");
+        if (nave != null)
+        {
+            AddCandle(nave, "AltarCandle1",   new Vector2(700,  80));
+            AddCandle(nave, "AltarCandle2",   new Vector2(860,  80));
+            AddCandle(nave, "SideSconce1",    new Vector2(320,  300));
+            AddCandle(nave, "SideSconce2",    new Vector2(2240, 300));
+            AddCandle(nave, "ChoirLantern1",  new Vector2(420,  440));
+            AddCandle(nave, "ChoirLantern2",  new Vector2(2140, 440));
+            AddCandle(nave, "VestryCandle",   new Vector2(1280, 480));
+        }
+    }
+
+    private void AddCandle(Node2D parent, string id, Vector2 pos)
+    {
+        var candle = new Area2D { Name = $"Candle_{id}" };
+        candle.CollisionLayer = 0;
+        candle.CollisionMask  = 1 << 1; // Player layer
+        candle.Position       = pos;
+
+        var shape = new CollisionShape2D();
+        shape.Shape = new CircleShape2D { Radius = 22f };
+        candle.AddChild(shape);
+
+        // Flame visual — small warm glow square.
+        var flame = new ColorRect
+        {
+            Color    = new Color(1.0f, 0.75f, 0.15f, 0.9f),
+            Size     = new Vector2(6f, 10f),
+            Position = new Vector2(-3f, -10f),
+        };
+        candle.AddChild(flame);
+
+        bool extinguished = false;
+
+        candle.BodyEntered += (body) =>
+        {
+            if (extinguished || !body.IsInGroup("Player")) return;
+            extinguished = true;
+
+            // Snuff the flame visually.
+            var tween = candle.CreateTween();
+            tween.TweenProperty(flame, "color", new Color(0.15f, 0.12f, 0.10f, 0.4f), 0.4f);
+
+            // Create a permanent shadow zone at this position.
+            AddShadowZone(parent, pos, new Vector2(80f, 80f));
+
+            candle.SetDeferred(Area2D.PropertyName.Monitoring, false);
+            GD.Print($"[Chapel] Candle '{id}' extinguished — shadow zone added at {pos}.");
+        };
+
+        parent.AddChild(candle);
     }
 
     // ═════════════════════════════════════════════════════════════

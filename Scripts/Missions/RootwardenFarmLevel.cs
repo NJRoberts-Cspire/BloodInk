@@ -91,9 +91,43 @@ public partial class RootwardenFarmLevel : MissionLevelBase
         "################################################################################",
     };
 
-    private static readonly Vector2 YardOffset = new(0, 1120);
+    // ─── Root Cellar — fourth zone ────────────────────────────────
+    // Below the fighting pit: Rootwarden's private cellar where he keeps the
+    // orc fighting contracts, his cut of the prize money, and escape tunnels.
+    // Unique mechanic: CROWD NOISE. A noise pulse fires every ~8 seconds when
+    // the crowd cheers — during this window, guard detection range is halved
+    // and the player can move freely without risking alert. A visible "pulse"
+    // of dark color washes over the screen to cue the player.
+    private static readonly string[] CellarMap = {
+        "################################################################################",
+        "#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwww#",
+        "#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwww#",
+        "#..........#........#..........#........#..........#........#..........#......#",
+        "#..~~......#........#..........#........#..........#........#..~~......#......#",
+        "#..~~......................................................................#......#",
+        "#..........................................................................#......#",
+        "#..........................................................................#......#",
+        "#########..........####...####...####...####...####...####...####..#######",
+        "#########..........####...####...####...####...####...####...####..#######",
+        "#..........................................................................#......#",
+        "#..........................................................................#......#",
+        "#..~~......................................................................#......#",
+        "#..~~......#........#..........#........#..........#........#..~~......#......#",
+        "#..........#........#..........#........#..........#........#..........#......#",
+        "#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwww#",
+        "#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwwwww#..........#wwwwww#",
+        "################################################################################",
+    };
+
+    private static readonly Vector2 YardOffset     = new(0, 1120);
     private static readonly Vector2 ApproachOffset = new(0, 0);
-    private static readonly Vector2 PitOffset = new(0, -720);
+    private static readonly Vector2 PitOffset      = new(0, -720);
+    private static readonly Vector2 CellarOffset   = new(0, -1310); // Below the pit
+
+    // ─── Crowd Noise State ────────────────────────────────────────
+    // When _crowdNoisActive is true, guard detection range is halved.
+    private bool _crowdNoiseActive;
+    private readonly System.Collections.Generic.List<Enemies.GuardEnemy> _allGuards = new();
 
     public override void _Ready()
     {
@@ -102,14 +136,28 @@ public partial class RootwardenFarmLevel : MissionLevelBase
         BuildFarmYard();
         BuildBarnApproach();
         BuildFightingPit();
+        BuildRootCellar();
 
         SpawnPlayer(YardOffset + new Vector2(640, 180));
         SetupHUD();
-        SetCameraLimits(0, -720, 1280, 1500);
+        SetupCheckpointRespawn();
+
+        // Checkpoint 1 — player enters Barn Approach zone.
+        AddCheckpoint(this, 1, new Vector2(640, 50), 1280f, new Vector2(640, 200));
+
+        // Checkpoint 2 — player enters the Fighting Pit zone.
+        AddCheckpoint(this, 2, new Vector2(640, -700), 1280f, new Vector2(640, -600));
+
+        // Checkpoint 3 — player descends into Rootwarden's Root Cellar.
+        AddCheckpoint(this, 3, new Vector2(640, -1290), 1280f, new Vector2(640, -1180));
+
+        // Expand camera bounds to include root cellar.
+        SetCameraLimits(0, -1670, 1280, 1500);
 
         GD.Print("═══ ROOTWARDEN FARM LOADED ═══");
         GD.Print("  Target: Silas Rootwarden — farm owner & fighting ring operator.");
-        GD.Print("  Optional target. Difficulty 4. Barn has heavy guard presence.");
+        GD.Print("  Optional target. Difficulty 4. Four zones: Yard → Approach → Pit → Cellar.");
+        GD.Print("  MECHANIC: Crowd noise pulses every ~8 s — guard detection halved during cheers.");
     }
 
     // ─── Zone Builders ────────────────────────────────────────────
@@ -120,7 +168,7 @@ public partial class RootwardenFarmLevel : MissionLevelBase
         zone.Position = YardOffset;
         AddChild(zone);
 
-        BuildTileMap(zone, YardMap, new Vector2(0, 0));
+        MapBuilder.Build(zone, YardMap);
         AddAreaZone(zone, "Farm Yard", new Vector2(640, 280), new Vector2(1280, 400));
 
         // Shadow — hedgerow corners, tool shed back
@@ -145,7 +193,7 @@ public partial class RootwardenFarmLevel : MissionLevelBase
         zone.Position = ApproachOffset;
         AddChild(zone);
 
-        BuildTileMap(zone, BarnApproachMap, new Vector2(0, 0));
+        MapBuilder.Build(zone, BarnApproachMap);
         AddAreaZone(zone, "Barn Approach", new Vector2(640, 300), new Vector2(1280, 400));
         AddAreaZone(zone, "Guard Post", new Vector2(640, 100), new Vector2(200, 160), isRestricted: true);
 
@@ -180,7 +228,7 @@ public partial class RootwardenFarmLevel : MissionLevelBase
         zone.Position = PitOffset;
         AddChild(zone);
 
-        BuildTileMap(zone, PitMap, new Vector2(0, 0));
+        MapBuilder.Build(zone, PitMap);
         AddAreaZone(zone, "Fighting Pit", new Vector2(640, 250), new Vector2(1280, 400));
         AddAreaZone(zone, "Viewing Gallery", new Vector2(640, 80), new Vector2(1000, 160), isRestricted: true);
         AddAreaZone(zone, "Orc Cages", new Vector2(100, 250), new Vector2(160, 300), isRestricted: false);
@@ -246,49 +294,106 @@ public partial class RootwardenFarmLevel : MissionLevelBase
             whisperText: "\"It's entertainment. They were going to die anyway.\"");
     }
 
-    // ─── Tile Map Builder ─────────────────────────────────────────
+    // ─── Root Cellar Zone ─────────────────────────────────────────
 
-    private static void BuildTileMap(Node2D parent, string[] map, Vector2 origin)
+    private void BuildRootCellar()
     {
-        const float TileSize = 16f;
+        var zone = new Node2D { Name = "RootCellarZone" };
+        zone.Position = CellarOffset;
+        AddChild(zone);
 
-        for (int row = 0; row < map.Length; row++)
-        {
-            for (int col = 0; col < map[row].Length; col++)
-            {
-                char tile = map[row][col];
-                var pos = origin + new Vector2(col * TileSize, row * TileSize);
+        MapBuilder.Build(zone, CellarMap);
+        AddAreaZone(zone, "Root Cellar", new Vector2(640, 260), new Vector2(1280, 480));
+        AddAreaZone(zone, "Contracts Vault", new Vector2(640, 130), new Vector2(400, 200), isRestricted: true);
 
-                Color? color = tile switch
-                {
-                    '#' => new Color(0.30f, 0.22f, 0.14f, 1f),
-                    '.' => new Color(0.45f, 0.38f, 0.28f, 1f),
-                    'w' => new Color(0.42f, 0.32f, 0.20f, 1f),
-                    'p' => new Color(0.40f, 0.36f, 0.28f, 1f),
-                    '~' => new Color(0.10f, 0.15f, 0.10f, 0.5f),
-                    ',' => null,
-                    _ => null
-                };
+        // Shadow — wine rack alcoves, vaulted ceiling corners
+        AddShadowZone(zone, new Vector2(60, 230), new Vector2(100, 200));
+        AddShadowZone(zone, new Vector2(1220, 230), new Vector2(100, 200));
+        AddShadowZone(zone, new Vector2(640, 360), new Vector2(320, 60));
 
-                if (color == null) continue;
+        // Hiding spots — barrel rows, root pile, wine racks
+        AddHidingSpot(zone, "Barrel Row", new Vector2(180, 230));
+        AddHidingSpot(zone, "Wine Rack", new Vector2(1100, 230));
+        AddHidingSpot(zone, "Root Pile", new Vector2(640, 350));
 
-                var rect = new ColorRect();
-                rect.Color = color.Value;
-                rect.Position = pos;
-                rect.Size = new Vector2(TileSize, TileSize);
+        // Locked vault — fighting contracts and prize ledger inside
+        AddLockedDoor(zone, "Contracts Vault Door", new Vector2(640, 130), "vault_key");
+        AddKeyChest(zone, "Pit Master Key Chest", new Vector2(400, 280), "vault_key", "Pit Master Key");
+        AddItemChest(zone, "Prize Ledger", new Vector2(640, 100),
+            "consumable", "fighting_contracts", "Fighting Contracts", 1, "vault_key");
 
-                if (tile == '#')
-                {
-                    var body = new StaticBody2D();
-                    body.Position = pos + new Vector2(TileSize / 2, TileSize / 2);
-                    var shape = new CollisionShape2D();
-                    shape.Shape = new RectangleShape2D { Size = new Vector2(TileSize, TileSize) };
-                    body.AddChild(shape);
-                    parent.AddChild(body);
-                }
+        // Escape tunnel — breakable wall at the far end of the cellar
+        AddBreakableWall(zone, "Escape Tunnel Wall", new Vector2(1230, 260), hitsRequired: 2, width: 16f, height: 128f);
 
-                parent.AddChild(rect);
-            }
-        }
+        // Guards — two contract enforcers who stay in the cellar
+        var g1 = SpawnAndTrackGuard(zone, "CellarEnforcer1", new Vector2(300, 260),
+            new[] { new Vector2(150, 260), new Vector2(500, 260) });
+        var g2 = SpawnAndTrackGuard(zone, "CellarEnforcer2", new Vector2(980, 260),
+            new[] { new Vector2(780, 260), new Vector2(1130, 260) }, elite: true);
+
+        _allGuards.Add(g1);
+        _allGuards.Add(g2);
+
+        // Start crowd noise cycle — fires from the pit above
+        StartCrowdNoiseCycle();
     }
+
+    // ─── Crowd Noise Mechanic ─────────────────────────────────────
+
+    private void StartCrowdNoiseCycle()
+    {
+        // Crowd cheers every 8 seconds, noise lasts 3 seconds.
+        var timer = new Timer { WaitTime = 8.0, Autostart = true, OneShot = false };
+        timer.Timeout += OnCrowdNoisePulse;
+        AddChild(timer);
+    }
+
+    private async void OnCrowdNoisePulse()
+    {
+        if (_crowdNoiseActive) return;
+
+        _crowdNoiseActive = true;
+
+        // Halve all guard detection ranges.
+        foreach (var g in _allGuards)
+        {
+            var sensor = g.GetNodeOrNull<Stealth.DetectionSensor>("DetectionSensor");
+            if (sensor != null) sensor.ViewDistance *= 0.5f;
+        }
+
+        // Visual cue — brief dark overlay pulse so the player knows the window is open.
+        var layer = new CanvasLayer { Layer = 9 };
+        var rect  = new ColorRect { Color = new Color(0f, 0f, 0f, 0.0f) };
+        rect.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+        rect.LayoutMode = 1;
+        layer.AddChild(rect);
+        AddChild(layer);
+
+        var tween = CreateTween().SetLoops(1);
+        tween.TweenProperty(rect, "color:a", 0.25f, 0.3f);
+        tween.TweenProperty(rect, "color:a", 0.0f,  0.3f);
+        tween.TweenCallback(Callable.From(() => layer.QueueFree()));
+
+        GD.Print("[Crowd Noise] Detection window OPEN — 3 seconds.");
+
+        await ToSignal(GetTree().CreateTimer(3.0), SceneTreeTimer.SignalName.Timeout);
+
+        // Restore guard detection ranges.
+        foreach (var g in _allGuards)
+        {
+            var sensor = g.GetNodeOrNull<Stealth.DetectionSensor>("DetectionSensor");
+            if (sensor != null) sensor.ViewDistance *= 2.0f;
+        }
+
+        _crowdNoiseActive = false;
+        GD.Print("[Crowd Noise] Detection window CLOSED.");
+    }
+
+    private Enemies.GuardEnemy SpawnAndTrackGuard(Node2D parent, string name, Vector2 pos,
+        Vector2[] waypoints, bool elite = false)
+    {
+        AddGuard(parent, name, pos, waypoints, elite);
+        return parent.GetNode<Enemies.GuardEnemy>(name);
+    }
+
 }

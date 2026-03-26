@@ -174,12 +174,17 @@ public partial class DialogueManager : Node
         // Check condition.
         if (!EvaluateCondition(line.Condition))
         {
-            // Skip this line — go to next or end.
+            // Skip this line — advance past it.
+            // For choice lines the individual NextLineId is empty; fall through to EndConversation.
+            // For linear lines, follow NextLineId so the FSM doesn't silently swallow a branch.
             if (!string.IsNullOrEmpty(line.NextLineId))
             {
                 ShowLine(_activeData?.GetLine(line.NextLineId));
                 return;
             }
+
+            // A skipped line with no NextLineId (including choice-only lines whose condition
+            // failed) has no valid successor — end the conversation rather than hanging.
             EndConversation();
             return;
         }

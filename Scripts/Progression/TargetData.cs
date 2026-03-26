@@ -52,4 +52,13 @@ public partial class TargetData : Resource
     /// <summary>Flavour text whispered by the blood.</summary>
     [Export(PropertyHint.MultilineText)]
     public string DeathWhisper { get; set; } = "";
+
+    /// <summary>
+    /// When true, MissionBoard shows this target as locked rather than deployable,
+    /// even if a scene file exists.
+    /// </summary>
+    [Export] public bool IsLocked { get; set; } = false;
+
+    /// <summary>Short reason shown to the player when the target is locked (e.g. "Intel Required").</summary>
+    [Export] public string LockReason { get; set; } = "";
 }

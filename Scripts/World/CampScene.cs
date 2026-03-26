@@ -1,6 +1,7 @@
 using Godot;
 using BloodInk.Content;
 using BloodInk.Core;
+using BloodInk.Dialogue;
 using BloodInk.Interaction;
 using BloodInk.Tools;
 using BloodInk.VFX;
@@ -28,6 +29,15 @@ public partial class CampScene : Node2D
 
     public override void _Ready()
     {
+        // Show the intro narration on the very first camp visit.
+        var choices = GameManager.Instance?.Choices;
+        if (choices != null && !choices.HasMadeChoice(DialogueFlags.SawIntro))
+        {
+            // DemoIntro sets the flag and then loads Camp again when done.
+            GetTree().ChangeSceneToFile("res://Scenes/UI/DemoIntro.tscn");
+            return;
+        }
+
         PlaceholderSprites.CreateAll();
 
         // Spawn player if not already present.
@@ -314,6 +324,9 @@ public partial class CampScene : Node2D
             case "open_warband":
                 CallDeferred(nameof(OpenWarbandPanel));
                 break;
+            case "show_demo_end":
+                CallDeferred(nameof(ShowDemoEnd));
+                break;
         }
     }
 
@@ -372,5 +385,15 @@ public partial class CampScene : Node2D
         AddChild(panel);
         panel.Open();
         GD.Print("CampScene: Warband panel opened.");
+    }
+
+    private void ShowDemoEnd()
+    {
+        // Prevent duplicates if the event somehow fires twice.
+        if (GetNodeOrNull("DemoEnd") != null) return;
+
+        var demoEnd = new UI.DemoEnd { Name = "DemoEnd" };
+        AddChild(demoEnd);
+        GD.Print("CampScene: Demo end screen shown.");
     }
 }

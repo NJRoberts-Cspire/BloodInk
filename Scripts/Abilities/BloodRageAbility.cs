@@ -42,6 +42,14 @@ public partial class BloodRageAbility : AbilityBase
             health.HealthChanged += OnHealthChanged;
     }
 
+    public override void _ExitTree()
+    {
+        // Disconnect to prevent duplicate connections if the ability node is re-parented or re-added.
+        var health = Owner2D?.GetNodeOrNull<Combat.HealthComponent>("HealthComponent");
+        if (health != null && health.IsConnected(Combat.HealthComponent.SignalName.HealthChanged, Callable.From<int, int>(OnHealthChanged)))
+            health.HealthChanged -= OnHealthChanged;
+    }
+
     private void OnHealthChanged(int current, int max)
     {
         if (!_isRaging && !IsOnCooldown && current <= max / 2)
@@ -52,12 +60,22 @@ public partial class BloodRageAbility : AbilityBase
     {
         _isRaging = true;
         _rageTimer = Duration;
+
+        var hitbox = Owner2D?.GetNodeOrNull<Combat.Hitbox>("Hitbox");
+        if (hitbox != null)
+            hitbox.DamageMultiplier = DamageMult;
+
         GD.Print($"[BloodRage] RAGE ACTIVE for {Duration}s — damage ×{DamageMult}");
     }
 
     private void EndRage()
     {
         _isRaging = false;
+
+        var hitbox = Owner2D?.GetNodeOrNull<Combat.Hitbox>("Hitbox");
+        if (hitbox != null)
+            hitbox.DamageMultiplier = 1.0f;
+
         GD.Print("[BloodRage] Rage expired.");
         ExpireAbility();
     }

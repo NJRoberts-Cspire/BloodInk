@@ -1,5 +1,6 @@
 using Godot;
 using BloodInk.Stealth;
+using BloodInk.UI;
 
 namespace BloodInk.Interaction;
 
@@ -42,6 +43,7 @@ public partial class Door : Interactable
             else
             {
                 GD.Print($"Door is locked. Requires key: {RequiredKeyId}");
+                GameHUD.ShowLockedMessage(GetTree(), PuzzleUtils.HumanizeId(RequiredKeyId));
                 return;
             }
         }

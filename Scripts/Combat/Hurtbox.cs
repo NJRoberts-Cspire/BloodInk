@@ -15,6 +15,26 @@ public partial class Hurtbox : Area2D
     /// <summary>If true, this hurtbox is temporarily invincible (e.g. during dodge).</summary>
     [Export] public bool IsInvincible { get; set; }
 
+    /// <summary>
+    /// When set > 0, calling <see cref="StartIFrames"/> makes the hurtbox
+    /// invincible for this many seconds, then automatically resets.
+    /// </summary>
+    [Export] public float IFrameDuration { get; set; } = 0.2f;
+
+    private SceneTreeTimer? _iFrameTimer;
+
+    /// <summary>
+    /// Start a timed invincibility window using <see cref="IFrameDuration"/>.
+    /// Calling this again while i-frames are active restarts the timer.
+    /// </summary>
+    public void StartIFrames()
+    {
+        IsInvincible = true;
+        _iFrameTimer?.EmitSignal(SceneTreeTimer.SignalName.Timeout); // cancel previous if any
+        _iFrameTimer = GetTree().CreateTimer(IFrameDuration);
+        _iFrameTimer.Timeout += () => IsInvincible = false;
+    }
+
     public override void _Ready()
     {
         AreaEntered += OnAreaEntered;
@@ -26,23 +46,28 @@ public partial class Hurtbox : Area2D
 
         if (area is Hitbox hitbox)
         {
+            // Capture owner reference once before EmitSignal, which may free the owner.
+            var target = Owner as Node2D;
+
             var knockbackDir = Vector2.Zero;
-            if (hitbox.Source != null && Owner is Node2D self)
+            if (hitbox.Source != null && target != null)
             {
-                knockbackDir = (self.GlobalPosition - hitbox.Source.GlobalPosition).Normalized();
+                knockbackDir = (target.GlobalPosition - hitbox.Source.GlobalPosition).Normalized();
             }
 
             var knockback = knockbackDir * hitbox.KnockbackForce.Length();
-            EmitSignal(SignalName.Hurt, hitbox.Damage, knockback);
+            EmitSignal(SignalName.Hurt, hitbox.ScaledDamage, knockback);
+            hitbox.EmitSignal(Hitbox.SignalName.HitConnected);
 
             // ─── VFX Juice ────────────────────────────────────────
-            // Guard against owner being freed (e.g. death on same frame).
-            if (Owner is not Node2D target || !IsInstanceValid(target))
+            // Guard against owner being freed on the same frame as EmitSignal
+            // (e.g. HealthComponent.Died triggers QueueFree immediately).
+            if (target == null || !IsInstanceValid(target))
                 return;
 
             // Stealth kills are lethal but quiet — minimal VFX.
             bool isStealthKill = hitbox.IsStealthKill;
-            bool isCrit = !isStealthKill && hitbox.Damage >= 3;
+            bool isCrit = !isStealthKill && hitbox.ScaledDamage >= 3;
 
             // Hit flash (white blink on the damaged sprite).
             HitFlash.FlashNode(
@@ -55,7 +80,7 @@ public partial class Hurtbox : Area2D
                 DamageNumber.Spawn(
                     target.GetTree().CurrentScene,
                     target.GlobalPosition + new Vector2(0, -12),
-                    hitbox.Damage, isCrit);
+                    hitbox.ScaledDamage, isCrit);
             }
 
             // Blood splatter in knockback direction.
@@ -87,7 +112,7 @@ public partial class Hurtbox : Area2D
             {
                 if (isCrit)
                     HitStop.Instance?.FreezeHeavy();
-                else if (hitbox.Damage >= 2)
+                else if (hitbox.ScaledDamage >= 2)
                     HitStop.Instance?.FreezeLight();
             }
         }

@@ -19,6 +19,103 @@ namespace BloodInk.Missions;
 /// </summary>
 public abstract partial class MissionLevelBase : Node2D
 {
+    // ─── Checkpoint State ─────────────────────────────────────────
+
+    private Vector2 _checkpointRespawnPos;
+    private bool    _hasCheckpoint;
+
+    /// <summary>
+    /// Place an invisible checkpoint trigger at <paramref name="worldPos"/>.
+    /// The trigger is a full-width horizontal strip (width × 32 px tall).
+    /// When the player walks through it for the first time, <see cref="_checkpointRespawnPos"/>
+    /// is updated to <paramref name="respawnPos"/> — where the player will re-enter
+    /// the zone on death.
+    /// </summary>
+    protected void AddCheckpoint(Node2D parent, int index, Vector2 worldPos, float width, Vector2 respawnPos)
+    {
+        var cp = new MissionCheckpoint
+        {
+            CheckpointIndex = index,
+            RespawnPos      = respawnPos,
+            Position        = worldPos,
+        };
+
+        var shape = new CollisionShape2D();
+        shape.Shape = new RectangleShape2D { Size = new Vector2(width, 32f) };
+        cp.AddChild(shape);
+
+        cp.CheckpointReached += (idx, pos) =>
+        {
+            _checkpointRespawnPos = pos;
+            _hasCheckpoint        = true;
+        };
+
+        parent.AddChild(cp);
+    }
+
+    /// <summary>
+    /// Wire the player's HealthComponent.Died signal so death triggers a
+    /// checkpoint respawn instead of immediate game-over.
+    /// Call this after SpawnPlayer().
+    /// </summary>
+    protected void SetupCheckpointRespawn()
+    {
+        CallDeferred(MethodName.WirePlayerDeathHandler);
+    }
+
+    private void WirePlayerDeathHandler()
+    {
+        var player = GetTree().GetFirstNodeInGroup("Player") as Player.PlayerController;
+        if (player == null) return;
+
+        // Connect only to PlayerDied (emitted by PlayerController after it has already
+        // shut down physics/input/StateMachine).  Do NOT also connect health.Died — that
+        // fires first, before the controller cleans up, and would result in OnPlayerDied
+        // being called twice per death (and the duplicate listener accumulating on every
+        // subsequent respawn).
+        player.PlayerDied += OnPlayerDied;
+    }
+
+    private void OnPlayerDied()
+    {
+        if (!_hasCheckpoint)
+        {
+            // No checkpoint reached — full scene reload.
+            GetTree().ReloadCurrentScene();
+            return;
+        }
+
+        // Respawn at last checkpoint position with full health restored.
+        var player = GetTree().GetFirstNodeInGroup("Player") as Player.PlayerController;
+        if (player == null) { GetTree().ReloadCurrentScene(); return; }
+
+        // Cancel the PlayerController's Game Over timer.
+        // Must be called while _deathTransitionSuppressed is still false (i.e. before
+        // the timer lambda fires), which is guaranteed because PlayerDied is synchronous.
+        player.SuppressDeathTransition();
+
+        var health = player.GetNodeOrNull<HealthComponent>("HealthComponent");
+        if (health != null)
+        {
+            health.Heal(health.MaxHealth);
+        }
+
+        player.Position = _checkpointRespawnPos;
+
+        // Reset backup flag on all live guards so they can call for help again
+        // in the resumed encounter.
+        foreach (var guard in GetTree().GetNodesInGroup("Enemies"))
+        {
+            if (guard is GuardEnemy g)
+                g.HasCalledBackup = false;
+        }
+
+        // Fade back in smoothly.
+        DoFadeIn(0.6f);
+
+        GD.Print($"[Checkpoint Respawn] Player restored at {_checkpointRespawnPos}.");
+    }
+
     // ─── Player Spawn ─────────────────────────────────────────────
 
     /// <summary>Instantiate the player scene at <paramref name="spawnPos"/>.</summary>
@@ -175,7 +272,7 @@ public abstract partial class MissionLevelBase : Node2D
         guard.Position = pos;
         guard.CollisionLayer = 1 << 2;  // Enemy layer (layer 3).
         guard.CollisionMask = 1;          // World.
-        guard.PatrolSpeed = elite ? 50f : 40f;
+        guard.PatrolSpeed = elite ? 65f : 55f;
         guard.AlertedSpeed = elite ? 80f : 70f;
         guard.ChaseSpeed = elite ? 100f : 90f;
         guard.DetectRange = elite ? 140f : 100f;
@@ -218,7 +315,7 @@ public abstract partial class MissionLevelBase : Node2D
 
         // Detection sensor.
         var sensor = new DetectionSensor { Name = "DetectionSensor" };
-        sensor.ViewDistance = elite ? 140f : 120f;
+        sensor.ViewDistance = elite ? 140f : 110f;
         sensor.ViewAngle = 55f;
         guard.AddChild(sensor);
 
@@ -238,7 +335,7 @@ public abstract partial class MissionLevelBase : Node2D
         parent.AddChild(guard);
     }
 
-    /// <summary>Create all 7 guard AI states and add to the state machine.</summary>
+    /// <summary>Create all 8 guard AI states and add to the state machine.</summary>
     protected static void AddGuardStates(StateMachine stateMachine)
     {
         stateMachine.AddChild(new GuardPatrolState { Name = "Patrol" });
@@ -246,6 +343,7 @@ public abstract partial class MissionLevelBase : Node2D
         stateMachine.AddChild(new GuardInvestigateState { Name = "Investigate" });
         stateMachine.AddChild(new GuardAlertState { Name = "Alert" });
         stateMachine.AddChild(new GuardChaseState { Name = "Chase" });
+        stateMachine.AddChild(new GuardBackupState { Name = "Backup" });
         stateMachine.AddChild(new GuardSearchState { Name = "Search" });
         stateMachine.AddChild(new GuardAttackState { Name = "Attack" });
     }

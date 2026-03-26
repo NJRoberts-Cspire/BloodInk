@@ -158,12 +158,34 @@ public partial class PlayerStealthKillState : State
         // and the player is behind it (backstab) OR fully hidden.
         if (_stealth.Visibility == VisibilityLevel.Hidden)
         {
-            // Hidden = always counts as stealth kill if target in range.
-            return true;
+            // Hidden = always counts as stealth kill, but only if a target is actually
+            // within lunge range. Without this check, the player would stealth-kill
+            // into empty air and still get the full silent-kill effect.
+            return HasTargetInRange();
         }
 
         // For Low visibility — must be behind the enemy.
         return CheckBackstabAngle();
+    }
+
+    /// <summary>
+    /// Returns true if any enemy body is within <see cref="LungeRange"/> ahead of the player.
+    /// Used to prevent stealth-kill animations (and accompanying VFX/sounds) from firing
+    /// when there is no valid target in range.
+    /// </summary>
+    private bool HasTargetInRange()
+    {
+        var spaceState = _player.GetWorld2D().DirectSpaceState;
+        var from = _player.GlobalPosition;
+        var to = from + _player.FacingDirection * LungeRange * 1.5f;
+
+        var query = PhysicsRayQueryParameters2D.Create(from, to);
+        query.CollisionMask = 1 << 2; // Enemies layer (layer 3).
+        query.CollideWithAreas = false;
+        query.CollideWithBodies = true;
+
+        var result = spaceState.IntersectRay(query);
+        return result.Count > 0;
     }
 
     private bool CheckBackstabAngle()

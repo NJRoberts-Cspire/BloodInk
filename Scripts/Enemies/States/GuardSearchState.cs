@@ -32,8 +32,9 @@ public partial class GuardSearchState : State
         int alertLevel = MissionAlertManager.Instance?.AlertLevel ?? 0;
         float alertBonus = alertLevel switch
         {
-            >= 3 => _guard.SearchTime * 2f,    // Hunted / Siege — search indefinitely.
-            2    => _guard.SearchTime * 1f,    // Alerted — 2× base.
+            >= 3 => _guard.SearchTime * 2f,    // Hunted / Siege — 3× base total (search very long).
+            2    => _guard.SearchTime * 1f,    // Alerted — 2× base total.
+            1    => _guard.SearchTime * 0.5f,  // Suspicious — 1.5× base total.
             _    => 0f
         };
         _searchTimer = _guard.SearchTime + alertBonus;

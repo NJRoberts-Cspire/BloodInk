@@ -18,7 +18,9 @@ public partial class StateMachine : Node
         // If an initial state path is set, use it; otherwise use the first child State.
         if (!string.IsNullOrEmpty(InitialStatePath))
         {
-            _currentState = GetNode<State>(InitialStatePath);
+            _currentState = GetNodeOrNull<State>(InitialStatePath);
+            if (_currentState == null)
+                GD.PrintErr($"StateMachine: InitialStatePath '{InitialStatePath}' did not resolve to a State node.");
         }
         else
         {

@@ -44,7 +44,10 @@ public partial class NoisePropagator : Node
     /// Propagate a noise event to all sensors. Each sensor decides if it can hear it.
     /// Raycasts to check for wall occlusion — noise is blocked by solid geometry.
     /// </summary>
-    public void PropagateNoise(Vector2 position, float radius)
+    /// <param name="position">World position of the noise source.</param>
+    /// <param name="radius">Radius in pixels the noise can travel.</param>
+    /// <param name="type">Type of noise (optional; used for future filtering by noise type).</param>
+    public void PropagateNoise(Vector2 position, float radius, NoiseType type = NoiseType.Movement)
     {
         if (radius <= 0f) return;
 

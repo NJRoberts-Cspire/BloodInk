@@ -44,7 +44,8 @@ public static class CampDialogues
             new() { Id = "2", Speaker = "Needlewise", Text = "Sit still. This will feel... incorrect.", NextLineId = "3" },
             new() { Id = "3", Speaker = "", Text = "The needle bites. The ink burns cold. You see flashes — a garden, sunlight, a man who never looked down.", NextLineId = "4" },
             new() { Id = "4", Speaker = "Needlewise", Text = "Shadow Step. You can walk between darknesses now.", NextLineId = "5" },
-            new() { Id = "5", Speaker = "Needlewise", Text = "One anchor broken. Five remain. The Edict weakens... but it won't die easy.", SetFlag = "tattoo_shadow_step_applied", Event = "apply_tattoo:shadow_step" },
+            new() { Id = "5", Speaker = "Needlewise", Text = "One anchor broken. Five remain. The Edict weakens... but it won't die easy.", SetFlag = "tattoo_shadow_step_applied", Event = "apply_tattoo:shadow_step", NextLineId = "6" },
+            new() { Id = "6", Speaker = "", Text = "Thanks for playing the BloodInk Demo.", Event = "show_demo_end" },
         }
     };
 

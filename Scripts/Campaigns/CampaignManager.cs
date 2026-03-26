@@ -96,7 +96,12 @@ public partial class CampaignManager : Node
         _completedCampaigns.Add(ActiveCampaign);
         EmitSignal(SignalName.CampaignCompleted, (int)ActiveCampaign);
 
-        var data = _campaigns[ActiveCampaign];
+        if (!_campaigns.TryGetValue(ActiveCampaign, out var data))
+        {
+            GD.PrintErr($"CampaignManager: CompleteCampaign called for unregistered campaign '{ActiveCampaign}'.");
+            return;
+        }
+
         GD.Print($"Campaign completed: {data.DisplayName}");
 
         if (data.GrantsUniqueTattoo && !string.IsNullOrEmpty(data.CompletionTattooId))
